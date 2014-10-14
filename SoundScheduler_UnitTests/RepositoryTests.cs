@@ -51,7 +51,9 @@ namespace SoundScheduler_UnitTests {
 
             // Act
             rep1.SaveToSource();
-            Repository rep2 = Repository.LoadFromSource();
+            Repository rep2 = new Repository();
+            rep2.LoadFromSource();
+
 
             // Assert
             Assert.AreEqual(rep1.Jobs.Count, rep2.Jobs.Count);

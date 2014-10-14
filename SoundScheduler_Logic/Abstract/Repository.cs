@@ -13,18 +13,22 @@ namespace SoundScheduler_Logic.Abstract {
 
         public List<Job> Jobs {
             get { return _data.Jobs; }
+            set { _data.Jobs = value; }
         }
 
         public List<Meeting> Meetings {
             get { return _data.Meetings; }
+            set { _data.Meetings = value; }
         }
 
         public List<Template> Templates {
             get { return _data.Templates; }
+            set { _data.Templates = value; }
         }
 
         public List<User> Users {
             get { return _data.Users; }
+            set { _data.Users = value; }
         }
 
         public void SaveToSource() {
@@ -60,7 +64,7 @@ namespace SoundScheduler_Logic.Abstract {
             _data = objectOut;
         }
 
-        private class RepositoryData {
+        public class RepositoryData {
             public List<Job> Jobs { get; set; }
             public List<Meeting> Meetings { get; set; }
             public List<Template> Templates { get; set; }

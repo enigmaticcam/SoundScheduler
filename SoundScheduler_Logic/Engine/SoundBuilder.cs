@@ -9,29 +9,6 @@ using System.Threading.Tasks;
 using SoundScheduler_Logic.Abstract;
 
 namespace SoundScheduler_Logic.Engine {
-    //public class Repository {
-    //    private string _filename;
-
-    //    public SoundBuilder LoadSoundBuilder() {
-    //        SoundBuilder sound;
-    //        Stream stream = File.Open(_filename, FileMode.Open);
-    //        BinaryFormatter formatter = new BinaryFormatter();
-    //        sound = (SoundBuilder)formatter.Deserialize(stream);
-    //        stream.Close();
-    //        return sound;
-            
-    //    }
-    //    public void SaveSoundBuilder(SoundBuilder sound) {
-    //        Stream stream = File.Open(_filename, FileMode.Create);
-    //        BinaryFormatter formatter = new BinaryFormatter();
-    //        formatter.Serialize(stream, sound);
-    //        stream.Close();
-    //    }
-
-    //    public Repository(string filename) {
-    //        _filename = filename;
-    //    }
-    //}
 
     public class SoundBuilder {
         private int _consecutiveMeetingCountPerUserMax = 3;
@@ -41,13 +18,27 @@ namespace SoundScheduler_Logic.Engine {
         private List<Meeting> _meetings;
         private List<ExistingMeeting> _existingMeetings;
         private List<int> _jobOrder;
+        private List<HashSet<User>> _exceptions;
         Dictionary<int, int> _jobCount;
 
         public List<Meeting> BuildSchedule() {
+            Validate();
             CreateMeetings();
             AssembleJobsInOrder();
             AssignJobsToUsers();
             return _meetings;
+        }
+
+        private void Validate() {
+            if (_exceptions == null) {
+                _exceptions = new List<HashSet<User>>();
+                foreach (Template template in _templates) {
+                    _exceptions.Add(new HashSet<User>());
+                }
+            }
+            if (_exceptions.Count != _templates.Count) {
+                throw new Exception("Exception count not the same as meeting count");
+            }
         }
 
         private void CreateMeetings() {
@@ -128,7 +119,7 @@ namespace SoundScheduler_Logic.Engine {
             int initialUserIndex = userIndex;
             bool foundUser = false;
             do {
-                if (CanUserDoJob(_meetings[meetingIndex].Jobs[jobIndex], _users[userIndex])) {
+                if (CanUserDoJob(_meetings[meetingIndex].Jobs[jobIndex], _users[userIndex]) && !IsUserInException(meetingIndex, userIndex)) {
                     _meetings[meetingIndex].JobUserSlots.AddUserToJob(jobIndex, _users[userIndex]);
                     if (!IsMeetingStateValid()) {
                         _meetings[meetingIndex].JobUserSlots.RemoveUserFromJob(jobIndex);
@@ -145,6 +136,10 @@ namespace SoundScheduler_Logic.Engine {
                 }
             } while (!foundUser);
             return userIndex;
+        }
+
+        private bool IsUserInException(int meetingIndex, int userIndex) {
+            return _exceptions[meetingIndex].Contains(_users[userIndex]);
         }
 
         private bool IsMeetingStateValid() {
@@ -203,6 +198,7 @@ namespace SoundScheduler_Logic.Engine {
             _jobs = builder.Jobs;
             _users = builder.Users;
             _existingMeetings = builder.ExistingMeetings;
+            _exceptions = builder.Exceptions;
         }
 
         public class Builder {
@@ -210,6 +206,7 @@ namespace SoundScheduler_Logic.Engine {
             public List<Job> Jobs;
             public List<User> Users;
             public List<ExistingMeeting> ExistingMeetings;
+            public List<HashSet<User>> Exceptions;
 
             public Builder SetTemplates(List<Template> templates) {
                 this.Templates = templates;
@@ -228,6 +225,11 @@ namespace SoundScheduler_Logic.Engine {
 
             public Builder SetExistingMeetings(List<ExistingMeeting> existingMeetings) {
                 this.ExistingMeetings = existingMeetings;
+                return this;
+            }
+
+            public Builder SetExceptions(List<HashSet<User>> exceptions) {
+                this.Exceptions = exceptions;
                 return this;
             }
 
