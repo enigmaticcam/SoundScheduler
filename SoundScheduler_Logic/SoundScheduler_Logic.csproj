@@ -44,7 +44,9 @@
     <Compile Include="Abstract\Repository.cs" />
     <Compile Include="Abstract\Template.cs" />
     <Compile Include="Abstract\User.cs" />
+    <Compile Include="Engine\JobCancelers.cs" />
     <Compile Include="Engine\SoundBuilder.cs" />
+    <Compile Include="Engine\SoundBuilderV2.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup />

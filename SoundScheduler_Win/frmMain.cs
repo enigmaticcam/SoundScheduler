@@ -114,26 +114,26 @@ namespace SoundScheduler_Win {
             // WORK
             // --------------------------------------------------------
 
-            SoundBuilder engine = new SoundBuilder.Builder()
-               .SetJobs(new List<Job> { jobSound, jobStage, jobMic })
-               .SetUser(new List<User>(users))
-               .SetTemplates(new List<Template> { 
-                    templateTuesday, templateSunday, 
-                    templateTuesday, templateSunday, 
-                    templateTuesday, templateSunday, 
-                    templateTuesday, templateSunday, 
-                    templateTuesday, templateSunday, 
-                    templateTuesday, templateSunday, 
-                    templateTuesday, templateSunday, 
-                    templateTuesday, templateSunday, 
-                    templateTuesday, templateSunday,
-                    templateTuesday, templateSunday
-                })
-                .SetExistingMeetings(new List<SoundBuilder.ExistingMeeting>())
-                .SetExceptions(exceptions)
-               .Build();
+            //SoundBuilder engine = new SoundBuilder.Builder()
+            //   .SetJobs(new List<Job> { jobSound, jobStage, jobMic })
+            //   .SetUser(new List<User>(users))
+            //   .SetTemplates(new List<Template> { 
+            //        templateTuesday, templateSunday, 
+            //        templateTuesday, templateSunday, 
+            //        templateTuesday, templateSunday, 
+            //        templateTuesday, templateSunday, 
+            //        templateTuesday, templateSunday, 
+            //        templateTuesday, templateSunday, 
+            //        templateTuesday, templateSunday, 
+            //        templateTuesday, templateSunday, 
+            //        templateTuesday, templateSunday,
+            //        templateTuesday, templateSunday
+            //    })
+            //    .SetExistingMeetings(new List<SoundBuilder.ExistingMeeting>())
+            //    .SetExceptions(exceptions)
+            //   .Build();
 
-            _meetings = engine.BuildSchedule();
+            //_meetings = engine.BuildSchedule();
             PopulateAllData();
         }
 
@@ -159,7 +159,7 @@ namespace SoundScheduler_Win {
             message.AppendLine("");
             for (int i = 0; i < meeting.Jobs.Count; i++) {
                 message.Append("Job: " + meeting.Jobs[i].Name);
-                message.AppendLine(" (" + meeting.JobUserSlots.UserForJob(i).Name + ")");
+                //message.AppendLine(" (" + meeting.JobUserSlots.UserForJob(i).Name + ")");
             }
             txtResults.Text = message.ToString();
         }
