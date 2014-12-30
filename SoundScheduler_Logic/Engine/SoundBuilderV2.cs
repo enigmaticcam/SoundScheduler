@@ -12,7 +12,7 @@ namespace SoundScheduler_Logic.Engine {
     public class SoundBuilderV2 {
         private SoundMetrics _metrics;
         private List<Job> _jobs;
-        private List<User> _users;
+        private HashSet<User> _users;
         private MeetingsByDate _meetings;
         private Dictionary<DateTime, Template> _templates;
         private ExceptionsByDate _exceptions;
@@ -60,8 +60,25 @@ namespace SoundScheduler_Logic.Engine {
         }
 
         private void FillJob(DateTime date, Job job) {
-            // test
+            ActionFillJob action = new ActionFillJob.Builder()
+                .SetDate(date)
+                .SetJob(job)
+                .SetExceptions(_exceptions)
+                .SetJobCancelers(GetJobCancelers())
+                .SetMeetings(_meetings)
+                .SetUsers(_users)
+                .Build();
+            action.PerformAction();
+            
+        }
 
+        private List<JobCancel> GetJobCancelers() {
+            List<JobCancel> jobCancelers = new List<JobCancel>();
+            jobCancelers.Add(new JobCancelUsersWhoAlreadyHaveJob());
+            jobCancelers.Add(new JobCancelUsersWhoHaveExceptions());
+            jobCancelers.Add(new JobCancelUsersWhoCantDoJob());
+            jobCancelers.Add(new JobCancelUserWhoNeedABreak());
+            return jobCancelers;
         }
 
         public class ActionFillJob {
@@ -69,39 +86,80 @@ namespace SoundScheduler_Logic.Engine {
             private ExceptionsByDate _exceptions;
             private DateTime _date;
             private Job _job;
-            private SoundMetrics _metrics;
             private HashSet<User> _users;
             private HashSet<User> _usersAvailable;
-            private List<IJobCancel> _jobCancelers;
+            private IEnumerable<JobCancel> _jobCancelers;
             private List<HashSet<User>> _usersCanceled;
+            private Random _random;
 
-            public void PerformAction() {
-                CreateMetrics();
-                CreateJobCancelers();
+            public User PerformAction() {
                 CancelJobsForAll();
+                ReverseCancels();
+                RemoveUsersWhoHaveBeenUsedTheMost();
+                PickAUserRandomly();
+                return GetOnlyUser();
             }
 
-            private void CreateMetrics() {
-                _metrics = new SoundMetrics.Builder()
+            private void CancelJobsForAll() {
+                _usersAvailable = new HashSet<User>(_users);
+                for (int i = 0; i < _jobCancelers.Count(); i++) {
+                    SoundMetrics metrics = CreateMetrics();
+                    HashSet<User> usersToRemove = _jobCancelers.ElementAt(i).CancelUsers(metrics);
+                    RemoveUsersFromAvailableUsers(usersToRemove);
+                    _usersCanceled.Add(usersToRemove);
+                }
+            }
+
+            private void ReverseCancels() {
+                int jobCancelerIndex = _jobCancelers.Count() - 1;
+                while (_usersAvailable.Count == 0) {
+                    if (!_jobCancelers.ElementAt(jobCancelerIndex).CanAddBack) {
+                        throw new Exception("could not find a user for job");
+                    } else {
+                        AddBackUsers(_usersCanceled[jobCancelerIndex]);
+                    }
+                    jobCancelerIndex--;
+                }
+            }
+
+            private void RemoveUsersWhoHaveBeenUsedTheMost() {
+
+            }
+
+            private void PickAUserRandomly() {
+                SoundMetrics metrics = CreateMetrics();
+                JobCancel jobCancel = new JobCancelPickARandomUser(_random);
+                HashSet<User> usersToRemove = jobCancel.CancelUsers(metrics);
+                RemoveUsersFromAvailableUsers(usersToRemove);
+            }
+
+            private User GetOnlyUser() {
+                if (_usersAvailable.Count > 1) {
+                    throw new SoundBuilderTooManyUsersException();
+                } else {
+                    return _usersAvailable.ElementAt(0);
+                }
+            }
+
+            private SoundMetrics CreateMetrics() {
+                return new SoundMetrics.Builder()
                     .SetCurrentDate(_date)
                     .SetCurrentJob(_job)
                     .SetExceptions(_exceptions)
                     .SetMeetings(_meetings)
-                    .SetUsers(_users)
+                    .SetUsers(_usersAvailable)
                     .Build();
             }
 
-            private void CreateJobCancelers() {
-                _jobCancelers = new List<IJobCancel>();
-                _jobCancelers.Add(new JobCancelUsersWhoAlreadyHaveJob());
-                _jobCancelers.Add(new JobCancelUsersWhoHaveExceptions());
-                _jobCancelers.Add(new JobCancelUsersWhoCantDoJob());
-                _jobCancelers.Add(new JobCancelUserWhoNeedABreak());
+            private void RemoveUsersFromAvailableUsers(HashSet<User> usersToRemove) {
+                foreach (User user in usersToRemove) {
+                    _usersAvailable.Remove(user);
+                }
             }
 
-            private void CancelJobsForAll() {
-                for (int i = 0; i < _jobCancelers.Count; i++) {
-
+            private void AddBackUsers(HashSet<User> usersToAdd) {
+                foreach (User user in usersToAdd) {
+                    _usersAvailable.Add(user);
                 }
             }
 
@@ -111,8 +169,10 @@ namespace SoundScheduler_Logic.Engine {
                 _job = builder.Job;
                 _exceptions = builder.Exceptions;
                 _users = builder.Users;
+                _jobCancelers = builder.JobCancelers;
                 _usersCanceled = new List<HashSet<User>>();
                 _usersAvailable = new HashSet<User>();
+                _random = new Random();
             }
 
             public class Builder {
@@ -121,6 +181,7 @@ namespace SoundScheduler_Logic.Engine {
                 public DateTime Date;
                 public Job Job;
                 public HashSet<User> Users;
+                public IEnumerable<JobCancel> JobCancelers;
 
                 public Builder SetMeetings(MeetingsByDate meetings) {
                     this.Meetings = meetings;
@@ -147,6 +208,11 @@ namespace SoundScheduler_Logic.Engine {
                     return this;
                 }
 
+                public Builder SetJobCancelers(IEnumerable<JobCancel> jobCancelers) {
+                    this.JobCancelers = jobCancelers;
+                    return this;
+                }
+
                 public ActionFillJob Build() {
                     return new ActionFillJob(this);
                 }
@@ -163,14 +229,14 @@ namespace SoundScheduler_Logic.Engine {
 
         public class Builder {
             public List<Job> Jobs;
-            public List<User> Users;
+            public HashSet<User> Users;
 
             public Builder SetJobs(List<Job> jobs) {
                 this.Jobs = jobs;
                 return this;
             }
 
-            public Builder SetUser(List<User> Users) {
+            public Builder SetUser(HashSet<User> Users) {
                 this.Users = Users;
                 return this;
             }
@@ -325,5 +391,7 @@ namespace SoundScheduler_Logic.Engine {
         }
     }
 
-    
+    public class SoundBuilderTooManyUsersException : Exception {
+        
+    }
 }
