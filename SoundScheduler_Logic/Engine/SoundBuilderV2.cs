@@ -10,7 +10,6 @@ using SoundScheduler_Logic.Abstract;
 
 namespace SoundScheduler_Logic.Engine {
     public class SoundBuilderV2 {
-        private SoundMetrics _metrics;
         private List<Job> _jobs;
         private HashSet<User> _users;
         private MeetingsByDate _meetings;
@@ -25,8 +24,8 @@ namespace SoundScheduler_Logic.Engine {
             _meetings.AddMeeting(meeting);
         }
 
-        public void AddException(DateTime date, User user) {
-            _exceptions.AddException(date, user);
+        public void AddException(DateTime date, User user, bool isSoftException) {
+            _exceptions.AddException(date, user, isSoftException);
         }
 
         public List<Meeting> BuildSchedule() {
@@ -309,8 +308,12 @@ namespace SoundScheduler_Logic.Engine {
                 return userCount;
             }
 
-            public bool DoesUserHaveException(User user) {
-                return _exceptions.DoesUserHaveException(_currentDate, user);
+            public bool DoesUserHaveHardException(User user) {
+                return _exceptions.DoesUserHaveHardException(_currentDate, user);
+            }
+
+            public bool DoesUserHaveSoftException(User user) {
+                return _exceptions.DoesUserHaveSoftException(_currentDate, user);
             }
 
             public SoundMetrics(Builder builder) {
@@ -393,25 +396,39 @@ namespace SoundScheduler_Logic.Engine {
         }
 
         public class ExceptionsByDate {
-            private Dictionary<DateTime, HashSet<User>> _exceptions;
+            private Dictionary<DateTime, Dictionary<User, MeetingException>> _exceptions;
 
-            public void AddException(DateTime date, User user) {
+            public void AddException(DateTime date, User user, bool isSoftException) {
                 if (!_exceptions.ContainsKey(date)) {
-                    _exceptions.Add(date, new HashSet<User>());
+                    _exceptions.Add(date, new Dictionary<User, MeetingException>());
                 }
-                _exceptions[date].Add(user);
+                MeetingException exception = new MeetingException();
+                exception.Date = date;
+                exception.User = user;
+                exception.IsSoftException = isSoftException;
+                _exceptions[date].Add(user, exception);
             }
 
-            public bool DoesUserHaveException(DateTime date, User user) {
-                if (_exceptions.ContainsKey(date) && _exceptions[date].Contains(user)) {
-                    return true;
+            public bool DoesUserHaveSoftException(DateTime date, User user) {
+                if (_exceptions.ContainsKey(date) && _exceptions[date].ContainsKey(user)) {
+                    MeetingException exception = _exceptions[date][user];
+                    return exception.IsSoftException;
+                } else {
+                    return false;
+                }
+            }
+
+            public bool DoesUserHaveHardException(DateTime date, User user) {
+                if (_exceptions.ContainsKey(date) && _exceptions[date].ContainsKey(user)) {
+                    MeetingException exception = _exceptions[date][user];
+                    return !exception.IsSoftException;
                 } else {
                     return false;
                 }
             }
 
             public ExceptionsByDate() {
-                _exceptions = new Dictionary<DateTime, HashSet<User>>();
+                _exceptions = new Dictionary<DateTime, Dictionary<User, MeetingException>>();
             }
         }
     }

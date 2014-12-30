@@ -9,26 +9,28 @@ namespace SoundScheduler_UnitTests {
     public class JobCancelerTests {
 
         [TestMethod]
-        public void JobCanceler_DoesRemoveUsersWhoHaveExceptions() {
+        public void JobCanceler_DoesRemoveUsersWhoHaveHardExceptions() {
 
             // Arrange
             Job job1 = new Job();
-            Job job2 = new Job();
+            job1.IsVoidedOnSoftException = false;
+
             User user1 = new User();
             User user2 = new User();
+            User user3 = new User();
 
             Template template1 = new Template();
             template1.Jobs.Add(job1);
-            template1.Jobs.Add(job2);
 
             Meeting meeting = template1.ToMeeting(DateTime.Parse("12/1/2014"));
-            meeting.AddUserForJob(user1, job1);
 
             SoundBuilderV2.MeetingsByDate meetings = new SoundBuilderV2.MeetingsByDate();
             meetings.AddMeeting(meeting);
 
             SoundBuilderV2.ExceptionsByDate exceptions = new SoundBuilderV2.ExceptionsByDate();
-            exceptions.AddException(DateTime.Parse("12/1/2014"), user1);
+            exceptions.AddException(DateTime.Parse("12/1/2014"), user1, false);
+            exceptions.AddException(DateTime.Parse("12/1/2014"), user2, true);
+            exceptions.AddException(DateTime.Parse("12/1/2014"), user3, true);
 
             SoundBuilderV2.SoundMetrics metrics = new SoundBuilderV2.SoundMetrics.Builder()
                 .SetCurrentDate(DateTime.Parse("12/1/2014"))
@@ -45,6 +47,48 @@ namespace SoundScheduler_UnitTests {
             // Assert
             Assert.AreEqual(true, canceledUsers.Contains(user1));
             Assert.AreEqual(false, canceledUsers.Contains(user2));
+            Assert.AreEqual(false, canceledUsers.Contains(user3));
+        }
+
+        [TestMethod]
+        public void JobCanceler_DoesRemoveUsersWhoHaveSoftExceptions() {
+
+            // Arrange
+            Job job1 = new Job();
+            job1.IsVoidedOnSoftException = true;
+
+            User user1 = new User();
+            User user2 = new User();
+            User user3 = new User();
+
+            Template template1 = new Template();
+            template1.Jobs.Add(job1);
+
+            Meeting meeting = template1.ToMeeting(DateTime.Parse("12/1/2014"));
+
+            SoundBuilderV2.MeetingsByDate meetings = new SoundBuilderV2.MeetingsByDate();
+            meetings.AddMeeting(meeting);
+
+            SoundBuilderV2.ExceptionsByDate exceptions = new SoundBuilderV2.ExceptionsByDate();
+            exceptions.AddException(DateTime.Parse("12/1/2014"), user1, false);
+            exceptions.AddException(DateTime.Parse("12/1/2014"), user2, true);
+
+            SoundBuilderV2.SoundMetrics metrics = new SoundBuilderV2.SoundMetrics.Builder()
+                .SetCurrentDate(DateTime.Parse("12/1/2014"))
+                .SetCurrentJob(job1)
+                .SetMeetings(meetings)
+                .SetExceptions(exceptions)
+                .SetUsers(new HashSet<User> { user1, user2 })
+                .Build();
+
+            // Act
+            JobCancelUsersWhoHaveExceptions jobCancel = new JobCancelUsersWhoHaveExceptions();
+            HashSet<User> canceledUsers = jobCancel.CancelUsers(metrics);
+
+            // Assert
+            Assert.AreEqual(true, canceledUsers.Contains(user1));
+            Assert.AreEqual(true, canceledUsers.Contains(user2));
+            Assert.AreEqual(false, canceledUsers.Contains(user3));
         }
 
         [TestMethod]

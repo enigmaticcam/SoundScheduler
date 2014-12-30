@@ -39,6 +39,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Abstract\MeetingException.cs" />
     <Compile Include="Abstract\Job.cs" />
     <Compile Include="Abstract\Meeting.cs" />
     <Compile Include="Abstract\Repository.cs" />

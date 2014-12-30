@@ -78,7 +78,9 @@ namespace SoundScheduler_Logic.Engine {
 
         private void CancelUsers() {
             foreach (User user in _metrics.Users) {
-                if (_metrics.DoesUserHaveException(user)) {
+                if (_metrics.DoesUserHaveHardException(user)) {
+                    _usersToBeCancelled.Add(user);
+                } else if (_metrics.DoesUserHaveSoftException(user) && _metrics.CurrentJob.IsVoidedOnSoftException) {
                     _usersToBeCancelled.Add(user);
                 }
             }
