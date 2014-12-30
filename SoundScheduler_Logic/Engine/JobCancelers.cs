@@ -12,6 +12,82 @@ namespace SoundScheduler_Logic.Engine {
         public abstract bool CanAddBack { get; }
     }
 
+    public class JobCancelUsersWhoHaveBeenUsedMoreForJob : JobCancel {
+        SoundBuilderV2.SoundMetrics _metrics;
+        HashSet<User> _usersToBeCancelled;
+        Dictionary<User, int> _userCounts;
+
+        public override bool CanAddBack {
+            get { return true; }
+        }
+
+        public override HashSet<User> CancelUsers(SoundBuilderV2.SoundMetrics metrics) {
+            _metrics = metrics;
+            _usersToBeCancelled = new HashSet<User>();
+            CancelUsers();
+            return _usersToBeCancelled;
+        }
+
+        private void CancelUsers() {
+            BuildUserCounts();
+            int lowestCount = GetLowestCount();
+            CancelUsersHigherThanCount(lowestCount);
+        }
+
+        private void BuildUserCounts() {
+            foreach (User user in _metrics.Users) {
+                _userCounts.Add(user, _metrics.UserTotalCountForJob(user, _metrics.CurrentJob));
+            }
+        }
+
+        private int GetLowestCount() {
+            return _userCounts.Values.OrderBy(c => c).Take(1).ElementAt(0);
+        }
+
+        private void CancelUsersHigherThanCount(int count) {
+            foreach (User user in _metrics.Users) {
+                int userCount = 0;
+                if (_userCounts.ContainsKey(user)) {
+                    userCount = _userCounts[user];
+                }
+                if (userCount > count) {
+                    _usersToBeCancelled.Add(user);
+                }
+            }
+        }
+
+        public JobCancelUsersWhoHaveBeenUsedMoreForJob() {
+            _userCounts = new Dictionary<User, int>();
+        }
+    }
+
+    public class JobCancelUsersWhoDidSameJobLastMeeting : JobCancel {
+        SoundBuilderV2.SoundMetrics _metrics;
+        HashSet<User> _usersToBeCancelled;
+
+        public override bool CanAddBack {
+            get { return true; }
+        }
+
+        public override HashSet<User> CancelUsers(SoundBuilderV2.SoundMetrics metrics) {
+            _metrics = metrics;
+            _usersToBeCancelled = new HashSet<User>();
+            CancelUsers();
+            return _usersToBeCancelled;
+        }
+
+        private void CancelUsers() {
+            if (_metrics.LastMeeting != null) {
+                foreach (User user in _metrics.Users) {
+                    Job lastJob = _metrics.LastMeeting.JobForUser(user);
+                    if (lastJob != null && lastJob.IsSameJob(_metrics.CurrentJob)) {
+                        _usersToBeCancelled.Add(user);
+                    }
+                }
+            }
+        }
+    }
+
     public class JobCancelUsersWhoPreferNotCertainMeetings : JobCancel {
         SoundBuilderV2.SoundMetrics _metrics;
         HashSet<User> _usersToBeCancelled;

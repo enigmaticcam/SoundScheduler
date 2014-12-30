@@ -12,6 +12,7 @@ namespace SoundScheduler_Logic.Abstract {
         public Meeting ToMeeting(DateTime date) {
             Meeting meeting = new Meeting(this);
             meeting.Date = date;
+            meeting.Name = this.Name + " - " + date.ToShortDateString();
             foreach (Job job in this.Jobs) {
                 meeting.Jobs.Add(job);
             }

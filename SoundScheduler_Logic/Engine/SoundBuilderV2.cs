@@ -33,10 +33,10 @@ namespace SoundScheduler_Logic.Engine {
             _preferences.AddPrefernceNot(user, template);
         }
 
-        public List<Meeting> BuildSchedule() {
+        public MeetingsByDate BuildSchedule() {
             CreateMeetingsFromTemplates();
             FillMeetingsAll();
-            return null;
+            return _meetings;
         }
 
         private void CreateMeetingsFromTemplates() {
@@ -83,6 +83,7 @@ namespace SoundScheduler_Logic.Engine {
             jobCancelers.Add(new JobCancelUsersWhoHaveExceptions());
             jobCancelers.Add(new JobCancelUsersWhoCantDoJob());
             jobCancelers.Add(new JobCancelUserWhoNeedABreak());
+            jobCancelers.Add(new JobCancelUsersWhoDidSameJobLastMeeting());
             jobCancelers.Add(_preferences);
             return jobCancelers;
         }
@@ -129,8 +130,20 @@ namespace SoundScheduler_Logic.Engine {
             }
 
             private void RemoveUsersWhoHaveBeenUsedTheMost() {
+                RemoveUsersWhoHaveBeenUsedAcrossAllJobs();
+                RemoveUsersWhoHaveBeenUsedForThisOneJob();
+            }
+
+            private void RemoveUsersWhoHaveBeenUsedAcrossAllJobs() {
                 SoundMetrics metrics = CreateMetrics();
                 JobCancel jobCancel = new JobCancelUsersWhoHaveBeenUsedMore();
+                HashSet<User> usersToRemove = jobCancel.CancelUsers(metrics);
+                RemoveUsersFromAvailableUsers(usersToRemove);
+            }
+
+            private void RemoveUsersWhoHaveBeenUsedForThisOneJob() {
+                SoundMetrics metrics = CreateMetrics();
+                JobCancel jobCancel = new JobCancelUsersWhoHaveBeenUsedMoreForJob();
                 HashSet<User> usersToRemove = jobCancel.CancelUsers(metrics);
                 RemoveUsersFromAvailableUsers(usersToRemove);
             }
@@ -284,6 +297,22 @@ namespace SoundScheduler_Logic.Engine {
                 get { return _meetings.GetMeeting(this.CurrentDate); }
             }
 
+            private Meeting _lastMeeting;
+            public Meeting LastMeeting {
+                get {
+                    if (_lastMeeting == null) {
+                        foreach (DateTime date in _meetings.Keys) {
+                            if (date == this.CurrentDate) {
+                                break;
+                            } else {
+                                _lastMeeting = _meetings.GetMeeting(date);
+                            }
+                        }
+                    }
+                    return _lastMeeting;
+                }
+            }
+
             public IEnumerable<User> Users {
                 get { return _users; }
             }
@@ -313,6 +342,20 @@ namespace SoundScheduler_Logic.Engine {
                     if (DateTime.Compare(date, _currentDate) < 0) {
                         Meeting meeting = _meetings.GetMeeting(date);
                         if (meeting.JobForUser(user) != null) {
+                            userCount++;
+                        }
+                    }
+                }
+                return userCount;
+            }
+
+            public int UserTotalCountForJob(User user, Job job) {
+                int userCount = 0;
+                foreach (DateTime date in _meetings.Keys) {
+                    if (DateTime.Compare(date, _currentDate) < 0) {
+                        Meeting meeting = _meetings.GetMeeting(date);
+                        Job tempJob = meeting.JobForUser(user);
+                        if (tempJob != null && tempJob.IsSameJob(job)) {
                             userCount++;
                         }
                     }
