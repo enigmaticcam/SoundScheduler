@@ -27,26 +27,32 @@ namespace SoundScheduler_Win {
             Job jobSound = new Job();
             jobSound.Name = "Sound Box";
             jobs.Add(jobSound);
+            jobSound.IsVoidedOnSoftException = true;
 
             Job jobStage = new Job();
             jobStage.Name = "Stage";
             jobs.Add(jobStage);
+            jobStage.IsVoidedOnSoftException = false;
 
             Job jobMic1 = new Job();
             jobMic1.Name = "Mic 1";
             jobs.Add(jobMic1);
+            jobMic1.IsVoidedOnSoftException = true;
 
             Job jobMic2 = new Job();
             jobMic2.Name = "Mic 2";
             jobs.Add(jobMic2);
+            jobMic2.IsVoidedOnSoftException = true;
 
             Job jobMic3 = new Job();
             jobMic3.Name = "Mic 3";
             jobs.Add(jobMic3);
+            jobMic3.IsVoidedOnSoftException = true;
 
             Job jobMic4 = new Job();
             jobMic4.Name = "Mic 4";
             jobs.Add(jobMic4);
+            jobMic4.IsVoidedOnSoftException = true;
 
             jobMic1.AddSameJob(jobMic2);
             jobMic1.AddSameJob(jobMic3);
@@ -84,20 +90,20 @@ namespace SoundScheduler_Win {
             userDLopez.Jobs = new List<Job> { jobSound, jobStage, jobMic1, jobMic2, jobMic3, jobMic4 };
             users.Add(userDLopez);
 
-            //User userJHermosillo = new User();
-            //userJHermosillo.Name = "Joseph Hermosillo";
-            //userJHermosillo.Jobs = new List<Job> { jobSound, jobStage, jobMic1, jobMic2, jobMic3, jobMic4 };
-            //users.Add(userJHermosillo);
+            User userJHermosillo = new User();
+            userJHermosillo.Name = "Joseph Hermosillo";
+            userJHermosillo.Jobs = new List<Job>();
+            users.Add(userJHermosillo);
 
             User userEWilder = new User();
             userEWilder.Name = "Ethan Wilder";
             userEWilder.Jobs = new List<Job> { jobSound, jobStage, jobMic1, jobMic2, jobMic3, jobMic4 };
             users.Add(userEWilder);
 
-            //User userCOldani = new User();
-            //userCOldani.Name = "Chris Oldani";
-            //userCOldani.Jobs = new List<Job> { jobMic1, jobMic2, jobMic3, jobMic4 };
-            //users.Add(userCOldani);
+            User userCOldani = new User();
+            userCOldani.Name = "Chris Oldani";
+            userCOldani.Jobs = new List<Job>();
+            users.Add(userCOldani);
 
             User userRStubbs = new User();
             userRStubbs.Name = "Reed Stubbs";
@@ -145,10 +151,63 @@ namespace SoundScheduler_Win {
             // --------------------------------------------------------
             // WORK - Previous Meetings
             // --------------------------------------------------------
+
+            Meeting meeting = templateTuesday.ToMeeting(DateTime.Parse("12/16/2014"));
+            meeting.AddUserForJob(userCTangen, jobSound);
+            meeting.AddUserForJob(userESavelberg, jobStage);
+            meeting.AddUserForJob(userDCook, jobMic1);
+            meeting.AddUserForJob(userEWilder, jobMic2);
+            engine.AddMeeting(meeting.Date, meeting);
+
+            meeting = templateSunday.ToMeeting(DateTime.Parse("12/21/2014"));
+            meeting.AddUserForJob(userESavelberg, jobSound);
+            meeting.AddUserForJob(userDLopez, jobStage);
+            meeting.AddUserForJob(userJHermosillo, jobMic1);
+            meeting.AddUserForJob(userCOldani, jobMic2);
+            meeting.AddUserForJob(userRStubbs, jobMic3);
+            meeting.AddUserForJob(userEWilder, jobMic4);
+            engine.AddMeeting(meeting.Date, meeting);
+
+            meeting = templateTuesday.ToMeeting(DateTime.Parse("12/23/2014"));
+            meeting.AddUserForJob(userDCook, jobSound);
+            meeting.AddUserForJob(userCTangen, jobStage);
+            meeting.AddUserForJob(userESavelberg, jobMic1);
+            meeting.AddUserForJob(userRStubbs, jobMic2);
+            engine.AddMeeting(meeting.Date, meeting);
+
+            meeting = templateSunday.ToMeeting(DateTime.Parse("12/28/2014"));
+            meeting.AddUserForJob(userJHermosillo, jobSound);
+            meeting.AddUserForJob(userEWilder, jobStage);
+            meeting.AddUserForJob(userDLopez, jobMic1);
+            meeting.AddUserForJob(userDCook, jobMic2);
+            meeting.AddUserForJob(userCOldani, jobMic3);
+            meeting.AddUserForJob(userKSugiyama, jobMic4);
+            
             
             // --------------------------------------------------------
             // WORK - Exceptions
             // --------------------------------------------------------
+
+            engine.AddException(DateTime.Parse("12/30/2014"), userDCook, true);
+            engine.AddException(DateTime.Parse("12/30/2014"), userCTangen, true);
+            engine.AddException(DateTime.Parse("1/25/2015"), userESavelberg, false);
+            engine.AddException(DateTime.Parse("2/8/2015"), userESavelberg, false);
+            engine.AddException(DateTime.Parse("1/13/2015"), userCTangen, true);
+            engine.AddException(DateTime.Parse("1/20/2015"), userKSugiyama, true);
+            engine.AddException(DateTime.Parse("1/20/2015"), userDCook, true);
+            engine.AddException(DateTime.Parse("1/27/2015"), userCTangen, true);
+            engine.AddException(DateTime.Parse("1/27/2015"), userESavelberg, true);
+            engine.AddException(DateTime.Parse("2/15/2015"), userDLopez, true);
+            engine.AddException(DateTime.Parse("3/1/2015"), userCTangen, false);
+            engine.AddException(DateTime.Parse("3/3/2015"), userKSugiyama, true);
+            engine.AddException(DateTime.Parse("3/3/2015"), userESavelberg, true);
+            engine.AddException(DateTime.Parse("3/8/2015"), userDCook, false);
+            engine.AddException(DateTime.Parse("3/8/2015"), userESavelberg, true);
+            engine.AddException(DateTime.Parse("3/15/2015"), userRStubbs, true);
+            engine.AddException(DateTime.Parse("3/23/2015"), userCTangen, false);
+            engine.AddException(DateTime.Parse("4/12/2015"), userDCook, true);
+            engine.AddException(DateTime.Parse("4/19/2015"), userKSugiyama, true);
+
 
             // --------------------------------------------------------
             // WORK - Preferences
