@@ -197,6 +197,98 @@ namespace SoundScheduler_UnitTests {
             Assert.AreEqual(true, true);
         }
 
+        [TestMethod]
+        public void SoundBuilder_AlwaysReturnsACorrectRandomUser1() {
+
+            // Arrange
+            JobCancel jobCanceler1 = GetJobCanceler(2);
+            JobCancel jobCanceler2 = GetJobCanceler(2);
+            JobCancel jobCanceler3 = GetJobCanceler(1);
+            JobCancel jobCanceler4 = GetJobCanceler(5);
+            List<JobCancel> jobCancelers = new List<JobCancel> { jobCanceler1, jobCanceler2, jobCanceler3, jobCanceler4 };
+
+            List<User> users = GetUsers(10);
+            HashSet<User> usersFirstHalf = new HashSet<User>();
+            usersFirstHalf.Add(users[0]);
+            usersFirstHalf.Add(users[1]);
+            usersFirstHalf.Add(users[2]);
+            usersFirstHalf.Add(users[3]);
+            usersFirstHalf.Add(users[4]);
+
+            // Act
+            HashSet<User> usersFound = new HashSet<User>();
+            bool foundInFirstHalf = false;
+            Random random = new Random();
+            for (int i = 0; i < 1000; i++ ) {
+                SoundBuilderV2.ActionFillJob action = new SoundBuilderV2.ActionFillJob.Builder()
+                .SetDate(DateTime.Parse("12/1/2014"))
+                .SetExceptions(new SoundBuilderV2.ExceptionsByDate())
+                .SetJob(new Job())
+                .SetJobCancelers(jobCancelers)
+                .SetMeetings(new SoundBuilderV2.MeetingsByDate())
+                .SetUsers(new HashSet<User>(users))
+                .SetRandom(random)
+                .Build();
+
+                User user = action.PerformAction();
+                if (usersFirstHalf.Contains(user)) {
+                    foundInFirstHalf = true;
+                } else {
+                    usersFound.Add(user);
+                }
+            }
+
+            // Assert
+            Assert.AreEqual(false, foundInFirstHalf);
+            Assert.AreEqual(5, usersFound.Count);
+        }
+
+        [TestMethod]
+        public void SoundBuilder_AlwaysReturnsACorrectRandomUser2() {
+
+            // Arrange
+            JobCancel jobCanceler1 = GetJobCanceler(0);
+            JobCancel jobCanceler2 = GetJobCanceler(0);
+            JobCancel jobCanceler3 = GetJobCanceler(0);
+            JobCancel jobCanceler4 = GetJobCanceler(5);
+            List<JobCancel> jobCancelers = new List<JobCancel> { jobCanceler1, jobCanceler2, jobCanceler3, jobCanceler4 };
+
+            List<User> users = GetUsers(10);
+            HashSet<User> usersFirstHalf = new HashSet<User>();
+            usersFirstHalf.Add(users[0]);
+            usersFirstHalf.Add(users[1]);
+            usersFirstHalf.Add(users[2]);
+            usersFirstHalf.Add(users[3]);
+            usersFirstHalf.Add(users[4]);
+
+            // Act
+            HashSet<User> usersFound = new HashSet<User>();
+            bool foundInFirstHalf = false;
+            Random random = new Random();
+            for (int i = 0; i < 1000; i++) {
+                SoundBuilderV2.ActionFillJob action = new SoundBuilderV2.ActionFillJob.Builder()
+                .SetDate(DateTime.Parse("12/1/2014"))
+                .SetExceptions(new SoundBuilderV2.ExceptionsByDate())
+                .SetJob(new Job())
+                .SetJobCancelers(jobCancelers)
+                .SetMeetings(new SoundBuilderV2.MeetingsByDate())
+                .SetUsers(new HashSet<User>(users))
+                .SetRandom(random)
+                .Build();
+
+                User user = action.PerformAction();
+                if (usersFirstHalf.Contains(user)) {
+                    foundInFirstHalf = true;
+                } else {
+                    usersFound.Add(user);
+                }
+            }
+
+            // Assert
+            Assert.AreEqual(false, foundInFirstHalf);
+            Assert.AreEqual(5, usersFound.Count);
+        }
+
         //[TestMethod]
         //public void SoundBuilder_MainEngineTest() {
 

@@ -123,7 +123,10 @@ namespace SoundScheduler_Logic.Engine {
             }
 
             private void RemoveUsersWhoHaveBeenUsedTheMost() {
-
+                SoundMetrics metrics = CreateMetrics();
+                JobCancel jobCancel = new JobCancelUsersWhoHaveBeenUsedMore();
+                HashSet<User> usersToRemove = jobCancel.CancelUsers(metrics);
+                RemoveUsersFromAvailableUsers(usersToRemove);
             }
 
             private void PickAUserRandomly() {
@@ -170,9 +173,12 @@ namespace SoundScheduler_Logic.Engine {
                 _exceptions = builder.Exceptions;
                 _users = builder.Users;
                 _jobCancelers = builder.JobCancelers;
+                _random = builder.Rnd;
+                if (_random == null) {
+                    _random = new Random();
+                }
                 _usersCanceled = new List<HashSet<User>>();
                 _usersAvailable = new HashSet<User>();
-                _random = new Random();
             }
 
             public class Builder {
@@ -182,6 +188,7 @@ namespace SoundScheduler_Logic.Engine {
                 public Job Job;
                 public HashSet<User> Users;
                 public IEnumerable<JobCancel> JobCancelers;
+                public Random Rnd;
 
                 public Builder SetMeetings(MeetingsByDate meetings) {
                     this.Meetings = meetings;
@@ -210,6 +217,11 @@ namespace SoundScheduler_Logic.Engine {
 
                 public Builder SetJobCancelers(IEnumerable<JobCancel> jobCancelers) {
                     this.JobCancelers = jobCancelers;
+                    return this;
+                }
+
+                public Builder SetRandom(Random rnd) {
+                    this.Rnd = rnd;
                     return this;
                 }
 
@@ -278,6 +290,19 @@ namespace SoundScheduler_Logic.Engine {
                             userCount++;
                         } else {
                             userCount = 0;
+                        }
+                    }
+                }
+                return userCount;
+            }
+
+            public int UserTotalCount(User user) {
+                int userCount = 0;
+                foreach (DateTime date in _meetings.Keys) {
+                    if (DateTime.Compare(date, _currentDate) < 0) {
+                        Meeting meeting = _meetings.GetMeeting(date);
+                        if (meeting.JobForUser(user) != null) {
+                            userCount++;
                         }
                     }
                 }

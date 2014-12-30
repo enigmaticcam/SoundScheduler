@@ -175,5 +175,64 @@ namespace SoundScheduler_UnitTests {
             Assert.AreEqual(true, canceledUsers.Contains(user1));
             Assert.AreEqual(false, canceledUsers.Contains(user2));
         }
+
+        [TestMethod]
+        public void JobCanceler_DoesRemoveUsersWhoAreUsedMore() {
+
+            // Arrange
+            Job job1 = new Job();
+            Job job2 = new Job();
+
+            User user1 = new User();
+            User user2 = new User();
+            User user3 = new User();
+
+            Template template = new Template();
+            template.Jobs.Add(job1);
+            template.Jobs.Add(job2);
+
+            Meeting meeting1 = template.ToMeeting(DateTime.Parse("12/1/2014"));
+            Meeting meeting2 = template.ToMeeting(DateTime.Parse("12/2/2014"));
+            Meeting meeting3 = template.ToMeeting(DateTime.Parse("12/3/2014"));
+            Meeting meeting4 = template.ToMeeting(DateTime.Parse("12/4/2014"));
+            Meeting meeting5 = template.ToMeeting(DateTime.Parse("12/5/2014"));
+            Meeting meeting6 = template.ToMeeting(DateTime.Parse("12/6/2014"));
+
+            meeting1.AddUserForJob(user1, job1);
+            meeting2.AddUserForJob(user1, job1);
+            meeting3.AddUserForJob(user1, job1);
+            meeting4.AddUserForJob(user1, job1);
+            meeting5.AddUserForJob(user1, job1);
+
+            meeting1.AddUserForJob(user2, job2);
+            meeting2.AddUserForJob(user2, job2);
+
+            meeting4.AddUserForJob(user3, job2);
+            meeting5.AddUserForJob(user3, job2);
+
+            SoundBuilderV2.MeetingsByDate meetings = new SoundBuilderV2.MeetingsByDate();
+            meetings.AddMeeting(meeting1);
+            meetings.AddMeeting(meeting2);
+            meetings.AddMeeting(meeting3);
+            meetings.AddMeeting(meeting4);
+            meetings.AddMeeting(meeting5);
+            meetings.AddMeeting(meeting6);
+
+            SoundBuilderV2.SoundMetrics metrics = new SoundBuilderV2.SoundMetrics.Builder()
+                .SetCurrentDate(DateTime.Parse("12/6/2014"))
+                .SetCurrentJob(job1)
+                .SetMeetings(meetings)
+                .SetUsers(new HashSet<User> { user1, user2 })
+                .Build();
+
+            // Act
+            JobCancelUsersWhoHaveBeenUsedMore jobCancel = new JobCancelUsersWhoHaveBeenUsedMore();
+            HashSet<User> canceledUsers = jobCancel.CancelUsers(metrics);
+
+            // Assert
+            Assert.AreEqual(true, canceledUsers.Contains(user1));
+            Assert.AreEqual(false, canceledUsers.Contains(user2));
+            Assert.AreEqual(false, canceledUsers.Contains(user3));
+        }
     }
 }
