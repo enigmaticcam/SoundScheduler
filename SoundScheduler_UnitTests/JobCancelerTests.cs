@@ -9,6 +9,41 @@ namespace SoundScheduler_UnitTests {
     public class JobCancelerTests {
 
         [TestMethod]
+        public void JobCanceler_DoesRemoveUsersWhoPreferNotThatMeeting() {
+
+            // Arrange
+            Job job = new Job();
+
+            User user1 = new User();
+            User user2 = new User();
+
+            Template template1 = new Template();
+            template1.Jobs.Add(job);
+
+            Meeting meeting = template1.ToMeeting(DateTime.Parse("12/1/2014"));
+
+            SoundBuilderV2.MeetingsByDate meetings = new SoundBuilderV2.MeetingsByDate();
+            meetings.AddMeeting(meeting);
+
+            SoundBuilderV2.SoundMetrics metrics = new SoundBuilderV2.SoundMetrics.Builder()
+                .SetCurrentDate(DateTime.Parse("12/1/2014"))
+                .SetCurrentJob(job)
+                .SetMeetings(meetings)
+                .SetExceptions(new SoundBuilderV2.ExceptionsByDate())
+                .SetUsers(new HashSet<User> { user1, user2 })
+                .Build();
+
+            // Act
+            JobCancelUsersWhoPreferNotCertainMeetings jobCancel = new JobCancelUsersWhoPreferNotCertainMeetings();
+            jobCancel.AddPrefernceNot(user1, template1);
+            HashSet<User> canceledUsers = jobCancel.CancelUsers(metrics);
+
+            // Assert
+            Assert.AreEqual(true, canceledUsers.Contains(user1));
+            Assert.AreEqual(false, canceledUsers.Contains(user2));
+        }
+
+        [TestMethod]
         public void JobCanceler_DoesRemoveUsersWhoHaveHardExceptions() {
 
             // Arrange
@@ -37,7 +72,7 @@ namespace SoundScheduler_UnitTests {
                 .SetCurrentJob(job1)
                 .SetMeetings(meetings)
                 .SetExceptions(exceptions)
-                .SetUsers(new HashSet<User> { user1, user2 })
+                .SetUsers(new HashSet<User> { user1, user2, user3 })
                 .Build();
 
             // Act
@@ -78,7 +113,7 @@ namespace SoundScheduler_UnitTests {
                 .SetCurrentJob(job1)
                 .SetMeetings(meetings)
                 .SetExceptions(exceptions)
-                .SetUsers(new HashSet<User> { user1, user2 })
+                .SetUsers(new HashSet<User> { user1, user2, user3 })
                 .Build();
 
             // Act
@@ -266,7 +301,7 @@ namespace SoundScheduler_UnitTests {
                 .SetCurrentDate(DateTime.Parse("12/6/2014"))
                 .SetCurrentJob(job1)
                 .SetMeetings(meetings)
-                .SetUsers(new HashSet<User> { user1, user2 })
+                .SetUsers(new HashSet<User> { user1, user2, user3 })
                 .Build();
 
             // Act

@@ -12,6 +12,42 @@ namespace SoundScheduler_Logic.Engine {
         public abstract bool CanAddBack { get; }
     }
 
+    public class JobCancelUsersWhoPreferNotCertainMeetings : JobCancel {
+        SoundBuilderV2.SoundMetrics _metrics;
+        HashSet<User> _usersToBeCancelled;
+        Dictionary<User, HashSet<Template>> _preferences;
+
+        public void AddPrefernceNot(User user, Template template) {
+            if (!_preferences.ContainsKey(user)) {
+                _preferences.Add(user, new HashSet<Template>());
+            }
+            _preferences[user].Add(template);
+        }
+
+        public override bool CanAddBack {
+            get { return true; }
+        }
+
+        public override HashSet<User> CancelUsers(SoundBuilderV2.SoundMetrics metrics) {
+            _metrics = metrics;
+            _usersToBeCancelled = new HashSet<User>();
+            CancelUsers();
+            return _usersToBeCancelled;
+        }
+
+        private void CancelUsers() {
+            foreach (User user in _metrics.Users) {
+                if (_preferences.ContainsKey(user) && _preferences[user].Contains(_metrics.CurrentMeeting.TemplateParent)) {
+                    _usersToBeCancelled.Add(user);
+                }
+            }
+        }
+
+        public JobCancelUsersWhoPreferNotCertainMeetings() {
+            _preferences = new Dictionary<User, HashSet<Template>>();
+        }
+    }
+
     public class JobCancelUsersWhoHaveBeenUsedMore : JobCancel {
         SoundBuilderV2.SoundMetrics _metrics;
         HashSet<User> _usersToBeCancelled;

@@ -10,6 +10,11 @@ namespace SoundScheduler_Logic.Abstract {
         public DateTime Date { get; set; }
         public List<Job> Jobs { get; set; }
 
+        private Template _templateParent;
+        public Template TemplateParent {
+            get { return _templateParent; }
+        }
+
         private Dictionary<Job, User> _jobUserSlots;
         public User UserForJob(Job job) {
             if (_jobUserSlots.ContainsKey(job)) {
@@ -34,7 +39,8 @@ namespace SoundScheduler_Logic.Abstract {
         }
         
 
-        public Meeting() {
+        public Meeting(Template templateParent) {
+            _templateParent = templateParent;
             this.Jobs = new List<Job>();
             _jobUserSlots = new Dictionary<Job, User>();
             _userJobSlots = new Dictionary<User, Job>();

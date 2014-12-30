@@ -10,7 +10,7 @@ namespace SoundScheduler_Logic.Abstract {
         public List<Job> Jobs { get; set; }
 
         public Meeting ToMeeting(DateTime date) {
-            Meeting meeting = new Meeting();
+            Meeting meeting = new Meeting(this);
             meeting.Date = date;
             foreach (Job job in this.Jobs) {
                 meeting.Jobs.Add(job);

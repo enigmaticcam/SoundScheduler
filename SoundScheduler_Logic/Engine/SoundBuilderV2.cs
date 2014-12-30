@@ -15,6 +15,7 @@ namespace SoundScheduler_Logic.Engine {
         private MeetingsByDate _meetings;
         private Dictionary<DateTime, Template> _templates;
         private ExceptionsByDate _exceptions;
+        private JobCancelUsersWhoPreferNotCertainMeetings _preferences;
 
         public void AddTemplate(DateTime date, Template template) {
             _templates.Add(date, template);
@@ -26,6 +27,10 @@ namespace SoundScheduler_Logic.Engine {
 
         public void AddException(DateTime date, User user, bool isSoftException) {
             _exceptions.AddException(date, user, isSoftException);
+        }
+
+        public void AddPreferenceNot(User user, Template template) {
+            _preferences.AddPrefernceNot(user, template);
         }
 
         public List<Meeting> BuildSchedule() {
@@ -67,8 +72,9 @@ namespace SoundScheduler_Logic.Engine {
                 .SetMeetings(_meetings)
                 .SetUsers(_users)
                 .Build();
-            action.PerformAction();
-            
+            User user = action.PerformAction();
+            Meeting meeting = _meetings.GetMeeting(date);
+            meeting.AddUserForJob(user, job);
         }
 
         private List<JobCancel> GetJobCancelers() {
@@ -77,6 +83,7 @@ namespace SoundScheduler_Logic.Engine {
             jobCancelers.Add(new JobCancelUsersWhoHaveExceptions());
             jobCancelers.Add(new JobCancelUsersWhoCantDoJob());
             jobCancelers.Add(new JobCancelUserWhoNeedABreak());
+            jobCancelers.Add(_preferences);
             return jobCancelers;
         }
 
@@ -236,6 +243,7 @@ namespace SoundScheduler_Logic.Engine {
             _templates = new Dictionary<DateTime, Template>();
             _meetings = new MeetingsByDate();
             _exceptions = new ExceptionsByDate();
+            _preferences = new JobCancelUsersWhoPreferNotCertainMeetings();
         }
 
         public class Builder {
@@ -270,6 +278,10 @@ namespace SoundScheduler_Logic.Engine {
             private Job _currentJob;
             public Job CurrentJob {
                 get { return _currentJob; }
+            }
+
+            public Meeting CurrentMeeting {
+                get { return _meetings.GetMeeting(this.CurrentDate); }
             }
 
             public IEnumerable<User> Users {
