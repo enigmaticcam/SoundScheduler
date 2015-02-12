@@ -16,11 +16,6 @@ namespace SoundScheduler_Logic.Abstract {
             set { _data.Jobs = value; }
         }
 
-        public List<Meeting> Meetings {
-            get { return _data.Meetings; }
-            set { _data.Meetings = value; }
-        }
-
         public List<Template> Templates {
             get { return _data.Templates; }
             set { _data.Templates = value; }
@@ -44,31 +39,43 @@ namespace SoundScheduler_Logic.Abstract {
         }
 
         public void LoadFromSource() {
-            string attributeXml = string.Empty;
+            if (File.Exists("SoundScheduler.dat")) {
+                string attributeXml = string.Empty;
 
-            RepositoryData objectOut = default(RepositoryData);
+                RepositoryData objectOut = default(RepositoryData);
 
-            XmlDocument xmlDocument = new XmlDocument();
-            xmlDocument.Load("SoundScheduler.dat");
-            string xmlString = xmlDocument.OuterXml;
+                XmlDocument xmlDocument = new XmlDocument();
+                xmlDocument.Load("SoundScheduler.dat");
+                string xmlString = xmlDocument.OuterXml;
 
-            using (StringReader read = new StringReader(xmlString)) {
+                using (StringReader read = new StringReader(xmlString)) {
 
-                XmlSerializer serializer = new XmlSerializer(typeof(RepositoryData));
-                using (XmlReader reader = new XmlTextReader(read)) {
-                    objectOut = (RepositoryData)serializer.Deserialize(reader);
-                    reader.Close();
+                    XmlSerializer serializer = new XmlSerializer(typeof(RepositoryData));
+                    using (XmlReader reader = new XmlTextReader(read)) {
+                        objectOut = (RepositoryData)serializer.Deserialize(reader);
+                        reader.Close();
+                    }
+                    read.Close();
                 }
-                read.Close();
+                _data = objectOut;
+            } else {
+                _data = new RepositoryData();
             }
-            _data = objectOut;
         }
 
+        [Serializable]
         public class RepositoryData {
             public List<Job> Jobs { get; set; }
-            public List<Meeting> Meetings { get; set; }
             public List<Template> Templates { get; set; }
             public List<User> Users { get; set; }
+            public List<MeetingException> MeetingExceptions { get; set; }
+
+            public RepositoryData() {
+                this.Jobs = new List<Job>();
+                this.Templates = new List<Template>();
+                this.Users = new List<User>();
+                this.MeetingExceptions = new List<MeetingException>();
+            }
         }
     }
 }

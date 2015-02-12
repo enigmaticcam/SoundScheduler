@@ -37,7 +37,6 @@ namespace SoundScheduler_Logic.Abstract {
             _jobUserSlots.Add(job, user);
             _userJobSlots.Add(user, job);
         }
-        
 
         public Meeting(Template templateParent) {
             _templateParent = templateParent;

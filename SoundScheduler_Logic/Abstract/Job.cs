@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace SoundScheduler_Logic.Abstract {
+    [Serializable]
     public class Job {
         private HashSet<Job> _sameJobs;
 

@@ -39,6 +39,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Abstract\Factory.cs" />
     <Compile Include="Abstract\MeetingException.cs" />
     <Compile Include="Abstract\Job.cs" />
     <Compile Include="Abstract\Meeting.cs" />
@@ -51,6 +52,8 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Views\Abstract\ViewJobs.cs" />
+    <Compile Include="Views\Concrete\ViewJobs.cs" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
