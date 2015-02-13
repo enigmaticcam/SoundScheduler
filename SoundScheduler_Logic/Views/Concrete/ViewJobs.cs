@@ -22,6 +22,30 @@ namespace SoundScheduler_Logic.Views.Concrete {
             }
         }
 
+        public IEnumerable<Job> RelatedJobs(Job selectedJob) {
+            foreach (Job job in _jobs) {
+                if (job != selectedJob && selectedJob.IsSameJob(job)) {
+                    yield return job;
+                }
+            }
+        }
+
+        public virtual IEnumerable<Job> ApplicableRelatedJobs(Job selectedJob) {
+            foreach (Job job in _jobs) {
+                if (job != selectedJob && !selectedJob.IsSameJob(job)) {
+                    yield return job;
+                }
+            }
+        }
+
+        public void AddRelatedJob(Job selectedJob, Job relatedJob) {
+            selectedJob.AddSameJob(relatedJob);
+        }
+
+        public void RemoveRelatedJob(Job selectedJob, Job relatedJob) {
+            selectedJob.RemoveSameJob(relatedJob);
+        }
+
         public void LoadFromSource() {
             _repository = _factory.CreateRepository();
             _repository.LoadFromSource();
