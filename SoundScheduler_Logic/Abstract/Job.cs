@@ -4,38 +4,29 @@ using System.Linq;
 using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
-using System.Xml;
-using System.Xml.Serialization;
-using System.Xml.Schema;
 
 namespace SoundScheduler_Logic.Abstract {
-    public class Job : IXmlSerializable {
-        private HashSet<int> _sameJobs;
-
-        private int _id;
-        public int Id {
-            get { return _id; }
-        }
-
+    public class Job  {
+        public List<Job> SameJobs { get; set; }
         public string Name { get; set; }
         public bool IsVoidedOnSoftException { get; set; }
 
         public void AddSameJob(Job job) {
-            if (!_sameJobs.Contains(job.Id)) {
-                _sameJobs.Add(job.Id);
+            if (!this.SameJobs.Contains(job)) {
+                this.SameJobs.Add(job);
                 job.AddSameJob(this);
             }
         }
 
         public void RemoveSameJob(Job job) {
-            if (_sameJobs.Contains(job.Id)) {
-                _sameJobs.Remove(job.Id);
+            if (this.SameJobs.Contains(job)) {
+                this.SameJobs.Remove(job);
                 job.RemoveSameJob(this);
             }
         }
 
         public bool IsSameJob(Job job) {
-            if (job.Id == _id || _sameJobs.Contains(job.Id)) {
+            if (job == this || this.SameJobs.Contains(job)) {
                 return true;
             } else {
                 return false;
@@ -43,23 +34,7 @@ namespace SoundScheduler_Logic.Abstract {
         }
 
         public Job() {
-            _sameJobs = new HashSet<int>();
-        }
-
-        public Job(int id) : this() {
-            _id = id;
-        }
-
-        public void WriteXml(XmlWriter writer) {
-            
-        }
-
-        public void ReadXml(XmlReader reader) {
-
-        }
-
-        public XmlSchema GetSchema() {
-            return null;
+            this.SameJobs = new List<Job>();
         }
     }
 }

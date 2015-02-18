@@ -9,7 +9,7 @@ namespace SoundScheduler_Logic.Abstract {
     [Serializable]
     public class MeetingException {
         public DateTime Date { get; set; }
-        public int UserId { get; set; }
+        public User User { get; set; }
         public bool IsSoftException { get; set; }
     }
 }

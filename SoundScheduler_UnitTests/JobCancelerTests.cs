@@ -12,21 +12,21 @@ namespace SoundScheduler_UnitTests {
         public void JobCanceler_DoesRemoveUsersWhoDidSameJobLastMeeting() {
 
             // Arrange
-            Job job1 = new Job(1);
-            Job job2 = new Job(2);
-            Job job3 = new Job(3);
+            Job job1 = new Job();
+            Job job2 = new Job();
+            Job job3 = new Job();
 
             job1.AddSameJob(job2);
 
-            User user1 = new User(1);
-            User user2 = new User(2);
-            User user3 = new User(3);
-            User user4 = new User(4);
+            User user1 = new User();
+            User user2 = new User();
+            User user3 = new User();
+            User user4 = new User();
 
             Template template = new Template();
-            template.AddJob(job1);
-            template.AddJob(job2);
-            template.AddJob(job3);
+            template.Jobs.Add(job1);
+            template.Jobs.Add(job2);
+            template.Jobs.Add(job3);
 
             Meeting meeting1 = template.ToMeeting(DateTime.Parse("12/1/2014"));
             Meeting meeting2 = template.ToMeeting(DateTime.Parse("12/2/2014"));
@@ -71,7 +71,7 @@ namespace SoundScheduler_UnitTests {
             User user2 = new User();
 
             Template template1 = new Template();
-            template1.AddJob(job);
+            template1.Jobs.Add(job);
 
             Meeting meeting = template1.ToMeeting(DateTime.Parse("12/1/2014"));
 
@@ -103,12 +103,12 @@ namespace SoundScheduler_UnitTests {
             Job job1 = new Job();
             job1.IsVoidedOnSoftException = false;
 
-            User user1 = new User(1);
-            User user2 = new User(2);
-            User user3 = new User(3);
+            User user1 = new User();
+            User user2 = new User();
+            User user3 = new User();
 
             Template template1 = new Template();
-            template1.AddJob(job1);
+            template1.Jobs.Add(job1);
 
             Meeting meeting = template1.ToMeeting(DateTime.Parse("12/1/2014"));
 
@@ -145,12 +145,12 @@ namespace SoundScheduler_UnitTests {
             Job job1 = new Job();
             job1.IsVoidedOnSoftException = true;
 
-            User user1 = new User(1);
-            User user2 = new User(2);
-            User user3 = new User(3);
+            User user1 = new User();
+            User user2 = new User();
+            User user3 = new User();
 
             Template template1 = new Template();
-            template1.AddJob(job1);
+            template1.Jobs.Add(job1);
 
             Meeting meeting = template1.ToMeeting(DateTime.Parse("12/1/2014"));
 
@@ -183,14 +183,14 @@ namespace SoundScheduler_UnitTests {
         public void JobCanceler_DoesRemoveUsersWhoAlreadyHaveJob() {
 
             // Arrange
-            Job job1 = new Job(1);
-            Job job2 = new Job(2);
-            User user1 = new User(1);
-            User user2 = new User(2);
+            Job job1 = new Job();
+            Job job2 = new Job();
+            User user1 = new User();
+            User user2 = new User();
 
             Template template1 = new Template();
-            template1.AddJob(job1);
-            template1.AddJob(job2);
+            template1.Jobs.Add(job1);
+            template1.Jobs.Add(job2);
 
             Meeting meeting = template1.ToMeeting(DateTime.Parse("12/1/2014"));
             meeting.AddUserForJob(user1, job1);
@@ -218,18 +218,18 @@ namespace SoundScheduler_UnitTests {
         public void JobCanceler_DoesRemoveUsersWhoCantDoJob() {
 
             // Arrange
-            Job job1 = new Job(1);
-            Job job2 = new Job(2);
+            Job job1 = new Job();
+            Job job2 = new Job();
 
             User user1 = new User();
-            user1.AddJob(job2);
+            user1.Jobs.Add(job2);
             User user2 = new User();
-            user2.AddJob(job1);
-            user2.AddJob(job2);
+            user2.Jobs.Add(job1);
+            user2.Jobs.Add(job2);
 
             Template template1 = new Template();
-            template1.AddJob(job1);
-            template1.AddJob(job2);
+            template1.Jobs.Add(job1);
+            template1.Jobs.Add(job2);
 
             Meeting meeting = template1.ToMeeting(DateTime.Parse("12/1/2014"));
             meeting.AddUserForJob(user1, job1);
@@ -257,15 +257,15 @@ namespace SoundScheduler_UnitTests {
         public void JobCanceler_DoesRemoveUsersWhoNeedABreak() {
 
             // Arrange
-            Job job1 = new Job(1);
-            Job job2 = new Job(2);
+            Job job1 = new Job();
+            Job job2 = new Job();
 
-            User user1 = new User(1);
-            User user2 = new User(2);
+            User user1 = new User();
+            User user2 = new User();
 
             Template template1 = new Template();
-            template1.AddJob(job1);
-            template1.AddJob(job2);
+            template1.Jobs.Add(job1);
+            template1.Jobs.Add(job2);
 
             Meeting meeting1 = template1.ToMeeting(DateTime.Parse("12/1/2014"));
             Meeting meeting2 = template1.ToMeeting(DateTime.Parse("12/2/2014"));
@@ -312,16 +312,16 @@ namespace SoundScheduler_UnitTests {
         public void JobCanceler_DoesRemoveUsersWhoAreUsedMore() {
 
             // Arrange
-            Job job1 = new Job(1);
-            Job job2 = new Job(2);
+            Job job1 = new Job();
+            Job job2 = new Job();
 
-            User user1 = new User(1);
-            User user2 = new User(2);
-            User user3 = new User(3);
+            User user1 = new User();
+            User user2 = new User();
+            User user3 = new User();
 
             Template template = new Template();
-            template.AddJob(job1);
-            template.AddJob(job2);
+            template.Jobs.Add(job1);
+            template.Jobs.Add(job2);
 
             Meeting meeting1 = template.ToMeeting(DateTime.Parse("12/1/2014"));
             Meeting meeting2 = template.ToMeeting(DateTime.Parse("12/2/2014"));
@@ -371,20 +371,20 @@ namespace SoundScheduler_UnitTests {
         public void JobCanceler_DoesRemoveUsersWhoAreUsedMoreForJob() {
 
             // Arrange
-            Job job1 = new Job(1);
-            Job job2 = new Job(2);
-            Job job3 = new Job(3);
+            Job job1 = new Job();
+            Job job2 = new Job();
+            Job job3 = new Job();
 
             job1.AddSameJob(job2);
 
-            User user1 = new User(1);
-            User user2 = new User(2);
-            User user3 = new User(3);
+            User user1 = new User();
+            User user2 = new User();
+            User user3 = new User();
 
             Template template = new Template();
-            template.AddJob(job1);
-            template.AddJob(job2);
-            template.AddJob(job3);
+            template.Jobs.Add(job1);
+            template.Jobs.Add(job2);
+            template.Jobs.Add(job3);
 
             Meeting meeting1 = template.ToMeeting(DateTime.Parse("12/1/2014"));
             Meeting meeting2 = template.ToMeeting(DateTime.Parse("12/2/2014"));

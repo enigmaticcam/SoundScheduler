@@ -2,10 +2,9 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
-using System.Xml;
-using System.Xml.Serialization;
 
 namespace SoundScheduler_Logic.Abstract {
     public class Repository {
@@ -27,43 +26,31 @@ namespace SoundScheduler_Logic.Abstract {
         }
 
         public void SaveToSource() {
-            XmlDocument xmlDocument = new XmlDocument();
-            XmlSerializer serializer = new XmlSerializer(typeof(RepositoryData));
-            using (MemoryStream stream = new MemoryStream()) {
-                serializer.Serialize(stream, _data);
-                stream.Position = 0;
-                xmlDocument.Load(stream);
-                xmlDocument.Save("SoundScheduler.dat");
-                stream.Close();
+            using (FileStream writer = new FileStream("SoundScheduler.xml", FileMode.Create, FileAccess.Write)) {
+                DataContractSerializer serializer = new DataContractSerializer(typeof(RepositoryData), SerializerSettings());
+                serializer.WriteObject(writer, _data);
+                writer.Close();
             }
         }
 
         public void LoadFromSource() {
-            if (File.Exists("SoundScheduler.dat")) {
-                string attributeXml = string.Empty;
-
-                RepositoryData objectOut = default(RepositoryData);
-
-                XmlDocument xmlDocument = new XmlDocument();
-                xmlDocument.Load("SoundScheduler.dat");
-                string xmlString = xmlDocument.OuterXml;
-
-                using (StringReader read = new StringReader(xmlString)) {
-
-                    XmlSerializer serializer = new XmlSerializer(typeof(RepositoryData));
-                    using (XmlReader reader = new XmlTextReader(read)) {
-                        objectOut = (RepositoryData)serializer.Deserialize(reader);
-                        reader.Close();
-                    }
-                    read.Close();
+            if (File.Exists("SoundScheduler.xml")) {
+                using (FileStream reader = new FileStream("SoundScheduler.xml", FileMode.Open, FileAccess.Read)) {
+                    DataContractSerializer serializer = new DataContractSerializer(typeof(RepositoryData), SerializerSettings());
+                    _data = (RepositoryData)serializer.ReadObject(reader);
+                    reader.Close();
                 }
-                _data = objectOut;
             } else {
                 _data = new RepositoryData();
             }
         }
 
-        [Serializable]
+        private DataContractSerializerSettings SerializerSettings() {
+            DataContractSerializerSettings settings = new DataContractSerializerSettings();
+            settings.PreserveObjectReferences = true;
+            return settings;
+        }
+        
         public class RepositoryData {
             public List<Job> Jobs { get; set; }
             public List<Template> Templates { get; set; }

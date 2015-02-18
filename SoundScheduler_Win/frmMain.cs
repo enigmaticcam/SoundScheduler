@@ -72,66 +72,32 @@ namespace SoundScheduler_Win {
 
             User userCTangen = new User();
             userCTangen.Name = "Cameron Tangen";
-            //userCTangen.Jobs = new List<Job> { jobSound, jobStage, jobMic1, jobMic2, jobMic3, jobMic4 };
-            userCTangen.AddJob(jobSound);
-            userCTangen.AddJob(jobStage);
-            userCTangen.AddJob(jobMic1);
-            userCTangen.AddJob(jobMic2);
-            userCTangen.AddJob(jobMic3);
-            userCTangen.AddJob(jobMic4);
+            userCTangen.Jobs = new List<Job> { jobSound, jobStage, jobMic1, jobMic2, jobMic3, jobMic4 };
             users.Add(userCTangen);
 
             User userESavelberg = new User();
             userESavelberg.Name = "Eric Savelberg";
-            //userESavelberg.Jobs = new List<Job> { jobSound, jobStage, jobMic1, jobMic2, jobMic3, jobMic4 };
-            userESavelberg.AddJob(jobSound);
-            userESavelberg.AddJob(jobStage);
-            userESavelberg.AddJob(jobMic1);
-            userESavelberg.AddJob(jobMic2);
-            userESavelberg.AddJob(jobMic3);
-            userESavelberg.AddJob(jobMic4);
+            userESavelberg.Jobs = new List<Job> { jobSound, jobStage, jobMic1, jobMic2, jobMic3, jobMic4 };
             users.Add(userESavelberg);
 
             User userDCook = new User();
             userDCook.Name = "Dennis Cook";
-            //userDCook.Jobs = new List<Job> { jobSound, jobStage, jobMic1, jobMic2, jobMic3, jobMic4 };
-            userDCook.AddJob(jobSound);
-            userDCook.AddJob(jobStage);
-            userDCook.AddJob(jobMic1);
-            userDCook.AddJob(jobMic2);
-            userDCook.AddJob(jobMic3);
-            userDCook.AddJob(jobMic4);
+            userDCook.Jobs = new List<Job> { jobSound, jobStage, jobMic1, jobMic2, jobMic3, jobMic4 };
             users.Add(userDCook);
 
             User userDLopez = new User();
             userDLopez.Name = "David Lopez";
-            //userDLopez.Jobs = new List<Job> { jobSound, jobStage, jobMic1, jobMic2, jobMic3, jobMic4 };
-            userDLopez.AddJob(jobSound);
-            userDLopez.AddJob(jobStage);
-            userDLopez.AddJob(jobMic1);
-            userDLopez.AddJob(jobMic2);
-            userDLopez.AddJob(jobMic3);
-            userDLopez.AddJob(jobMic4);
+            userDLopez.Jobs = new List<Job> { jobSound, jobStage, jobMic1, jobMic2, jobMic3, jobMic4 };
             users.Add(userDLopez);
 
             User userEWilder = new User();
             userEWilder.Name = "Ethan Wilder";
-            //userEWilder.Jobs = new List<Job> { jobSound, jobStage, jobMic1, jobMic2, jobMic3, jobMic4 };
-            userEWilder.AddJob(jobSound);
-            userEWilder.AddJob(jobStage);
-            userEWilder.AddJob(jobMic1);
-            userEWilder.AddJob(jobMic2);
-            userEWilder.AddJob(jobMic3);
-            userEWilder.AddJob(jobMic4);
+            userEWilder.Jobs = new List<Job> { jobSound, jobStage, jobMic1, jobMic2, jobMic3, jobMic4 };
             users.Add(userEWilder);
 
             User userRStubbs = new User();
             userRStubbs.Name = "Reed Stubbs";
-            //userRStubbs.Jobs = new List<Job> { jobMic1, jobMic2, jobMic3, jobMic4 };
-            userRStubbs.AddJob(jobMic1);
-            userRStubbs.AddJob(jobMic2);
-            userRStubbs.AddJob(jobMic3);
-            userRStubbs.AddJob(jobMic4);
+            userRStubbs.Jobs = new List<Job> { jobMic1, jobMic2, jobMic3, jobMic4 };
             users.Add(userRStubbs);
 
             // --------------------------------------------------------
@@ -140,21 +106,11 @@ namespace SoundScheduler_Win {
 
             Template templateSunday = new Template();
             templateSunday.Name = "Sunday";
-            //templateSunday.Jobs = new List<Job> { jobSound, jobStage, jobMic1, jobMic2, jobMic3, jobMic4 };
-            templateSunday.AddJob(jobSound);
-            templateSunday.AddJob(jobStage);
-            templateSunday.AddJob(jobMic1);
-            templateSunday.AddJob(jobMic2);
-            templateSunday.AddJob(jobMic3);
-            templateSunday.AddJob(jobMic4);
+            templateSunday.Jobs = new List<Job> { jobSound, jobStage, jobMic1, jobMic2, jobMic3, jobMic4 };
 
             Template templateTuesday = new Template();
             templateTuesday.Name = "Tuesday";
-            //templateTuesday.Jobs = new List<Job> { jobSound, jobStage, jobMic1, jobMic2 };
-            templateTuesday.AddJob(jobSound);
-            templateTuesday.AddJob(jobStage);
-            templateTuesday.AddJob(jobMic1);
-            templateTuesday.AddJob(jobMic2);
+            templateTuesday.Jobs = new List<Job> { jobSound, jobStage, jobMic1, jobMic2 };
 
             // --------------------------------------------------------
             // WORK
