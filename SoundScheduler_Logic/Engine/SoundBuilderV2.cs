@@ -451,22 +451,22 @@ namespace SoundScheduler_Logic.Engine {
         }
 
         public class ExceptionsByDate {
-            private Dictionary<DateTime, Dictionary<User, MeetingException>> _exceptions;
+            private Dictionary<DateTime, Dictionary<int, MeetingException>> _exceptions;
 
             public void AddException(DateTime date, User user, bool isSoftException) {
                 if (!_exceptions.ContainsKey(date)) {
-                    _exceptions.Add(date, new Dictionary<User, MeetingException>());
+                    _exceptions.Add(date, new Dictionary<int, MeetingException>());
                 }
                 MeetingException exception = new MeetingException();
                 exception.Date = date;
-                exception.User = user;
+                exception.UserId = user.Id;
                 exception.IsSoftException = isSoftException;
-                _exceptions[date].Add(user, exception);
+                _exceptions[date].Add(user.Id, exception);
             }
 
             public bool DoesUserHaveSoftException(DateTime date, User user) {
-                if (_exceptions.ContainsKey(date) && _exceptions[date].ContainsKey(user)) {
-                    MeetingException exception = _exceptions[date][user];
+                if (_exceptions.ContainsKey(date) && _exceptions[date].ContainsKey(user.Id)) {
+                    MeetingException exception = _exceptions[date][user.Id];
                     return exception.IsSoftException;
                 } else {
                     return false;
@@ -474,8 +474,8 @@ namespace SoundScheduler_Logic.Engine {
             }
 
             public bool DoesUserHaveHardException(DateTime date, User user) {
-                if (_exceptions.ContainsKey(date) && _exceptions[date].ContainsKey(user)) {
-                    MeetingException exception = _exceptions[date][user];
+                if (_exceptions.ContainsKey(date) && _exceptions[date].ContainsKey(user.Id)) {
+                    MeetingException exception = _exceptions[date][user.Id];
                     return !exception.IsSoftException;
                 } else {
                     return false;
@@ -483,7 +483,7 @@ namespace SoundScheduler_Logic.Engine {
             }
 
             public ExceptionsByDate() {
-                _exceptions = new Dictionary<DateTime, Dictionary<User, MeetingException>>();
+                _exceptions = new Dictionary<DateTime, Dictionary<int, MeetingException>>();
             }
         }
     }

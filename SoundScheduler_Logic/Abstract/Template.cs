@@ -8,20 +8,28 @@ namespace SoundScheduler_Logic.Abstract {
     [Serializable]
     public class Template {
         public string Name { get; set; }
-        public List<Job> Jobs { get; set; }
+
+        private Dictionary<int, Job> _jobs;
+        public IEnumerable<Job> Jobs {
+            get { return _jobs.Values; }
+        }
+
+        public void AddJob(Job job) {
+            _jobs.Add(job.Id, job);
+        }
 
         public Meeting ToMeeting(DateTime date) {
             Meeting meeting = new Meeting(this);
             meeting.Date = date;
             meeting.Name = this.Name + " - " + date.ToShortDateString();
             foreach (Job job in this.Jobs) {
-                meeting.Jobs.Add(job);
+                meeting.AddJob(job);
             }
             return meeting;
         }
 
         public Template() {
-            this.Jobs = new List<Job>();
+            _jobs = new Dictionary<int, Job>();
         }
     }
 }
