@@ -58,5 +58,112 @@ namespace SoundScheduler_Win {
             }
             RefreshScreen();
         }
+
+        private void PopulateJobs() {
+            lstJobs.Items.Clear();
+            foreach (Job job in _view.Jobs(_view.Users.ElementAt(lstUsers.SelectedIndex))) {
+                lstJobs.Items.Add(job.Name);
+            }
+        }
+
+        private void frmUsers_Load(object sender, EventArgs e) {
+            Factory factory = new Factory();
+            _view = factory.CreateViewUsers();
+            _view.LoadFromSource();
+            BuildVirtualForm();
+            PopulateUsers();
+            RefreshScreen();
+        }
+
+        private void txtUserName_TextChanged() {
+            _view.Users[lstUsers.SelectedIndex].Name = txtUserName.Text;
+            _isDirty = true;
+        }
+
+        private void cmdSave_Click() {
+            _view.SaveToSource();
+            _isDirty = false;
+            PopulateUsers();
+            RefreshScreen();
+        }
+
+        private void cmdAdd_Click() {
+            User user = new User();
+            user.Name = "<New User>";
+            _view.Users.Add(user);
+            _isDirty = true;
+            PopulateUsers();
+            RefreshScreen();
+        }
+
+        private void cmdDelete_Click() {
+            _view.Users.RemoveAt(lstUsers.SelectedIndex);
+            _isDirty = true;
+            PopulateUsers();
+            RefreshScreen();
+        }
+
+        private void lstUsers_SelectedIndexChanged() {
+            User user = _view.Users[lstUsers.SelectedIndex];
+            txtUserName.Text = user.Name;
+            PopulateJobs();
+            RefreshScreen();
+        }
+
+        private void cboJobsToAdd_SelectedIndexChanged() {
+            RefreshScreen();
+        }
+
+        private void cmdAddJob_Click() {
+            User user = _view.Users[lstUsers.SelectedIndex];
+            Job job = _view.Jobs(user).ElementAt(lstJobs.SelectedIndex);
+            _view.AddJob(user, job);
+            PopulateJobs();
+            RefreshScreen();
+        }
+
+        private void cmdDeleteJob_Click() {
+            User user = _view.Users[lstUsers.SelectedIndex];
+            Job job = _view.Jobs(user).ElementAt(lstJobs.SelectedIndex);
+            _view.RemoveJob(user, job);
+            PopulateJobs();
+            RefreshScreen();
+        }
+
+        private void txtUserName_TextChanged(object sender, EventArgs e) {
+            _form.PerformAction(txtUserName_TextChanged, sender, e);
+        }
+
+        private void cmdSave_Click(object sender, EventArgs e) {
+            _form.PerformAction(cmdSave_Click, sender, e);
+        }
+
+        private void cmdAdd_Click(object sender, EventArgs e) {
+            _form.PerformAction(cmdAdd_Click, sender, e);
+        }
+
+        private void cmdDelete_Click(object sender, EventArgs e) {
+            _form.PerformAction(cmdDelete_Click, sender, e);
+        }
+
+        private void lstUsers_SelectedIndexChanged(object sender, EventArgs e) {
+            _form.PerformAction(lstUsers_SelectedIndexChanged, sender, e);
+        }
+
+        private void cboJobsToAdd_SelectedIndexChanged(object sender, EventArgs e) {
+            _form.PerformAction(cboJobsToAdd_SelectedIndexChanged, sender, e);
+        }
+
+        private void cmdAddJob_Click(object sender, EventArgs e) {
+            _form.PerformAction(cmdAddJob_Click, sender, e);
+        }
+
+        private void cmdDeleteJob_Click(object sender, EventArgs e) {
+            _form.PerformAction(cmdDeleteJob_Click, sender, e);
+        }
+
+        private void cmdClose_Click(object sender, EventArgs e) {
+            this.Close();
+        }
     }
 }

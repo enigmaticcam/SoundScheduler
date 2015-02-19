@@ -11,6 +11,7 @@ namespace SoundScheduler_Logic.Views.Abstract {
         IEnumerable<Job> Jobs(User selectedUser);
         IEnumerable<Job> ApplicableJobs(User selectedUser);
         void AddJob(User selectedUser, Job job);
+        void RemoveJob(User selectedUser, Job job);
         void LoadFromSource();
         void SaveToSource();
     }
@@ -32,6 +33,10 @@ namespace SoundScheduler_Logic.Views.Abstract {
 
         public void AddJob(User selectedUser, Job job) {
             _view.AddJob(selectedUser, job);
+        }
+
+        public void RemoveJob(User selectedUser, Job job) {
+            _view.RemoveJob(selectedUser, job);
         }
 
         public void LoadFromSource() {

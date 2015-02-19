@@ -17,5 +17,10 @@ namespace SoundScheduler_Logic.Abstract {
             ViewJobs view = new ViewJobs(this);
             return view;
         }
+
+        public IViewUsers CreateViewUsers() {
+            ViewUsers view = new ViewUsers(this);
+            return view;
+        }
     }
 }

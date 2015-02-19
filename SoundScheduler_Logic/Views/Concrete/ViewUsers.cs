@@ -47,6 +47,10 @@ namespace SoundScheduler_Logic.Views.Concrete {
             user.Jobs.Add(job);
         }
 
+        public void RemoveJob(User selectedUser, Job job) {
+            selectedUser.Jobs.Remove(job);
+        }
+
         public void LoadFromSource() {
             _repository = _factory.CreateRepository();
             _repository.LoadFromSource();

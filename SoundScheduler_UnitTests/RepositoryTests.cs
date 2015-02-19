@@ -1,65 +1,93 @@
-﻿//using System;
-//using Microsoft.VisualStudio.TestTools.UnitTesting;
-//using SoundScheduler_Logic.Abstract;
-//using Moq;
+﻿using System;
+using System.Linq;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using SoundScheduler_Logic.Abstract;
+using Moq;
 
-//namespace SoundScheduler_UnitTests {
+namespace SoundScheduler_UnitTests {
 
-//    [TestClass]
-//    public class RepositoryTests {
+    [TestClass]
+    public class RepositoryTests {
 
-//        [TestMethod]
-//        public void Repository_DoesSaveAndReloadCorrectly() {
+        private string RepositorySaveFile {
+            get { return "UnitTestSaveFile.xml"; }
+        }
 
-//            // Arrange
-//            Repository rep1 = new Repository();
+        [TestMethod]
+        public void Repository_DoesSaveJobs() {
 
-//            Job job1 = new Job();            
-//            Job job2 = new Job();
-//            job1.Name = "Job1";
-//            job2.Name = "Job2";
-//            rep1.Jobs = new System.Collections.Generic.List<Job> { job1, job2 };
+            // Arrange
+            Job job1 = new Job();
+            job1.Name = "Job1";
+            job1.IsVoidedOnSoftException = true;
 
-//            User user1 = new User();
-//            User user2 = new User();
-//            user1.Name = "User1";
-//            user2.Name = "User2";
-//            user1.Jobs = new System.Collections.Generic.List<Job> { job1 };
-//            user2.Jobs = new System.Collections.Generic.List<Job> { job1, job2 };
-//            rep1.Users = new System.Collections.Generic.List<User> { user1, user2 };
+            Job job2 = new Job();
+            job2.Name = "Job2";
+            job2.IsVoidedOnSoftException = false;
 
-//            Meeting meeting1 = new Meeting();
-//            meeting1.Date = DateTime.Now;
-//            meeting1.Jobs = new System.Collections.Generic.List<Job> { job1 };
-//            meeting1.JobUserSlots = new Meeting.JobUserSlot();
-//            meeting1.JobUserSlots.AddUserToJob(0, user1);
-//            Meeting meeting2 = new Meeting();
-//            meeting2.Date = DateTime.Now.AddYears(1);
-//            meeting2.Jobs = new System.Collections.Generic.List<Job> { job1, job2 };
-//            meeting2.JobUserSlots = new Meeting.JobUserSlot();
-//            meeting2.JobUserSlots.AddUserToJob(0, user1);
-//            meeting2.JobUserSlots.AddUserToJob(1, user2);
-//            rep1.Meetings = new System.Collections.Generic.List<Meeting> { meeting1, meeting2 };
+            Job job3 = new Job();
+            job3.Name = "Job3";
+            job3.IsVoidedOnSoftException = true;
+            job3.AddSameJob(job2);
 
-//            Template template1 = new Template();
-//            template1.Name = "Template1";
-//            template1.Jobs = new System.Collections.Generic.List<Job> { job1 };
-//            Template template2 = new Template();
-//            template2.Name = "Template2";
-//            template2.Jobs = new System.Collections.Generic.List<Job> { job1, job2 };
-//            rep1.Templates = new System.Collections.Generic.List<Template> { template1, template2 };
+            // Act
+            Repository sourceRepository = new Repository(this.RepositorySaveFile);
+            sourceRepository.Jobs.Add(job1);
+            sourceRepository.Jobs.Add(job2);
+            sourceRepository.Jobs.Add(job3);
+            sourceRepository.SaveToSource();
 
-//            // Act
-//            rep1.SaveToSource();
-//            Repository rep2 = new Repository();
-//            rep2.LoadFromSource();
+            Repository targetRepository = new Repository(this.RepositorySaveFile);
+            targetRepository.LoadFromSource();
 
+            // Assert
+            Assert.AreEqual(sourceRepository.Jobs.Count, targetRepository.Jobs.Count);
+            Assert.AreEqual(sourceRepository.Jobs[0].Name, targetRepository.Jobs[0].Name);
+            Assert.AreEqual(sourceRepository.Jobs[1].Name, targetRepository.Jobs[1].Name);
+            Assert.AreEqual(sourceRepository.Jobs[2].Name, targetRepository.Jobs[2].Name);
+            Assert.AreEqual(sourceRepository.Jobs[0].IsVoidedOnSoftException, targetRepository.Jobs[0].IsVoidedOnSoftException);
+            Assert.AreEqual(sourceRepository.Jobs[1].IsVoidedOnSoftException, targetRepository.Jobs[1].IsVoidedOnSoftException);
+            Assert.AreEqual(sourceRepository.Jobs[2].IsVoidedOnSoftException, targetRepository.Jobs[2].IsVoidedOnSoftException);
+            Assert.AreEqual(sourceRepository.Jobs[0].SameJobs.Count(), targetRepository.Jobs[0].SameJobs.Count());
+            Assert.AreEqual(sourceRepository.Jobs[1].SameJobs.Count(), targetRepository.Jobs[1].SameJobs.Count());
+            Assert.AreEqual(sourceRepository.Jobs[2].SameJobs.Count(), targetRepository.Jobs[2].SameJobs.Count());
+            Assert.AreEqual("Job2", targetRepository.Jobs[2].SameJobs.ElementAt(0).Name);
+        }
 
-//            // Assert
-//            Assert.AreEqual(rep1.Jobs.Count, rep2.Jobs.Count);
-//            Assert.AreEqual(rep1.Users.Count, rep2.Users.Count);
-//            Assert.AreEqual(rep1.Meetings.Count, rep2.Meetings.Count);
-//            Assert.AreEqual(rep1.Templates.Count, rep2.Templates.Count);
-//        }
-//    }
-//}
+        [TestMethod]
+        public void Repository_DoesSaveUsers() {
+
+            // Arrange
+            Job job1 = new Job();
+            job1.Name = "Job1";
+
+            Job job2 = new Job();
+            job2.Name = "Job2";
+
+            User user1 = new User();
+            user1.Name = "1";
+            user1.Jobs.Add(job1);
+            user1.Jobs.Add(job2);
+
+            User user2 = new User();
+            user2.Name = "User2";
+            user2.Jobs.Add(job2);
+
+            // Act
+            Repository sourceRepository = new Repository(this.RepositorySaveFile);
+            sourceRepository.Jobs.Add(job1);
+            sourceRepository.Jobs.Add(job2);
+            sourceRepository.Users.Add(user1);
+            sourceRepository.Users.Add(user2);
+            sourceRepository.SaveToSource();
+
+            Repository targetRepository = new Repository(this.RepositorySaveFile);
+            targetRepository.LoadFromSource();
+
+            // Assert
+            Assert.AreEqual(sourceRepository.Users.Count, targetRepository.Users.Count);
+
+        }
+
+    }
+}

@@ -8,6 +8,8 @@ using System.Threading.Tasks;
 
 namespace SoundScheduler_Logic.Abstract {
     public class Repository {
+        private string _saveFile;
+
         public List<Job> Jobs { get; set; }
         public List<Template> Templates { get; set; }
         public List<User> Users { get; set; }
@@ -41,12 +43,14 @@ namespace SoundScheduler_Logic.Abstract {
             RepositoryData data = new RepositoryData();
             AddToRepositoryJobs(data);
             AddToRepositoryMeetings(data);
+            AddToRepositoryUsers(data);
             return data;
         }
 
         private void ExtractFromRepositoryData(RepositoryData data) {
             this.Jobs = data.Jobs.Select(x => new Job(x)).ToList();
             this.Meetings = data.Meetings.Select(x => new Meeting(x)).ToList();
+            this.Users = data.Users;
         }
 
         private void AddToRepositoryJobs(RepositoryData data) {
@@ -61,7 +65,23 @@ namespace SoundScheduler_Logic.Abstract {
             }
         }
 
+        private void AddToRepositoryUsers(RepositoryData data) {
+            foreach (User user in this.Users) {
+                data.Users.Add(user);
+            }
+        }
+
         public Repository() {
+            _saveFile = "SoundScheduler.xml";
+            Instantiate();
+        }
+
+        public Repository(string saveFile) {
+            _saveFile = saveFile;
+            Instantiate();
+        }
+
+        private void Instantiate() {
             this.Jobs = new List<Job>();
             this.Templates = new List<Template>();
             this.Users = new List<User>();

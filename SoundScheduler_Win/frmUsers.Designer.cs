@@ -48,6 +48,7 @@
             this.cmdDelete.TabIndex = 11;
             this.cmdDelete.Text = "-";
             this.cmdDelete.UseVisualStyleBackColor = true;
+            this.cmdDelete.Click += new System.EventHandler(this.cmdDelete_Click);
             // 
             // cmdAdd
             // 
@@ -57,6 +58,7 @@
             this.cmdAdd.TabIndex = 10;
             this.cmdAdd.Text = "+";
             this.cmdAdd.UseVisualStyleBackColor = true;
+            this.cmdAdd.Click += new System.EventHandler(this.cmdAdd_Click);
             // 
             // cmdClose
             // 
@@ -66,6 +68,7 @@
             this.cmdClose.TabIndex = 9;
             this.cmdClose.Text = "Close";
             this.cmdClose.UseVisualStyleBackColor = true;
+            this.cmdClose.Click += new System.EventHandler(this.cmdClose_Click);
             // 
             // cmdSave
             // 
@@ -75,6 +78,7 @@
             this.cmdSave.TabIndex = 8;
             this.cmdSave.Text = "Save";
             this.cmdSave.UseVisualStyleBackColor = true;
+            this.cmdSave.Click += new System.EventHandler(this.cmdSave_Click);
             // 
             // lstUsers
             // 
@@ -83,6 +87,7 @@
             this.lstUsers.Name = "lstUsers";
             this.lstUsers.Size = new System.Drawing.Size(204, 134);
             this.lstUsers.TabIndex = 7;
+            this.lstUsers.SelectedIndexChanged += new System.EventHandler(this.lstUsers_SelectedIndexChanged);
             // 
             // grpUserDetails
             // 
@@ -116,6 +121,7 @@
             this.cmdAddJob.TabIndex = 9;
             this.cmdAddJob.Text = "+";
             this.cmdAddJob.UseVisualStyleBackColor = true;
+            this.cmdAddJob.Click += new System.EventHandler(this.cmdAddJob_Click);
             // 
             // cboJobsToAdd
             // 
@@ -125,6 +131,7 @@
             this.cboJobsToAdd.Name = "cboJobsToAdd";
             this.cboJobsToAdd.Size = new System.Drawing.Size(121, 21);
             this.cboJobsToAdd.TabIndex = 10;
+            this.cboJobsToAdd.SelectedIndexChanged += new System.EventHandler(this.cboJobsToAdd_SelectedIndexChanged);
             // 
             // cmdDeleteJob
             // 
@@ -134,6 +141,7 @@
             this.cmdDeleteJob.TabIndex = 9;
             this.cmdDeleteJob.Text = "-";
             this.cmdDeleteJob.UseVisualStyleBackColor = true;
+            this.cmdDeleteJob.Click += new System.EventHandler(this.cmdDeleteJob_Click);
             // 
             // lstJobs
             // 
@@ -149,6 +157,7 @@
             this.txtUserName.Name = "txtUserName";
             this.txtUserName.Size = new System.Drawing.Size(161, 20);
             this.txtUserName.TabIndex = 4;
+            this.txtUserName.TextChanged += new System.EventHandler(this.txtUserName_TextChanged);
             // 
             // label1
             // 
@@ -172,6 +181,7 @@
             this.Controls.Add(this.lstUsers);
             this.Name = "frmUsers";
             this.Text = "frmUsers";
+            this.Load += new System.EventHandler(this.frmUsers_Load);
             this.grpUserDetails.ResumeLayout(false);
             this.grpUserDetails.PerformLayout();
             this.groupBox1.ResumeLayout(false);
