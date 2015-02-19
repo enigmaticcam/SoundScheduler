@@ -57,6 +57,10 @@ namespace SoundScheduler_Logic.Abstract {
             _data = data;
         }
 
+        public bool IsSameReference(Job job) {
+            return _data == job.JobData;
+        }
+
         public class Data {
             public List<Job.Data> SameJobs { get; set; }
             public string Name { get; set; }

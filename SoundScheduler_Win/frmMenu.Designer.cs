@@ -49,6 +49,7 @@
             this.cmdUsers.TabIndex = 1;
             this.cmdUsers.Text = "Users";
             this.cmdUsers.UseVisualStyleBackColor = true;
+            this.cmdUsers.Click += new System.EventHandler(this.cmdUsers_Click);
             // 
             // cmdTemplates
             // 

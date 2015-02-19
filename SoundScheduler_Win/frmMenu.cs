@@ -18,5 +18,10 @@ namespace SoundScheduler_Win {
             frmJobs frm = new frmJobs();
             frm.ShowDialog();
         }
+
+        private void cmdUsers_Click(object sender, EventArgs e) {
+            frmUsers frm = new frmUsers();
+            frm.ShowDialog();
+        }
     }
 }

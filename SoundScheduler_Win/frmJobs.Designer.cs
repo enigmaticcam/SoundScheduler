@@ -33,10 +33,10 @@
             this.chkVoidOnSoftException = new System.Windows.Forms.CheckBox();
             this.grpJobDetails = new System.Windows.Forms.GroupBox();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
-            this.lstRelatedJobs = new System.Windows.Forms.ListBox();
-            this.cmdDeleteRelatedJob = new System.Windows.Forms.Button();
-            this.cboRelatedJobsToAdd = new System.Windows.Forms.ComboBox();
             this.cmdAddRelatedJob = new System.Windows.Forms.Button();
+            this.cboRelatedJobsToAdd = new System.Windows.Forms.ComboBox();
+            this.cmdDeleteRelatedJob = new System.Windows.Forms.Button();
+            this.lstRelatedJobs = new System.Windows.Forms.ListBox();
             this.grpJobDetails.SuspendLayout();
             this.groupBox1.SuspendLayout();
             this.SuspendLayout();
@@ -143,24 +143,15 @@
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Related Jobs";
             // 
-            // lstRelatedJobs
+            // cmdAddRelatedJob
             // 
-            this.lstRelatedJobs.FormattingEnabled = true;
-            this.lstRelatedJobs.Location = new System.Drawing.Point(6, 19);
-            this.lstRelatedJobs.Name = "lstRelatedJobs";
-            this.lstRelatedJobs.Size = new System.Drawing.Size(120, 95);
-            this.lstRelatedJobs.TabIndex = 0;
-            this.lstRelatedJobs.SelectedIndexChanged += new System.EventHandler(this.lstRelatedJobs_SelectedIndexChanged);
-            // 
-            // cmdDeleteRelatedJob
-            // 
-            this.cmdDeleteRelatedJob.Location = new System.Drawing.Point(128, 19);
-            this.cmdDeleteRelatedJob.Name = "cmdDeleteRelatedJob";
-            this.cmdDeleteRelatedJob.Size = new System.Drawing.Size(22, 23);
-            this.cmdDeleteRelatedJob.TabIndex = 9;
-            this.cmdDeleteRelatedJob.Text = "-";
-            this.cmdDeleteRelatedJob.UseVisualStyleBackColor = true;
-            this.cmdDeleteRelatedJob.Click += new System.EventHandler(this.cmdDeleteRelatedJob_Click);
+            this.cmdAddRelatedJob.Location = new System.Drawing.Point(134, 119);
+            this.cmdAddRelatedJob.Name = "cmdAddRelatedJob";
+            this.cmdAddRelatedJob.Size = new System.Drawing.Size(21, 23);
+            this.cmdAddRelatedJob.TabIndex = 9;
+            this.cmdAddRelatedJob.Text = "+";
+            this.cmdAddRelatedJob.UseVisualStyleBackColor = true;
+            this.cmdAddRelatedJob.Click += new System.EventHandler(this.cmdAddRelatedJob_Click);
             // 
             // cboRelatedJobsToAdd
             // 
@@ -172,15 +163,24 @@
             this.cboRelatedJobsToAdd.TabIndex = 10;
             this.cboRelatedJobsToAdd.SelectedIndexChanged += new System.EventHandler(this.cboRelatedJobsToAdd_SelectedIndexChanged);
             // 
-            // cmdAddRelatedJob
+            // cmdDeleteRelatedJob
             // 
-            this.cmdAddRelatedJob.Location = new System.Drawing.Point(134, 119);
-            this.cmdAddRelatedJob.Name = "cmdAddRelatedJob";
-            this.cmdAddRelatedJob.Size = new System.Drawing.Size(21, 23);
-            this.cmdAddRelatedJob.TabIndex = 9;
-            this.cmdAddRelatedJob.Text = "+";
-            this.cmdAddRelatedJob.UseVisualStyleBackColor = true;
-            this.cmdAddRelatedJob.Click += new System.EventHandler(this.cmdAddRelatedJob_Click);
+            this.cmdDeleteRelatedJob.Location = new System.Drawing.Point(128, 19);
+            this.cmdDeleteRelatedJob.Name = "cmdDeleteRelatedJob";
+            this.cmdDeleteRelatedJob.Size = new System.Drawing.Size(22, 23);
+            this.cmdDeleteRelatedJob.TabIndex = 9;
+            this.cmdDeleteRelatedJob.Text = "-";
+            this.cmdDeleteRelatedJob.UseVisualStyleBackColor = true;
+            this.cmdDeleteRelatedJob.Click += new System.EventHandler(this.cmdDeleteRelatedJob_Click);
+            // 
+            // lstRelatedJobs
+            // 
+            this.lstRelatedJobs.FormattingEnabled = true;
+            this.lstRelatedJobs.Location = new System.Drawing.Point(6, 19);
+            this.lstRelatedJobs.Name = "lstRelatedJobs";
+            this.lstRelatedJobs.Size = new System.Drawing.Size(120, 95);
+            this.lstRelatedJobs.TabIndex = 0;
+            this.lstRelatedJobs.SelectedIndexChanged += new System.EventHandler(this.lstRelatedJobs_SelectedIndexChanged);
             // 
             // frmJobs
             // 
