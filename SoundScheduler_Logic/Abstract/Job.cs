@@ -14,7 +14,8 @@ namespace SoundScheduler_Logic.Abstract {
         }
 
         public IEnumerable<Job> SameJobs {
-            get { return _data.SameJobs.Select(x => new Job(x)); }
+            get { return _data.SameJobs; }
+            set { _data.SameJobs = value.ToList(); }
         }
 
         public string Name {
@@ -28,21 +29,21 @@ namespace SoundScheduler_Logic.Abstract {
         }
 
         public void AddSameJob(Job job) {
-            if (!_data.SameJobs.Contains(job.JobData)) {
-                _data.SameJobs.Add(job.JobData);
+            if (!_data.SameJobs.Contains(job)) {
+                _data.SameJobs.Add(job);
                 job.AddSameJob(this);
             }
         }
 
         public void RemoveSameJob(Job job) {
-            if (_data.SameJobs.Contains(job.JobData)) {
-                _data.SameJobs.Remove(job.JobData);
+            if (_data.SameJobs.Contains(job)) {
+                _data.SameJobs.Remove(job);
                 job.RemoveSameJob(this);
             }
         }
 
         public bool IsSameJob(Job job) {
-            if (job.JobData == _data || _data.SameJobs.Contains(job.JobData)) {
+            if (job == this || _data.SameJobs.Contains(job)) {
                 return true;
             } else {
                 return false;
@@ -62,12 +63,12 @@ namespace SoundScheduler_Logic.Abstract {
         }
 
         public class Data {
-            public List<Job.Data> SameJobs { get; set; }
+            public List<Job> SameJobs { get; set; }
             public string Name { get; set; }
             public bool IsVoidedOnSoftException { get; set; }
 
             public Data() {
-                this.SameJobs = new List<Job.Data>();
+                this.SameJobs = new List<Job>();
             }
         }
     }

@@ -100,6 +100,16 @@ namespace SoundScheduler_Win {
             userRStubbs.Jobs = new List<Job> { jobMic1, jobMic2, jobMic3, jobMic4 };
             users.Add(userRStubbs);
 
+            User userDKeil = new User();
+            userDKeil.Name = "David Keil";
+            userDKeil.Jobs = new List<Job> { jobMic1, jobMic2, jobMic3, jobMic4 };
+            users.Add(userDKeil);
+
+            User userBDeaver = new User();
+            userBDeaver.Name = "Beau Deaver";
+            userBDeaver.Jobs = new List<Job> { jobStage, jobMic1, jobMic2, jobMic3, jobMic4 };
+            users.Add(userBDeaver);
+
             // --------------------------------------------------------
             // TEMPLATES
             // --------------------------------------------------------
@@ -125,8 +135,8 @@ namespace SoundScheduler_Win {
             // WORK - Templates
             // --------------------------------------------------------
 
-            DateTime nextTuesday = DateTime.Parse("12/30/2014");
-            DateTime nextSunday = DateTime.Parse("1/4/2015");
+            DateTime nextTuesday = DateTime.Parse("2/24/2015");
+            DateTime nextSunday = DateTime.Parse("3/1/2015");
 
             for (int i = 0; i < 9; i++) {
                 engine.AddTemplate(nextTuesday.AddDays(7 * i), templateTuesday);
@@ -137,58 +147,66 @@ namespace SoundScheduler_Win {
             // WORK - Previous Meetings
             // --------------------------------------------------------
 
-            //Meeting meeting = templateTuesday.ToMeeting(DateTime.Parse("12/16/2014"));
-            //meeting.AddUserForJob(userCTangen, jobSound);
-            //meeting.AddUserForJob(userESavelberg, jobStage);
-            //meeting.AddUserForJob(userDCook, jobMic1);
-            //meeting.AddUserForJob(userEWilder, jobMic2);
-            //engine.AddMeeting(meeting.Date, meeting);
+            Meeting meeting = templateTuesday.ToMeeting(DateTime.Parse("2/3/2015"));
+            meeting.AddUserForJob(userCTangen, jobSound);
+            meeting.AddUserForJob(userESavelberg, jobStage);
+            meeting.AddUserForJob(userDLopez, jobMic1);
+            meeting.AddUserForJob(userDKeil, jobMic2);
+            engine.AddMeeting(meeting.Date, meeting);
 
-            //meeting = templateSunday.ToMeeting(DateTime.Parse("12/21/2014"));
-            //meeting.AddUserForJob(userESavelberg, jobSound);
-            //meeting.AddUserForJob(userDLopez, jobStage);
-            //meeting.AddUserForJob(userJHermosillo, jobMic1);
-            //meeting.AddUserForJob(userCOldani, jobMic2);
-            //meeting.AddUserForJob(userRStubbs, jobMic3);
-            //meeting.AddUserForJob(userEWilder, jobMic4);
-            //engine.AddMeeting(meeting.Date, meeting);
+            meeting = templateSunday.ToMeeting(DateTime.Parse("2/8/2015"));
+            meeting.AddUserForJob(userEWilder, jobSound);
+            meeting.AddUserForJob(userDCook, jobStage);
+            meeting.AddUserForJob(userDKeil, jobMic1);
+            meeting.AddUserForJob(userRStubbs, jobMic2);
+            meeting.AddUserForJob(userCTangen, jobMic3);
+            meeting.AddUserForJob(userDLopez, jobMic4);
+            engine.AddMeeting(meeting.Date, meeting);
 
-            //meeting = templateTuesday.ToMeeting(DateTime.Parse("12/23/2014"));
-            //meeting.AddUserForJob(userDCook, jobSound);
-            //meeting.AddUserForJob(userCTangen, jobStage);
-            //meeting.AddUserForJob(userESavelberg, jobMic1);
-            //meeting.AddUserForJob(userRStubbs, jobMic2);
-            //engine.AddMeeting(meeting.Date, meeting);
+            meeting = templateTuesday.ToMeeting(DateTime.Parse("2/10/2015"));
+            meeting.AddUserForJob(userESavelberg, jobSound);
+            meeting.AddUserForJob(userEWilder, jobStage);
+            meeting.AddUserForJob(userDCook, jobMic1);
+            meeting.AddUserForJob(userDKeil, jobMic2);
+            engine.AddMeeting(meeting.Date, meeting);
 
-            //meeting = templateSunday.ToMeeting(DateTime.Parse("12/28/2014"));
-            //meeting.AddUserForJob(userJHermosillo, jobSound);
-            //meeting.AddUserForJob(userEWilder, jobStage);
-            //meeting.AddUserForJob(userDLopez, jobMic1);
-            //meeting.AddUserForJob(userDCook, jobMic2);
-            //meeting.AddUserForJob(userCOldani, jobMic3);
-            //meeting.AddUserForJob(userKSugiyama, jobMic4);
+            meeting = templateSunday.ToMeeting(DateTime.Parse("2/15/2015"));
+            meeting.AddUserForJob(userCTangen, jobSound);
+            meeting.AddUserForJob(userESavelberg, jobStage);
+            meeting.AddUserForJob(userRStubbs, jobMic1);
+            meeting.AddUserForJob(userDCook, jobMic2);
+            meeting.AddUserForJob(userEWilder, jobMic3);
+            meeting.AddUserForJob(userDKeil, jobMic4);
             
             
             // --------------------------------------------------------
             // WORK - Exceptions
             // --------------------------------------------------------
 
-            engine.AddException(DateTime.Parse("12/30/2014"), userDCook, true);
-            engine.AddException(DateTime.Parse("12/30/2014"), userCTangen, true);
-            engine.AddException(DateTime.Parse("1/25/2015"), userESavelberg, false);
-            engine.AddException(DateTime.Parse("2/8/2015"), userESavelberg, false);
-            engine.AddException(DateTime.Parse("1/13/2015"), userCTangen, true);
-            engine.AddException(DateTime.Parse("1/20/2015"), userDCook, true);
-            engine.AddException(DateTime.Parse("1/27/2015"), userCTangen, true);
-            engine.AddException(DateTime.Parse("1/27/2015"), userESavelberg, true);
-            engine.AddException(DateTime.Parse("2/15/2015"), userDLopez, true);
-            engine.AddException(DateTime.Parse("3/1/2015"), userCTangen, false);
-            engine.AddException(DateTime.Parse("3/3/2015"), userESavelberg, true);
-            engine.AddException(DateTime.Parse("3/8/2015"), userDCook, false);
+            engine.AddException(DateTime.Parse("2/24/2015"), userBDeaver, false);
+
+            engine.AddException(DateTime.Parse("3/1/2015"), userCTangen, true);
             engine.AddException(DateTime.Parse("3/8/2015"), userESavelberg, true);
             engine.AddException(DateTime.Parse("3/15/2015"), userRStubbs, true);
-            engine.AddException(DateTime.Parse("3/23/2015"), userCTangen, false);
-            engine.AddException(DateTime.Parse("4/12/2015"), userDCook, true);
+            engine.AddException(DateTime.Parse("3/23/2015"), userCTangen, true);
+            engine.AddException(DateTime.Parse("5/3/2015"), userCTangen, true);
+            engine.AddException(DateTime.Parse("5/3/2015"), userRStubbs, false);
+            engine.AddException(DateTime.Parse("5/24/2015"), userESavelberg, true);
+            engine.AddException(DateTime.Parse("5/24/2015"), userDCook, true);
+
+            engine.AddException(DateTime.Parse("2/24/2015"), userDLopez, true);
+            engine.AddException(DateTime.Parse("3/3/2015"), userRStubbs, true);
+            engine.AddException(DateTime.Parse("4/21/2015"), userESavelberg, true);
+            engine.AddException(DateTime.Parse("4/28/2015"), userESavelberg, true);
+
+            engine.AddException(DateTime.Parse("2/24/2015"), userRStubbs, true);
+            engine.AddException(DateTime.Parse("3/3/2015"), userESavelberg, true);
+            engine.AddException(DateTime.Parse("3/3/2015"), userCTangen, true);
+            engine.AddException(DateTime.Parse("3/10/2015"), userCTangen, true);
+            engine.AddException(DateTime.Parse("3/17/2015"), userDLopez, true);
+            engine.AddException(DateTime.Parse("3/17/2015"), userDCook, true);
+            engine.AddException(DateTime.Parse("3/23/2015"), userDCook, true);
+            engine.AddException(DateTime.Parse("4/6/2015"), userESavelberg, true);
 
 
             // --------------------------------------------------------

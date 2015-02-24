@@ -83,8 +83,8 @@ namespace SoundScheduler_Logic.Engine {
             jobCancelers.Add(new JobCancelUsersWhoHaveExceptions());
             jobCancelers.Add(new JobCancelUsersWhoCantDoJob());
             jobCancelers.Add(new JobCancelUserWhoNeedABreak());
-            jobCancelers.Add(new JobCancelUsersWhoDidSameJobLastMeeting());
             jobCancelers.Add(_preferences);
+            jobCancelers.Add(new JobCancelUsersWhoDidSameJobLastMeeting());
             return jobCancelers;
         }
 
