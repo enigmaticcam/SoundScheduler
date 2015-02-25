@@ -59,6 +59,7 @@
             this.cmdTemplates.TabIndex = 2;
             this.cmdTemplates.Text = "Templates";
             this.cmdTemplates.UseVisualStyleBackColor = true;
+            this.cmdTemplates.Click += new System.EventHandler(this.cmdTemplates_Click);
             // 
             // cmdPreviousMeetings
             // 
@@ -68,6 +69,7 @@
             this.cmdPreviousMeetings.TabIndex = 3;
             this.cmdPreviousMeetings.Text = "Previous Meetings";
             this.cmdPreviousMeetings.UseVisualStyleBackColor = true;
+            this.cmdPreviousMeetings.Click += new System.EventHandler(this.cmdPreviousMeetings_Click);
             // 
             // cmdFutureExceptions
             // 

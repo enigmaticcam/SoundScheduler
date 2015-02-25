@@ -23,5 +23,14 @@ namespace SoundScheduler_Win {
             frmUsers frm = new frmUsers();
             frm.ShowDialog();
         }
+
+        private void cmdTemplates_Click(object sender, EventArgs e) {
+            frmTemplates frm = new frmTemplates();
+            frm.ShowDialog();
+        }
+
+        private void cmdPreviousMeetings_Click(object sender, EventArgs e) {
+
+        }
     }
 }

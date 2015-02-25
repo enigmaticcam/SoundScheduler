@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using SoundScheduler_Logic.Abstract;
 
 namespace SoundScheduler_Logic.Abstract {
-    [Serializable]
+    
     public class MeetingException {
         public DateTime Date { get; set; }
         public User User { get; set; }

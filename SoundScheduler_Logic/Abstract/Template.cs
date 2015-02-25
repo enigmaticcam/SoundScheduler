@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace SoundScheduler_Logic.Abstract {
-    [Serializable]
+    
     public class Template {
         public string Name { get; set; }
 

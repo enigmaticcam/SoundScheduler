@@ -56,8 +56,10 @@
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Views\Abstract\ViewJobs.cs" />
+    <Compile Include="Views\Abstract\ViewTemplates.cs" />
     <Compile Include="Views\Abstract\ViewUsers.cs" />
     <Compile Include="Views\Concrete\ViewJobs.cs" />
+    <Compile Include="Views\Concrete\ViewTemplates.cs" />
     <Compile Include="Views\Concrete\ViewUsers.cs" />
   </ItemGroup>
   <ItemGroup />

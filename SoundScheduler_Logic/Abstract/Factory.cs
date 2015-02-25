@@ -22,5 +22,10 @@ namespace SoundScheduler_Logic.Abstract {
             ViewUsers view = new ViewUsers(this);
             return view;
         }
+
+        public IViewTemplates CreateViewTemplates() {
+            ViewTemplates view = new ViewTemplates(this);
+            return view;
+        }
     }
 }
