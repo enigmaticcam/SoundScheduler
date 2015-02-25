@@ -7,10 +7,6 @@ using System.Threading.Tasks;
 namespace SoundScheduler_Logic.Abstract {
     public class Meeting {
         private Data _data;
-        public Data MeetingData {
-            get { return _data; }
-            set { _data = value; }
-        }
 
         public string Name {
             get { return _data.Name; }

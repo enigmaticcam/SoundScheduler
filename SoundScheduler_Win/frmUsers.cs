@@ -43,7 +43,7 @@ namespace SoundScheduler_Win {
             IFormatLogic jobSelected = userSelected.LogicOnTrue(() => lstJobs.SelectedIndex > -1);
             jobSelected.ActionOnBoolean(new Action<bool>(x => cmdDeleteJob.Enabled = x));
 
-            IFormatLogic jobToAddSelected = jobSelected.LogicOnTrue(() => cboJobsToAdd.SelectedIndex > -1);
+            IFormatLogic jobToAddSelected = userSelected.LogicOnTrue(() => cboJobsToAdd.SelectedIndex > -1);
             jobToAddSelected.ActionOnBoolean(new Action<bool>(x => cmdAddJob.Enabled = x));
         }
 
@@ -63,6 +63,13 @@ namespace SoundScheduler_Win {
             lstJobs.Items.Clear();
             foreach (Job job in _view.Jobs(_view.Users.ElementAt(lstUsers.SelectedIndex))) {
                 lstJobs.Items.Add(job.Name);
+            }
+        }
+
+        private void PopulateJobsToAdd() {
+            cboJobsToAdd.Items.Clear();
+            foreach (Job job in _view.ApplicableJobs(_view.Users.ElementAt(lstUsers.SelectedIndex))) {
+                cboJobsToAdd.Items.Add(job.Name);
             }
         }
 
@@ -104,10 +111,13 @@ namespace SoundScheduler_Win {
         }
 
         private void lstUsers_SelectedIndexChanged() {
-            User user = _view.Users[lstUsers.SelectedIndex];
-            txtUserName.Text = user.Name;
-            PopulateJobs();
-            RefreshScreen();
+            if (lstUsers.SelectedIndex > -1) {
+                User user = _view.Users[lstUsers.SelectedIndex];
+                txtUserName.Text = user.Name;
+                PopulateJobs();
+                PopulateJobsToAdd();
+                RefreshScreen();
+            }
         }
 
         private void cboJobsToAdd_SelectedIndexChanged() {
@@ -116,9 +126,11 @@ namespace SoundScheduler_Win {
 
         private void cmdAddJob_Click() {
             User user = _view.Users[lstUsers.SelectedIndex];
-            Job job = _view.Jobs(user).ElementAt(lstJobs.SelectedIndex);
+            Job job = _view.ApplicableJobs(user).ElementAt(cboJobsToAdd.SelectedIndex);
             _view.AddJob(user, job);
+            _isDirty = true;
             PopulateJobs();
+            PopulateJobsToAdd();
             RefreshScreen();
         }
 
@@ -126,7 +138,13 @@ namespace SoundScheduler_Win {
             User user = _view.Users[lstUsers.SelectedIndex];
             Job job = _view.Jobs(user).ElementAt(lstJobs.SelectedIndex);
             _view.RemoveJob(user, job);
+            _isDirty = true;
             PopulateJobs();
+            PopulateJobsToAdd();
+            RefreshScreen();
+        }
+
+        private void lstJobs_SelectedIndexChanged() {
             RefreshScreen();
         }
 
@@ -160,6 +178,10 @@ namespace SoundScheduler_Win {
 
         private void cmdDeleteJob_Click(object sender, EventArgs e) {
             _form.PerformAction(cmdDeleteJob_Click, sender, e);
+        }
+
+        private void lstJobs_SelectedIndexChanged(object sender, EventArgs e) {
+            _form.PerformAction(lstJobs_SelectedIndexChanged, sender, e);
         }
 
         private void cmdClose_Click(object sender, EventArgs e) {

@@ -8,10 +8,6 @@ using System.Threading.Tasks;
 namespace SoundScheduler_Logic.Abstract {
     public class Job  {
         private Data _data;
-        public Data JobData {
-            get { return _data; }
-            set { _data = value; }
-        }
 
         public IEnumerable<Job> SameJobs {
             get { return _data.SameJobs; }
@@ -56,10 +52,6 @@ namespace SoundScheduler_Logic.Abstract {
 
         public Job(Data data) {
             _data = data;
-        }
-
-        public bool IsSameReference(Job job) {
-            return _data == job.JobData;
         }
 
         public class Data {

@@ -150,6 +150,7 @@
             this.lstJobs.Name = "lstJobs";
             this.lstJobs.Size = new System.Drawing.Size(120, 95);
             this.lstJobs.TabIndex = 0;
+            this.lstJobs.SelectedIndexChanged += new System.EventHandler(this.lstJobs_SelectedIndexChanged);
             // 
             // txtUserName
             // 

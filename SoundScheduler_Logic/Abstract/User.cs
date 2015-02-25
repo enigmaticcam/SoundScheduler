@@ -5,7 +5,6 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace SoundScheduler_Logic.Abstract {
-    [Serializable]
     public class User {
         public string Name { get; set; }
         public List<Job> Jobs { get; set; }

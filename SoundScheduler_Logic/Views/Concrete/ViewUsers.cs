@@ -32,7 +32,7 @@ namespace SoundScheduler_Logic.Views.Concrete {
             foreach (Job availableJob in _repository.Jobs) {
                 bool isApplicable = true;
                 foreach (Job userJob in selectedUser.Jobs) {
-                    if (userJob.IsSameJob(availableJob)) {
+                    if (userJob == availableJob) {
                         isApplicable = false;
                         break;
                     }
