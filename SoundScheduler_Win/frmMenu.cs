@@ -29,8 +29,9 @@ namespace SoundScheduler_Win {
             frm.ShowDialog();
         }
 
-        private void cmdPreviousMeetings_Click(object sender, EventArgs e) {
-
+        private void cmdMeetings_Click(object sender, EventArgs e) {
+            frmMeetings frm = new frmMeetings();
+            frm.ShowDialog();
         }
     }
 }

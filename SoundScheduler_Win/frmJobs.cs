@@ -112,12 +112,14 @@ namespace SoundScheduler_Win {
         }
 
         private void lstJobs_SelectedIndexChanged() {
-            Job job = _view.Jobs[lstJobs.SelectedIndex];
-            txtJobName.Text = job.Name;
-            chkVoidOnSoftException.Checked = job.IsVoidedOnSoftException;
-            PopulateRelatedJobs();
-            PopulateRelatedJobsToAdd();
-            RefreshScreen();
+            if (lstJobs.SelectedIndex > -1) {
+                Job job = _view.Jobs[lstJobs.SelectedIndex];
+                txtJobName.Text = job.Name;
+                chkVoidOnSoftException.Checked = job.IsVoidedOnSoftException;
+                PopulateRelatedJobs();
+                PopulateRelatedJobsToAdd();
+                RefreshScreen();
+            }
         }
 
         private void chkVoidOnSoftException_CheckedChanged() {

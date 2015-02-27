@@ -26,9 +26,7 @@
             this.cmdJobs = new System.Windows.Forms.Button();
             this.cmdUsers = new System.Windows.Forms.Button();
             this.cmdTemplates = new System.Windows.Forms.Button();
-            this.cmdPreviousMeetings = new System.Windows.Forms.Button();
-            this.cmdFutureExceptions = new System.Windows.Forms.Button();
-            this.cmdAlgorithmComponents = new System.Windows.Forms.Button();
+            this.cmdMeetings = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // cmdJobs
@@ -61,42 +59,22 @@
             this.cmdTemplates.UseVisualStyleBackColor = true;
             this.cmdTemplates.Click += new System.EventHandler(this.cmdTemplates_Click);
             // 
-            // cmdPreviousMeetings
+            // cmdMeetings
             // 
-            this.cmdPreviousMeetings.Location = new System.Drawing.Point(142, 85);
-            this.cmdPreviousMeetings.Name = "cmdPreviousMeetings";
-            this.cmdPreviousMeetings.Size = new System.Drawing.Size(123, 66);
-            this.cmdPreviousMeetings.TabIndex = 3;
-            this.cmdPreviousMeetings.Text = "Previous Meetings";
-            this.cmdPreviousMeetings.UseVisualStyleBackColor = true;
-            this.cmdPreviousMeetings.Click += new System.EventHandler(this.cmdPreviousMeetings_Click);
-            // 
-            // cmdFutureExceptions
-            // 
-            this.cmdFutureExceptions.Location = new System.Drawing.Point(271, 85);
-            this.cmdFutureExceptions.Name = "cmdFutureExceptions";
-            this.cmdFutureExceptions.Size = new System.Drawing.Size(123, 66);
-            this.cmdFutureExceptions.TabIndex = 4;
-            this.cmdFutureExceptions.Text = "Future Exceptions";
-            this.cmdFutureExceptions.UseVisualStyleBackColor = true;
-            // 
-            // cmdAlgorithmComponents
-            // 
-            this.cmdAlgorithmComponents.Location = new System.Drawing.Point(13, 157);
-            this.cmdAlgorithmComponents.Name = "cmdAlgorithmComponents";
-            this.cmdAlgorithmComponents.Size = new System.Drawing.Size(123, 66);
-            this.cmdAlgorithmComponents.TabIndex = 6;
-            this.cmdAlgorithmComponents.Text = "Algorithm Components";
-            this.cmdAlgorithmComponents.UseVisualStyleBackColor = true;
+            this.cmdMeetings.Location = new System.Drawing.Point(142, 85);
+            this.cmdMeetings.Name = "cmdMeetings";
+            this.cmdMeetings.Size = new System.Drawing.Size(123, 66);
+            this.cmdMeetings.TabIndex = 4;
+            this.cmdMeetings.Text = "Meetings";
+            this.cmdMeetings.UseVisualStyleBackColor = true;
+            this.cmdMeetings.Click += new System.EventHandler(this.cmdMeetings_Click);
             // 
             // frmMenu
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(426, 269);
-            this.Controls.Add(this.cmdAlgorithmComponents);
-            this.Controls.Add(this.cmdFutureExceptions);
-            this.Controls.Add(this.cmdPreviousMeetings);
+            this.ClientSize = new System.Drawing.Size(296, 166);
+            this.Controls.Add(this.cmdMeetings);
             this.Controls.Add(this.cmdTemplates);
             this.Controls.Add(this.cmdUsers);
             this.Controls.Add(this.cmdJobs);
@@ -111,8 +89,6 @@
         private System.Windows.Forms.Button cmdJobs;
         private System.Windows.Forms.Button cmdUsers;
         private System.Windows.Forms.Button cmdTemplates;
-        private System.Windows.Forms.Button cmdPreviousMeetings;
-        private System.Windows.Forms.Button cmdFutureExceptions;
-        private System.Windows.Forms.Button cmdAlgorithmComponents;
+        private System.Windows.Forms.Button cmdMeetings;
     }
 }

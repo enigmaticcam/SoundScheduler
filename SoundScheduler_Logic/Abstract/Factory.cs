@@ -27,5 +27,10 @@ namespace SoundScheduler_Logic.Abstract {
             ViewTemplates view = new ViewTemplates(this);
             return view;
         }
+
+        public IViewMeetings CreateViewMeetings() {
+            ViewMeetings view = new ViewMeetings(this);
+            return view;
+        }
     }
 }

@@ -32,11 +32,12 @@ namespace SoundScheduler_Logic.Abstract {
         }
 
         public void SaveToSource() {
-            using (FileStream writer = new FileStream("SoundScheduler.xml", FileMode.Create, FileAccess.Write)) {
+            using (FileStream writer = new FileStream("_SoundScheduler.xml", FileMode.Create, FileAccess.Write)) {
                 DataContractSerializer serializer = new DataContractSerializer(typeof(RepositoryData), SerializerSettings());
                 serializer.WriteObject(writer, _data);
                 writer.Close();
             }
+            File.Copy("_SoundScheduler.xml", "SoundScheduler.xml", true);
         }
 
         public void LoadFromSource() {
