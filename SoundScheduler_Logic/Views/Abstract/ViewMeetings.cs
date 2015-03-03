@@ -9,10 +9,10 @@ namespace SoundScheduler_Logic.Views.Abstract {
     public interface IViewMeetings {
         IEnumerable<Meeting> Meetings { get; }
         IEnumerable<Template> Templates { get; }
-        IEnumerable<MeetingNode> Nodes { get; }
-        string NodeDescriptionMeeting(Meeting meeting);
-        string NodeDescriptionJob(Meeting meeting, Job job);
+        IEnumerable<NodeBase> Nodes { get; }
+        IEnumerable<User> Users { get; }
         void AddMeeting(Template template, DateTime date);
+        void AddMeetingException(DateTime date, User user, bool isSoftException);
         void LoadFromSource();
         void SaveToSource();
     }
@@ -28,16 +28,16 @@ namespace SoundScheduler_Logic.Views.Abstract {
             get { return _view.Templates; }
         }
 
-        private string NodeDescriptionMeeting(Meeting meeting) {
-            return _view.NodeDescriptionMeeting(meeting);
-        }
-
-        private string NodeDescriptionJob(Meeting meeting, Job job) {
-            return _view.NodeDescriptionJob(meeting, job);
+        public IEnumerable<User> Users {
+            get { return _view.Users; }
         }
 
         public void AddMeeting(Template template, DateTime date) {
             _view.AddMeeting(template, date);
+        }
+
+        public void AddMeetingException(DateTime date, User user, bool isSoftException) {
+            _view.AddMeetingException(date, user, isSoftException);
         }
 
         public void LoadFromSource() {
@@ -53,9 +53,21 @@ namespace SoundScheduler_Logic.Views.Abstract {
         }
     }
 
-    public class MeetingNode {
+    public abstract class NodeBase {
         public string Name { get; set; }
         public int OrderById { get; set; }
-        public IEnumerable<MeetingNode> Children { get; set; }
+
+        private List<NodeBase> _children;
+        public IEnumerable<NodeBase> Children {
+            get { return _children.OrderBy(x => x.OrderById); }
+        }
+
+        public void AddChild(NodeBase node) {
+            _children.Add(node);
+        }
+
+        public NodeBase() {
+            _children = new List<NodeBase>();
+        }
     }
 }

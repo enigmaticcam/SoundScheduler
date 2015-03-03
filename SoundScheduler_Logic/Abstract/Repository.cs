@@ -31,6 +31,11 @@ namespace SoundScheduler_Logic.Abstract {
             set { _data.Meetings = value; }
         }
 
+        public List<MeetingException> MeetingExceptions {
+            get { return _data.MeetingExceptions; }
+            set { _data.MeetingExceptions = value; }
+        }
+
         public void SaveToSource() {
             using (FileStream writer = new FileStream("_SoundScheduler.xml", FileMode.Create, FileAccess.Write)) {
                 DataContractSerializer serializer = new DataContractSerializer(typeof(RepositoryData), SerializerSettings());

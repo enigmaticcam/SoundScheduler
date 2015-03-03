@@ -27,21 +27,36 @@ namespace SoundScheduler_Win {
 
         private void PopulateMeetings() {
             treMeetings.Nodes.Clear();
-            foreach (Meeting meeting in _view.Meetings) {
-                TreeNode[] childNodes = new TreeNode[meeting.Jobs.Count];
-                for (int i = 0; i < meeting.Jobs.Count; i++) {
-                    TreeNode child = new TreeNode(_view.NodeDescriptionJob(meeting, meeting.Jobs[i]));
-                    childNodes[i] = child;
-                }
-                TreeNode parentNode = new TreeNode(_view.NodeDescriptionMeeting(meeting), childNodes);
-                treMeetings.Nodes.Add(parentNode);
+            foreach (NodeBase nodeBase in _view.Nodes) {
+                treMeetings.Nodes.Add(PopulateNode(nodeBase));
             }
+        }
+
+        private TreeNode PopulateNode(NodeBase node) {
+            TreeNode returnNode = null;
+            if (node.Children.Count() > 0) {
+                TreeNode[] childNodes = new TreeNode[node.Children.Count()];
+                for (int i = 0; i < node.Children.Count(); i++) {
+                    childNodes[i] = PopulateNode(node.Children.ElementAt(i));
+                }
+                returnNode = new TreeNode(node.Name, childNodes);
+            } else {
+                returnNode = new TreeNode(node.Name);
+            }
+            return returnNode;
         }
 
         private void PopulateTemplates() {
             cboTemplates.Items.Clear();
             foreach (Template template in _view.Templates) {
                 cboTemplates.Items.Add(template.Name);
+            }
+        }
+
+        private void PopulateUsers() {
+            cboUsers.Items.Clear();
+            foreach (User user in _view.Users) {
+                cboUsers.Items.Add(user.Name);
             }
         }
 
@@ -55,6 +70,18 @@ namespace SoundScheduler_Win {
             PopulateMeetings();
         }
 
+        private void cmdAddHardException_Click() {
+            User user = _view.Users.ElementAt(cboUsers.SelectedIndex);
+            _view.AddMeetingException(calMeetingDate.SelectionRange.Start, user, true);
+            PopulateMeetings();
+        }
+
+        private void cmdAddSoftException_Click() {
+            User user = _view.Users.ElementAt(cboUsers.SelectedIndex);
+            _view.AddMeetingException(calMeetingDate.SelectionRange.Start, user, false);
+            PopulateMeetings();
+        }
+
         private void frmMeetings_Load(object sender, EventArgs e) {
             Factory factory = new Factory();
             _view = factory.CreateViewMeetings();
@@ -62,6 +89,7 @@ namespace SoundScheduler_Win {
             BuildVirtualForm();
             PopulateMeetings();
             PopulateTemplates();
+            PopulateUsers();
             RefreshScreen();
         }
 
@@ -69,6 +97,12 @@ namespace SoundScheduler_Win {
             _form.PerformAction(cmdAddMeeting_Click, sender, e);
         }
 
+        private void cmdAddHardException_Click(object sender, EventArgs e) {
+            _form.PerformAction(cmdAddHardException_Click, sender, e);
+        }
 
+        private void cmdAddSoftException_Click(object sender, EventArgs e) {
+            _form.PerformAction(cmdAddSoftException_Click, sender, e);
+        }
     }
 }

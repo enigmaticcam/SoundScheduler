@@ -451,22 +451,24 @@ namespace SoundScheduler_Logic.Engine {
         }
 
         public class ExceptionsByDate {
-            private Dictionary<DateTime, Dictionary<User, MeetingException>> _exceptions;
+            private Dictionary<string, Dictionary<User, MeetingException>> _exceptions;
 
             public void AddException(DateTime date, User user, bool isSoftException) {
-                if (!_exceptions.ContainsKey(date)) {
-                    _exceptions.Add(date, new Dictionary<User, MeetingException>());
+                string key = DateToKey(date);
+                if (!_exceptions.ContainsKey(key)) {
+                    _exceptions.Add(key, new Dictionary<User, MeetingException>());
                 }
                 MeetingException exception = new MeetingException();
                 exception.Date = date;
                 exception.User = user;
                 exception.IsSoftException = isSoftException;
-                _exceptions[date].Add(user, exception);
+                _exceptions[key].Add(user, exception);
             }
 
             public bool DoesUserHaveSoftException(DateTime date, User user) {
-                if (_exceptions.ContainsKey(date) && _exceptions[date].ContainsKey(user)) {
-                    MeetingException exception = _exceptions[date][user];
+                string key = DateToKey(date);
+                if (_exceptions.ContainsKey(key) && _exceptions[key].ContainsKey(user)) {
+                    MeetingException exception = _exceptions[key][user];
                     return exception.IsSoftException;
                 } else {
                     return false;
@@ -474,16 +476,21 @@ namespace SoundScheduler_Logic.Engine {
             }
 
             public bool DoesUserHaveHardException(DateTime date, User user) {
-                if (_exceptions.ContainsKey(date) && _exceptions[date].ContainsKey(user)) {
-                    MeetingException exception = _exceptions[date][user];
+                string key = DateToKey(date);
+                if (_exceptions.ContainsKey(key) && _exceptions[key].ContainsKey(user)) {
+                    MeetingException exception = _exceptions[key][user];
                     return !exception.IsSoftException;
                 } else {
                     return false;
                 }
             }
 
+            private string DateToKey(DateTime date) {
+                return date.Year.ToString() + date.Month.ToString() + date.Day.ToString();
+            }
+
             public ExceptionsByDate() {
-                _exceptions = new Dictionary<DateTime, Dictionary<User, MeetingException>>();
+                _exceptions = new Dictionary<string, Dictionary<User, MeetingException>>();
             }
         }
     }

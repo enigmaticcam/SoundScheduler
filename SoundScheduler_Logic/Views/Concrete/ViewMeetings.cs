@@ -26,33 +26,34 @@ namespace SoundScheduler_Logic.Views.Concrete {
             get { return _repository.Templates; }
         }
 
-        private List<MeetingNode> _nodes;
-        public IEnumerable<MeetingNode> Nodes {
+        private List<NodeBase> _nodes;
+        public IEnumerable<NodeBase> Nodes {
             get {
                 if (_nodes == null) {
-                    return new List<MeetingNode>();
+                    return new List<NodeBase>();
                 } else {
                     return _nodes.OrderBy(x => x.OrderById);
                 }
             }
         }
 
-        public string NodeDescriptionMeeting(Meeting meeting) {
-            return meeting.Date.ToShortDateString();
-        }
-
-        public string NodeDescriptionJob(Meeting meeting, Job job) {
-            User user = meeting.UserForJob(job);
-            if (user == null) {
-                return job.Name + ": <empty>";
-            } else {
-                return job.Name + ": " + user.Name;
-            }
+        public IEnumerable<User> Users {
+            get { return _repository.Users; }
         }
 
         public void AddMeeting(Template template, DateTime date) {
             Meeting meeting = template.ToMeeting(date);
             _meetings.Add(meeting);
+            BuildNodes();
+        }
+
+        public void AddMeetingException(DateTime date, User user, bool isSoftException) {
+            MeetingException meetingException = new MeetingException();
+            meetingException.Date = date;
+            meetingException.User = user;
+            meetingException.IsSoftException = isSoftException;
+            _repository.MeetingExceptions.Add(meetingException);
+            BuildNodes();
         }
 
         public void LoadFromSource() {
@@ -67,16 +68,109 @@ namespace SoundScheduler_Logic.Views.Concrete {
         }
 
         private void BuildNodes() {
-            _nodes = new List<MeetingNode>();
+            _nodes = new List<NodeBase>();
+            ExceptionsByDate meetingExceptions = GetExceptionsByDate();
             int sortOrder = 0;
             foreach (Meeting meeting in this.Meetings.OrderBy(x => x.Date)) {
-
+                NodeMeeting node = new NodeMeeting();
+                node.Name = meeting.Date.ToShortDateString() + " - " + meeting.Date.DayOfWeek.ToString();
+                node.OrderById = sortOrder;
+                BuildNodesExceptions(node, meeting, meetingExceptions);
+                BuildNodesJobs(node, meeting);
+                _nodes.Add(node);
                 sortOrder++;
             }
         }
 
+        private void BuildNodesExceptions(NodeBase parentNode, Meeting meeting, ExceptionsByDate exceptions) {
+            NodeExceptionList nodeList = new NodeExceptionList();
+            nodeList.Name = "Exceptions";
+            int sortOrder = 0;
+            foreach (MeetingException meetingException in exceptions.ExceptionsForDate(meeting.Date)) {
+                NodeException node = new NodeException();
+                node.Name = NodeDescriptionException(meetingException);
+                node.OrderById = sortOrder;
+                nodeList.AddChild(node);
+                sortOrder++;
+            }
+            parentNode.AddChild(nodeList);
+        }
+
+        private void BuildNodesJobs(NodeBase parentNode, Meeting meeting) {
+            int sortOrder = 0;
+            foreach (Job job in meeting.Jobs) {
+                NodeJob node = new NodeJob();
+                node.Name = NodeDescriptionJob(meeting, job);
+                node.OrderById = sortOrder;
+                parentNode.AddChild(node);
+                sortOrder++;
+            }
+        }
+
+        private string NodeDescriptionJob(Meeting meeting, Job job) {
+            User user = meeting.UserForJob(job);
+            if (user == null) {
+                return job.Name + ": <empty>";
+            } else {
+                return job.Name + ": " + user.Name;
+            }
+        }
+
+        private string NodeDescriptionException(MeetingException meetingException) {
+            return meetingException.User.Name + ": " + (meetingException.IsSoftException ? "Soft" : "Hard");
+        }
+
+        private ExceptionsByDate GetExceptionsByDate() {
+            ExceptionsByDate exceptions = new ExceptionsByDate();
+            foreach (MeetingException meetingException in _repository.MeetingExceptions) {
+                exceptions.AddException(meetingException);
+            }
+            return exceptions;
+        }
+
         public ViewMeetings(Factory factory) {
             _factory = factory;
+        }
+
+        private class ExceptionsByDate {
+            private Dictionary<string, List<MeetingException>> _data = new Dictionary<string, List<MeetingException>>();
+
+            public void AddException(MeetingException meetingException) {
+                string key = DateToKey(meetingException.Date);
+                if (!_data.ContainsKey(key)) {
+                    _data.Add(key, new List<MeetingException>());
+                }
+                _data[key].Add(meetingException);
+            }
+
+            public IEnumerable<MeetingException> ExceptionsForDate(DateTime date) {
+                string key = DateToKey(date);
+                if (_data.ContainsKey(key)) {
+                    return _data[key];
+                } else {
+                    return new List<MeetingException>();
+                }
+            }
+
+            private string DateToKey(DateTime date) {
+                return date.Year.ToString() + date.Month.ToString() + date.Day.ToString();
+            }
+        }
+
+        private class NodeMeeting : NodeBase {
+            
+        }
+
+        private class NodeJob : NodeBase {
+
+        }
+
+        private class NodeExceptionList : NodeBase {
+
+        }
+
+        private class NodeException : NodeBase {
+
         }
     }
 }
