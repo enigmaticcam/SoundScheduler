@@ -54,8 +54,12 @@ namespace SoundScheduler_Logic.Views.Abstract {
     }
 
     public abstract class NodeBase {
+        public abstract bool CanDelete { get; }
+        public abstract enumViewMeetingsAction DeleteAction { get; }
+
         public string Name { get; set; }
         public int OrderById { get; set; }
+        public int NodeId { get; set; }
 
         private List<NodeBase> _children;
         public IEnumerable<NodeBase> Children {
@@ -69,5 +73,12 @@ namespace SoundScheduler_Logic.Views.Abstract {
         public NodeBase() {
             _children = new List<NodeBase>();
         }
+    }
+
+    public enum enumViewMeetingsAction {
+        DeleteNothing = 0,
+        DeleteJob,
+        DeleteMeeting,
+        DeleteException
     }
 }

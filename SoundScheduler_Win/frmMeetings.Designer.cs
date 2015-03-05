@@ -32,6 +32,7 @@
             this.cboUsers = new System.Windows.Forms.ComboBox();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.cmdDeleteNode = new System.Windows.Forms.Button();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.SuspendLayout();
@@ -40,7 +41,7 @@
             // 
             this.treMeetings.Location = new System.Drawing.Point(12, 12);
             this.treMeetings.Name = "treMeetings";
-            this.treMeetings.Size = new System.Drawing.Size(264, 494);
+            this.treMeetings.Size = new System.Drawing.Size(264, 463);
             this.treMeetings.TabIndex = 0;
             // 
             // cmdAddMeeting
@@ -119,11 +120,21 @@
             this.groupBox2.TabIndex = 8;
             this.groupBox2.TabStop = false;
             // 
+            // cmdDeleteNode
+            // 
+            this.cmdDeleteNode.Location = new System.Drawing.Point(12, 481);
+            this.cmdDeleteNode.Name = "cmdDeleteNode";
+            this.cmdDeleteNode.Size = new System.Drawing.Size(23, 23);
+            this.cmdDeleteNode.TabIndex = 9;
+            this.cmdDeleteNode.Text = "-";
+            this.cmdDeleteNode.UseVisualStyleBackColor = true;
+            // 
             // frmMeetings
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(576, 518);
+            this.ClientSize = new System.Drawing.Size(576, 515);
+            this.Controls.Add(this.cmdDeleteNode);
             this.Controls.Add(this.groupBox2);
             this.Controls.Add(this.groupBox1);
             this.Controls.Add(this.calMeetingDate);
@@ -148,5 +159,6 @@
         private System.Windows.Forms.ComboBox cboUsers;
         private System.Windows.Forms.GroupBox groupBox1;
         private System.Windows.Forms.GroupBox groupBox2;
+        private System.Windows.Forms.Button cmdDeleteNode;
     }
 }
