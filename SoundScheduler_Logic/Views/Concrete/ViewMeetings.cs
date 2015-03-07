@@ -41,6 +41,35 @@ namespace SoundScheduler_Logic.Views.Concrete {
             get { return _repository.Users; }
         }
 
+        public DateTime MeetingDateForNode(int nodeId) {
+            NodeBase node = FindNodeById(nodeId);
+            if (node != null) {
+                Meeting meeting = FindMeetingForNode(node);
+                if (meeting != null) {
+                    return meeting.Date;
+                }
+            }
+            return DateTime.MinValue;
+        }
+
+        public bool CanDeleteNode(int nodeId) {
+            NodeBase node = FindNodeById(nodeId);
+            if (node == null) {
+                return false;
+            } else {
+                return node.CanDelete;
+            }
+        }
+
+        public bool CanAddMeeting(DateTime date) {
+            foreach (Meeting meeting in _meetings) {
+                if (DateTime.Compare(date, meeting.Date) == 0) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
         public void AddMeeting(Template template, DateTime date) {
             Meeting meeting = template.ToMeeting(date);
             _meetings.Add(meeting);
@@ -68,8 +97,28 @@ namespace SoundScheduler_Logic.Views.Concrete {
         }
 
         private void BuildNodes() {
-            ActionBuildNodes action = new ActionBuildNodes(_repository.Meetings, _repository);
+            ActionBuildNodes action = new ActionBuildNodes(_meetings, _repository);
             _nodes = action.PerformAction();
+        }
+
+        private NodeBase FindNodeById(int nodeId) {
+            foreach (NodeBase node in _nodes) {
+                NodeBase targetNode = node.NodeById(nodeId);
+                if (targetNode != null) {
+                    return targetNode;
+                }
+            }
+            return null;
+        }
+
+        private Meeting FindMeetingForNode(NodeBase node) {
+            if (node.GetType() == typeof(NodeMeeting)) {
+                return ((NodeMeeting)node).Meeting;
+            } else if (node.Parent != null) {
+                return FindMeetingForNode(node.Parent);
+            } else {
+                return null;
+            }
         }
 
         public ViewMeetings(Factory factory) {
@@ -80,6 +129,7 @@ namespace SoundScheduler_Logic.Views.Concrete {
             private List<NodeBase> _nodes;
             private List<Meeting> _meetings;
             private Repository _repository;
+            private int _nodeId;
 
             public List<NodeBase> PerformAction() {
                 BuildNodes();
@@ -88,12 +138,15 @@ namespace SoundScheduler_Logic.Views.Concrete {
 
             private void BuildNodes() {
                 _nodes = new List<NodeBase>();
-                ExceptionsByDate meetingExceptions = GetExceptionsByDate();
+                _nodeId = 1;
                 int sortOrder = 0;
+                ExceptionsByDate meetingExceptions = GetExceptionsByDate();
                 foreach (Meeting meeting in _meetings.OrderBy(x => x.Date)) {
                     NodeMeeting node = new NodeMeeting();
                     node.Name = meeting.Date.ToShortDateString() + " - " + meeting.Date.DayOfWeek.ToString();
                     node.OrderById = sortOrder;
+                    node.Meeting = meeting;
+                    AssignIdToNode(node);
                     BuildNodesExceptions(node, meeting, meetingExceptions);
                     BuildNodesJobs(node, meeting);
                     _nodes.Add(node);
@@ -103,12 +156,14 @@ namespace SoundScheduler_Logic.Views.Concrete {
 
             private void BuildNodesExceptions(NodeBase parentNode, Meeting meeting, ExceptionsByDate exceptions) {
                 NodeExceptionList nodeList = new NodeExceptionList();
+                AssignIdToNode(nodeList);
                 nodeList.Name = "Exceptions";
                 int sortOrder = 0;
                 foreach (MeetingException meetingException in exceptions.ExceptionsForDate(meeting.Date)) {
                     NodeException node = new NodeException();
                     node.Name = NodeDescriptionException(meetingException);
                     node.OrderById = sortOrder;
+                    AssignIdToNode(node);
                     nodeList.AddChild(node);
                     sortOrder++;
                 }
@@ -121,6 +176,7 @@ namespace SoundScheduler_Logic.Views.Concrete {
                     NodeJob node = new NodeJob();
                     node.Name = NodeDescriptionJob(meeting, job);
                     node.OrderById = sortOrder;
+                    AssignIdToNode(node);
                     parentNode.AddChild(node);
                     sortOrder++;
                 }
@@ -145,6 +201,11 @@ namespace SoundScheduler_Logic.Views.Concrete {
                     exceptions.AddException(meetingException);
                 }
                 return exceptions;
+            }
+
+            private void AssignIdToNode(NodeBase node) {
+                node.NodeId = _nodeId;
+                _nodeId++;
             }
 
             public ActionBuildNodes(List<Meeting> meetings, Repository repository) {
@@ -181,6 +242,12 @@ namespace SoundScheduler_Logic.Views.Concrete {
         private class NodeMeeting : NodeBase {
             public override bool CanDelete {
                 get { return true; }
+            }
+
+            private Meeting _meeting;
+            public Meeting Meeting {
+                get { return _meeting; }
+                set { _meeting = value; }
             }
 
             public override enumViewMeetingsAction DeleteAction {

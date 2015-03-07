@@ -43,6 +43,7 @@
             this.treMeetings.Name = "treMeetings";
             this.treMeetings.Size = new System.Drawing.Size(264, 463);
             this.treMeetings.TabIndex = 0;
+            this.treMeetings.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.treMeetings_AfterSelect);
             // 
             // cmdAddMeeting
             // 
@@ -60,6 +61,7 @@
             this.calMeetingDate.MaxSelectionCount = 1;
             this.calMeetingDate.Name = "calMeetingDate";
             this.calMeetingDate.TabIndex = 2;
+            this.calMeetingDate.DateChanged += new System.Windows.Forms.DateRangeEventHandler(this.calMeetingDate_DateChanged);
             // 
             // cboTemplates
             // 
@@ -69,6 +71,7 @@
             this.cboTemplates.Name = "cboTemplates";
             this.cboTemplates.Size = new System.Drawing.Size(109, 21);
             this.cboTemplates.TabIndex = 3;
+            this.cboTemplates.SelectedIndexChanged += new System.EventHandler(this.cboTemplates_SelectedIndexChanged);
             // 
             // cmdAddSoftException
             // 
@@ -98,6 +101,7 @@
             this.cboUsers.Name = "cboUsers";
             this.cboUsers.Size = new System.Drawing.Size(109, 21);
             this.cboUsers.TabIndex = 6;
+            this.cboUsers.SelectedIndexChanged += new System.EventHandler(this.cboUsers_SelectedIndexChanged);
             // 
             // groupBox1
             // 
@@ -122,6 +126,7 @@
             // 
             // cmdDeleteNode
             // 
+            this.cmdDeleteNode.Enabled = false;
             this.cmdDeleteNode.Location = new System.Drawing.Point(12, 481);
             this.cmdDeleteNode.Name = "cmdDeleteNode";
             this.cmdDeleteNode.Size = new System.Drawing.Size(23, 23);

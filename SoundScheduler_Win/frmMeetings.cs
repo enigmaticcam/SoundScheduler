@@ -23,6 +23,18 @@ namespace SoundScheduler_Win {
 
         private void BuildVirtualForm() {
             _form = new VirtualFormDecoratorDontCallDuringProcessing(new VirtualForm());
+
+            IFormatLogic meetingAlreadyExists = _form.AddFormatLogic(() => _view.CanAddMeeting(calMeetingDate.SelectionStart));
+            meetingAlreadyExists.ActionOnBoolean(new Action<bool>(x => cboTemplates.Enabled = x));
+
+            IFormatLogic templateSelected = meetingAlreadyExists.LogicOnTrue(() => cboTemplates.SelectedIndex > -1);
+            templateSelected.ActionOnBoolean(new Action<bool>(x => cmdAddMeeting.Enabled = x));
+
+            IFormatLogic userSelected = meetingAlreadyExists.LogicOnFalse(() => cboUsers.SelectedIndex > -1);
+            userSelected.ActionOnBoolean(new Action<bool>(x => {
+                cmdAddHardException.Enabled = x;
+                cmdAddSoftException.Enabled = x;
+            }));
         }
 
         private void PopulateMeetings() {
@@ -43,6 +55,7 @@ namespace SoundScheduler_Win {
             } else {
                 returnNode = new TreeNode(node.Name);
             }
+            returnNode.Tag = node.NodeId;
             return returnNode;
         }
 
@@ -68,6 +81,7 @@ namespace SoundScheduler_Win {
             Template template = _view.Templates.ElementAt(cboTemplates.SelectedIndex);
             _view.AddMeeting(template, calMeetingDate.SelectionRange.Start);
             PopulateMeetings();
+            RefreshScreen();
         }
 
         private void cmdAddHardException_Click() {
@@ -80,6 +94,26 @@ namespace SoundScheduler_Win {
             User user = _view.Users.ElementAt(cboUsers.SelectedIndex);
             _view.AddMeetingException(calMeetingDate.SelectionRange.Start, user, false);
             PopulateMeetings();
+        }
+
+        private void treMeetings_AfterSelect() {
+            DateTime meetingDate = _view.MeetingDateForNode((int)treMeetings.SelectedNode.Tag);
+            if (meetingDate != null) {
+                calMeetingDate.SelectionStart = meetingDate;
+            }
+            cmdDeleteNode.Enabled = _view.CanDeleteNode((int)treMeetings.SelectedNode.Tag);
+        }
+
+        private void calMeetingDate_DateChanged() {
+            RefreshScreen();
+        }
+
+        private void cboTemplates_SelectedIndexChanged() {
+            RefreshScreen();
+        }
+
+        private void cboUsers_SelectedIndexChanged() {
+            RefreshScreen();
         }
 
         private void frmMeetings_Load(object sender, EventArgs e) {
@@ -103,6 +137,22 @@ namespace SoundScheduler_Win {
 
         private void cmdAddSoftException_Click(object sender, EventArgs e) {
             _form.PerformAction(cmdAddSoftException_Click, sender, e);
+        }
+
+        private void treMeetings_AfterSelect(object sender, TreeViewEventArgs e) {
+            _form.PerformAction(treMeetings_AfterSelect, sender, e);
+        }
+
+        private void calMeetingDate_DateChanged(object sender, DateRangeEventArgs e) {
+            _form.PerformAction(calMeetingDate_DateChanged, sender, e);
+        }
+
+        private void cboTemplates_SelectedIndexChanged(object sender, EventArgs e) {
+            _form.PerformAction(cboTemplates_SelectedIndexChanged, sender, e);
+        }
+
+        private void cboUsers_SelectedIndexChanged(object sender, EventArgs e) {
+            _form.PerformAction(cboUsers_SelectedIndexChanged, sender, e);
         }
     }
 }
