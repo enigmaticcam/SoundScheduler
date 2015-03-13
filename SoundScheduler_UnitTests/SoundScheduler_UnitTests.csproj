@@ -61,6 +61,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SoundBuilderTests.cs" />
     <Compile Include="JobCancelerTests.cs" />
+    <Compile Include="GeneticTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
