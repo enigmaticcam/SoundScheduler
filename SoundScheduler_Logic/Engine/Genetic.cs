@@ -24,16 +24,21 @@ namespace SoundScheduler_Logic.Engine {
         private char[][] _chromosonePair;
         private Dictionary<char, char> _mutateRef;
         private bool _stop;
+        private int _solutionIndex;
+        private char[] _bestSoFarChar;
+        private float _bestSoFarScore;
+        private bool _doLogging = true;
 
-        public void Begin(int bitLength, int bitCount) {
-            Begin(bitLength, bitCount, RandomFitness);
+        public int[] Begin(int bitLength, int bitCount) {
+            return Begin(bitLength, bitCount, RandomFitness);
         }
 
-        public void Begin(int bitLength, int bitCount, Func<int[], float> fitness) {
+        public int[] Begin(int bitLength, int bitCount, Func<int[], float> fitness) {
             _bitLength = bitLength;
             _bitCount = bitCount;
             _fitness = new FitnessFunction(fitness);
             Core();
+            return ChromosoneToInt(_chromosones[_solutionIndex]);
         }
 
         private void Core() {
@@ -44,7 +49,7 @@ namespace SoundScheduler_Logic.Engine {
         }
 
         private void Instantiate() {
-            _random = new Random();
+            _random = new Random(1);
             _ranks = new float[_chromosoneCount];
             _roulette = new float[_chromosoneCount];
             _newChromosones = new char[_chromosoneCount][];
@@ -52,7 +57,7 @@ namespace SoundScheduler_Logic.Engine {
             _chromosonePair[0] = new char[_chromosoneLength * _bitLength];
             _chromosonePair[1] = new char[_chromosoneLength * _bitLength];
             for (int i = 0; i < _chromosoneCount; i++) {
-                _newChromosones[i] = new char[_chromosoneCount * _bitLength];
+                _newChromosones[i] = new char[_chromosoneLength * _bitLength];
             }
             _chromosonesAsInt = new int[_chromosoneCount][];
             for (int i = 0; i < _chromosoneCount; i++) {
@@ -93,7 +98,8 @@ namespace SoundScheduler_Logic.Engine {
             do {
                 RankChromosonesInRoulette();
                 GenerateNewChromosones();
-                _chromosones = (char[][])_newChromosones.Clone();
+                ReferenceCheck();
+                CopyNewChromosonesToCurrentChromosones();
             } while (!_stop);
         }
 
@@ -105,10 +111,29 @@ namespace SoundScheduler_Logic.Engine {
                 if (score == this.IsSolved) {
                     _stop = true;
                 }
+                if (score > _bestSoFarScore) {
+                    _bestSoFarScore = score;
+                    _bestSoFarChar = _chromosones[index];
+                    if (_bestSoFarScore == 9) {
+                        bool stophere = true;
+                    }
+                    if (_doLogging) {
+                        LogBestSoFar(index);
+                    }
+                }
                 _ranks[index] = score;
                 sum += score;
             }
             GetRoulette(sum);
+        }
+
+        private void LogBestSoFar(int index) {
+            StringBuilder output = new StringBuilder();
+            for (int i = 0; i <= _chromosonesAsInt[index].GetUpperBound(0); i++) {
+                output.Append(_chromosonesAsInt[index][i]);
+            }
+            output.AppendLine(": score = " + _bestSoFarScore.ToString() + ": difference = " + ReferenceCheck().ToString());
+            System.Diagnostics.Debug.WriteLine(output.ToString());
         }
 
         private void GetRoulette(float totalFitnessSum) {
@@ -123,37 +148,28 @@ namespace SoundScheduler_Logic.Engine {
                 PerformCopyAndMaybeCrossover();
                 MutateChromosonePair();
                 if (IsChromosoneValid(_chromosonePair[0])) {
-                    _newChromosones[newChromosoneCount] = (char[])_chromosonePair[0].Clone();
-                    ++newChromosoneCount;
-                }
-                if (IsChromosoneValid(_chromosonePair[1]) && newChromosoneCount < _chromosoneCount) {
-                    _newChromosones[newChromosoneCount] = (char[])_chromosonePair[1].Clone();
+                    CopyChromosonePairToNewChromosone(0, newChromosoneCount);
                     ++newChromosoneCount;
                 }
             } while (newChromosoneCount < _chromosoneCount);
         }
 
         private void PerformCopyAndMaybeCrossover() {
-            double canPerformCrossover = _random.NextDouble();
             int swapIndex = int.MaxValue;
             int chromosone1 = GetRandomFromRoulette();
             int chromosone2 = GetRandomFromRoulette();
-            if (canPerformCrossover <= 0.7) {
-                swapIndex = _random.Next(0, _chromosoneLength * _bitLength);
-            }
+            swapIndex = _random.Next(0, _chromosoneLength * _bitLength);
             for (int index = 0; index < _chromosoneLength * _bitLength; index++) {
                 if (index > swapIndex) {
                     _chromosonePair[0][index] = _chromosones[chromosone2][index];
-                    _chromosonePair[1][index] = _chromosones[chromosone1][index];
                 } else {
                     _chromosonePair[0][index] = _chromosones[chromosone1][index];
-                    _chromosonePair[1][index] = _chromosones[chromosone2][index];
                 }
             }
         }
 
         private void MutateChromosonePair() {
-            for (int pairIndex = 0; pairIndex < 2; pairIndex++) {
+            for (int pairIndex = 0; pairIndex < 1; pairIndex++) {
                 for (int chromosoneIndex = 0; chromosoneIndex < _chromosoneLength; chromosoneIndex++) {
                     double canMutate = _random.NextDouble();
                     if (canMutate > 0.999) {
@@ -212,6 +228,38 @@ namespace SoundScheduler_Logic.Engine {
                 }
             }
             return true;
+        }
+
+        private void CopyNewChromosonesToCurrentChromosones() {
+            for (int i = 0; i <= _chromosones.GetUpperBound(0); i++) {
+                char[] innerValues = _chromosones[i];
+                for (int j = 0; j <= innerValues.GetUpperBound(0); j++) {
+                    _chromosones[i][j] = _newChromosones[i][j];
+                }
+            }
+        }
+
+        private void CopyChromosonePairToNewChromosone(int pairIndex, int newChromosoneIndex) {
+            for (int i = 0; i <= _newChromosones[newChromosoneIndex].GetUpperBound(0); i++) {
+                _newChromosones[newChromosoneIndex][i] = _chromosonePair[pairIndex][i];
+            }
+        }
+
+        private int ReferenceCheck() {
+            int count = 0;
+            for (int i = 0; i <= _chromosones.GetUpperBound(0); i++) {
+                char[] innerValues = _chromosones[i];
+                for (int j = 0; j <= innerValues.GetUpperBound(0); j++) {
+                    if (_chromosones[i][j] != _newChromosones[i][j]) {
+                        count++;
+                    }
+                }
+            }
+            return count;
+        }
+
+        private string OutputToOneLine(char[] someChar) {
+            return new string(someChar);
         }
 
         public class FitnessFunction {
