@@ -28,15 +28,26 @@ namespace SoundScheduler_Logic.Engine {
         private char[] _bestSoFarChar;
         private float _bestSoFarScore;
         private bool _doLogging = true;
+        private HashSet<string> _newChromosonesIndex;
+        private int _seed;
 
         public int[] Begin(int bitLength, int bitCount) {
-            return Begin(bitLength, bitCount, RandomFitness);
+            return Begin(bitLength, bitCount, -1, RandomFitness);
+        }
+
+        public int[] Begin(int bitLength, int bitCount, int seed) {
+            return Begin(bitLength, bitCount, seed, RandomFitness);
         }
 
         public int[] Begin(int bitLength, int bitCount, Func<int[], float> fitness) {
+            return Begin(bitLength, bitCount, -1, fitness);
+        }
+
+        public int[] Begin(int bitLength, int bitCount, int seed, Func<int[], float> fitness) {
             _bitLength = bitLength;
             _bitCount = bitCount;
             _fitness = new FitnessFunction(fitness);
+            _seed = seed;
             Core();
             return ChromosoneToInt(_chromosones[_solutionIndex]);
         }
@@ -49,7 +60,8 @@ namespace SoundScheduler_Logic.Engine {
         }
 
         private void Instantiate() {
-            _random = new Random(1);
+            GenerateSeed();
+            _newChromosonesIndex = new HashSet<string>();
             _ranks = new float[_chromosoneCount];
             _roulette = new float[_chromosoneCount];
             _newChromosones = new char[_chromosoneCount][];
@@ -66,6 +78,14 @@ namespace SoundScheduler_Logic.Engine {
             _mutateRef = new Dictionary<char, char>();
             _mutateRef.Add('0', '1');
             _mutateRef.Add('1', '0');
+        }
+
+        private void GenerateSeed() {
+            if (_seed != -1) {
+                _random = new Random(_seed);
+            } else {
+                _random = new Random();
+            }
         }
 
         private void SetChromosoneLength() {
@@ -97,10 +117,14 @@ namespace SoundScheduler_Logic.Engine {
         private void BeginGenetics() {
             do {
                 RankChromosonesInRoulette();
-                GenerateNewChromosones();
-                ReferenceCheck();
-                CopyNewChromosonesToCurrentChromosones();
-            } while (!_stop);
+                if (_stop) {
+                    break;
+                } else {
+                    GenerateNewChromosones();
+                    int difference = ReferenceCheck();
+                    CopyNewChromosonesToCurrentChromosones();
+                }
+            } while (true);
         }
 
         private void RankChromosonesInRoulette() {
@@ -110,30 +134,16 @@ namespace SoundScheduler_Logic.Engine {
                 float score = _fitness.GetFitness(_chromosonesAsInt[index]);
                 if (score == this.IsSolved) {
                     _stop = true;
+                    _solutionIndex = index;
                 }
                 if (score > _bestSoFarScore) {
                     _bestSoFarScore = score;
-                    _bestSoFarChar = _chromosones[index];
-                    if (_bestSoFarScore == 9) {
-                        bool stophere = true;
-                    }
-                    if (_doLogging) {
-                        LogBestSoFar(index);
-                    }
+                    _bestSoFarChar = (char[])_chromosones[index].Clone();
                 }
                 _ranks[index] = score;
                 sum += score;
             }
             GetRoulette(sum);
-        }
-
-        private void LogBestSoFar(int index) {
-            StringBuilder output = new StringBuilder();
-            for (int i = 0; i <= _chromosonesAsInt[index].GetUpperBound(0); i++) {
-                output.Append(_chromosonesAsInt[index][i]);
-            }
-            output.AppendLine(": score = " + _bestSoFarScore.ToString() + ": difference = " + ReferenceCheck().ToString());
-            System.Diagnostics.Debug.WriteLine(output.ToString());
         }
 
         private void GetRoulette(float totalFitnessSum) {
@@ -144,12 +154,15 @@ namespace SoundScheduler_Logic.Engine {
 
         private void GenerateNewChromosones() {
             int newChromosoneCount = 0;
+            _newChromosonesIndex.Clear();
             do {
                 PerformCopyAndMaybeCrossover();
                 MutateChromosonePair();
-                if (IsChromosoneValid(_chromosonePair[0])) {
+                string chromosone = OutputToOneLine(_chromosonePair[0]);
+                if (!_newChromosonesIndex.Contains(chromosone)) {
                     CopyChromosonePairToNewChromosone(0, newChromosoneCount);
                     ++newChromosoneCount;
+                    _newChromosonesIndex.Add(chromosone);
                 }
             } while (newChromosoneCount < _chromosoneCount);
         }
@@ -170,9 +183,9 @@ namespace SoundScheduler_Logic.Engine {
 
         private void MutateChromosonePair() {
             for (int pairIndex = 0; pairIndex < 1; pairIndex++) {
-                for (int chromosoneIndex = 0; chromosoneIndex < _chromosoneLength; chromosoneIndex++) {
-                    double canMutate = _random.NextDouble();
-                    if (canMutate > 0.999) {
+                for (int chromosoneIndex = 0; chromosoneIndex < _bitLength * _chromosoneLength; chromosoneIndex++) {
+                    int canMutate = _random.Next(0, 1001);
+                    if (canMutate == 1000) {
                         _chromosonePair[pairIndex][chromosoneIndex] = _mutateRef[_chromosonePair[pairIndex][chromosoneIndex]];
                     }
                 }

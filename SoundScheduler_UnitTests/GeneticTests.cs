@@ -11,7 +11,7 @@ namespace SoundScheduler_UnitTests {
         }
 
         private int BitLength {
-            get { return 40; }
+            get { return 10; }
         }
 
         [TestMethod]
@@ -29,15 +29,6 @@ namespace SoundScheduler_UnitTests {
                     count++;
                 }
             }
-            //if (count == chromosone.GetUpperBound(0) + 1) {
-            //    return -1;
-            //} else {
-            //    float divideBy = (float)chromosone.GetUpperBound(0) - count + 1;
-            //    if (divideBy == 0) {
-            //        throw new Exception("this shouldn't happen dude");
-            //    }
-            //    return 1 / divideBy;
-            //}
             if (count == chromosone.GetUpperBound(0) + 1) {
                 return -1;
             } else {
