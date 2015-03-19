@@ -62,6 +62,7 @@
     <Compile Include="SoundBuilderTests.cs" />
     <Compile Include="JobCancelerTests.cs" />
     <Compile Include="GeneticTests.cs" />
+    <Compile Include="JobConsiderationTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

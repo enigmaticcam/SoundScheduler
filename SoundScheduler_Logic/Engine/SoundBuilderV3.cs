@@ -49,18 +49,36 @@ namespace SoundScheduler_Logic.Engine {
         }
 
         private void FillMeetingsAll() {
-            ActionFillMeetingsAll action = new ActionFillMeetingsAll(_templates.Values);
+            ActionFillMeetingsAll action = new ActionFillMeetingsAll(_templates.Values, _users);
             action.PerformAction();
         }
 
         private class ActionFillMeetingsAll {
             private IEnumerable<Template> _templates;
+            private IEnumerable<User> _users;
 
             public void PerformAction() {
-                
+                Genetic genetic = new Genetic();
+                genetic.Begin(GetBitLength(), GetBitCount(), Fitness);
             }
 
-            public ActionFillMeetingsAll(IEnumerable<Template> templates) {
+            private int GetBitLength() {
+                int count = 0;
+                foreach (Template template in _templates) {
+                    count += template.Jobs.Count;
+                }
+                return count;
+            }
+
+            private int GetBitCount() {
+                return _users.Count();
+            }
+
+            private float Fitness(int[] chromosome, Genetic genetic) {
+                return 0;
+            }
+
+            public ActionFillMeetingsAll(IEnumerable<Template> templates, IEnumerable<User> users) {
                 _templates = templates;
             }
         }

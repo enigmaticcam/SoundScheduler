@@ -51,6 +51,7 @@
     <Compile Include="Abstract\User.cs" />
     <Compile Include="Engine\Genetic.cs" />
     <Compile Include="Engine\JobCancelers.cs" />
+    <Compile Include="Engine\JobConsiderations.cs" />
     <Compile Include="Engine\SoundBuilder.cs" />
     <Compile Include="Engine\SoundBuilderV2.cs">
       <SubType>Code</SubType>

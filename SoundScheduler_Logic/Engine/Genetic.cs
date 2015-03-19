@@ -10,25 +10,24 @@ namespace SoundScheduler_Logic.Engine {
             get { return -1; }
         }
 
-        private int _chromosoneCount = 100;
+        private int _chromosomeCount = 100;
         private Random _random;
         private int _bitLength;
         private int _bitCount;
         private FitnessFunction _fitness;
-        private int _chromosoneLength;
-        private char[][] _chromosones;
-        private char[][] _newChromosones;
-        private int[][] _chromosonesAsInt;
+        private int _chromosomeLength;
+        private char[][] _chromosomes;
+        private char[][] _newchromosomes;
+        private int[][] _chromosomesAsInt;
         private float[] _ranks;
         private float[] _roulette;
-        private char[][] _chromosonePair;
+        private char[][] _chromosomePair;
         private Dictionary<char, char> _mutateRef;
         private bool _stop;
         private int _solutionIndex;
         private char[] _bestSoFarChar;
         private float _bestSoFarScore;
-        private bool _doLogging = true;
-        private HashSet<string> _newChromosonesIndex;
+        private HashSet<string> _newchromosomesIndex;
         private int _seed;
 
         public int[] Begin(int bitLength, int bitCount) {
@@ -39,41 +38,41 @@ namespace SoundScheduler_Logic.Engine {
             return Begin(bitLength, bitCount, seed, RandomFitness);
         }
 
-        public int[] Begin(int bitLength, int bitCount, Func<int[], float> fitness) {
+        public int[] Begin(int bitLength, int bitCount, Func<int[], Genetic, float> fitness) {
             return Begin(bitLength, bitCount, -1, fitness);
         }
 
-        public int[] Begin(int bitLength, int bitCount, int seed, Func<int[], float> fitness) {
+        public int[] Begin(int bitLength, int bitCount, int seed, Func<int[], Genetic, float> fitness) {
             _bitLength = bitLength;
             _bitCount = bitCount;
             _fitness = new FitnessFunction(fitness);
             _seed = seed;
             Core();
-            return ChromosoneToInt(_chromosones[_solutionIndex]);
+            return chromosomeToInt(_chromosomes[_solutionIndex]);
         }
 
         private void Core() {
-            SetChromosoneLength();
+            SetchromosomeLength();
             Instantiate();
-            GenerateRandomChromosones();
+            GenerateRandomchromosomes();
             BeginGenetics();
         }
 
         private void Instantiate() {
             GenerateSeed();
-            _newChromosonesIndex = new HashSet<string>();
-            _ranks = new float[_chromosoneCount];
-            _roulette = new float[_chromosoneCount];
-            _newChromosones = new char[_chromosoneCount][];
-            _chromosonePair = new char[2][];
-            _chromosonePair[0] = new char[_chromosoneLength * _bitLength];
-            _chromosonePair[1] = new char[_chromosoneLength * _bitLength];
-            for (int i = 0; i < _chromosoneCount; i++) {
-                _newChromosones[i] = new char[_chromosoneLength * _bitLength];
+            _newchromosomesIndex = new HashSet<string>();
+            _ranks = new float[_chromosomeCount];
+            _roulette = new float[_chromosomeCount];
+            _newchromosomes = new char[_chromosomeCount][];
+            _chromosomePair = new char[2][];
+            _chromosomePair[0] = new char[_chromosomeLength * _bitLength];
+            _chromosomePair[1] = new char[_chromosomeLength * _bitLength];
+            for (int i = 0; i < _chromosomeCount; i++) {
+                _newchromosomes[i] = new char[_chromosomeLength * _bitLength];
             }
-            _chromosonesAsInt = new int[_chromosoneCount][];
-            for (int i = 0; i < _chromosoneCount; i++) {
-                _chromosonesAsInt[i] = new int[_bitLength];
+            _chromosomesAsInt = new int[_chromosomeCount][];
+            for (int i = 0; i < _chromosomeCount; i++) {
+                _chromosomesAsInt[i] = new int[_bitLength];
             }
             _mutateRef = new Dictionary<char, char>();
             _mutateRef.Add('0', '1');
@@ -88,57 +87,57 @@ namespace SoundScheduler_Logic.Engine {
             }
         }
 
-        private void SetChromosoneLength() {
+        private void SetchromosomeLength() {
             int length = 0;
             bool found = false;
             do {
                 double powerByTwo = Math.Pow(2, length);
                 if (powerByTwo > _bitCount) {
                     string bits = Convert.ToString(Convert.ToInt32(powerByTwo), 2);
-                    _chromosoneLength = bits.Length - 1;
+                    _chromosomeLength = bits.Length - 1;
                     found = true;
                 }
                 length++;
             } while (!found);
         }
 
-        private void GenerateRandomChromosones() {
-            _chromosones = new char[_chromosoneCount][];
-            for (int chromosoneIndex = 0; chromosoneIndex < _chromosoneCount; chromosoneIndex++) {
-                _chromosones[chromosoneIndex] = new char[_chromosoneLength * _bitLength];
+        private void GenerateRandomchromosomes() {
+            _chromosomes = new char[_chromosomeCount][];
+            for (int chromosomeIndex = 0; chromosomeIndex < _chromosomeCount; chromosomeIndex++) {
+                _chromosomes[chromosomeIndex] = new char[_chromosomeLength * _bitLength];
                 for (int bitIndex = 0; bitIndex < _bitLength; bitIndex++) {
                     int bitValue = _random.Next(0, _bitCount);
-                    char[] bits = Convert.ToString(bitValue, 2).PadLeft(_chromosoneLength, '0').ToCharArray();
-                    ReplaceInChar(ref _chromosones[chromosoneIndex], bits, bitIndex * _chromosoneLength);
+                    char[] bits = Convert.ToString(bitValue, 2).PadLeft(_chromosomeLength, '0').ToCharArray();
+                    ReplaceInChar(ref _chromosomes[chromosomeIndex], bits, bitIndex * _chromosomeLength);
                 }
             }
         }
 
         private void BeginGenetics() {
             do {
-                RankChromosonesInRoulette();
+                RankchromosomesInRoulette();
                 if (_stop) {
                     break;
                 } else {
-                    GenerateNewChromosones();
+                    GenerateNewchromosomes();
                     int difference = ReferenceCheck();
-                    CopyNewChromosonesToCurrentChromosones();
+                    CopyNewchromosomesToCurrentchromosomes();
                 }
             } while (true);
         }
 
-        private void RankChromosonesInRoulette() {
+        private void RankchromosomesInRoulette() {
             float sum = 0;
-            for (int index = 0; index < _chromosoneCount; index++) {
-                _chromosonesAsInt[index] = ChromosoneToInt(_chromosones[index]);
-                float score = _fitness.GetFitness(_chromosonesAsInt[index]);
+            for (int index = 0; index < _chromosomeCount; index++) {
+                _chromosomesAsInt[index] = chromosomeToInt(_chromosomes[index]);
+                float score = _fitness.GetFitness(_chromosomesAsInt[index], this);
                 if (score == this.IsSolved) {
                     _stop = true;
                     _solutionIndex = index;
                 }
                 if (score > _bestSoFarScore) {
                     _bestSoFarScore = score;
-                    _bestSoFarChar = (char[])_chromosones[index].Clone();
+                    _bestSoFarChar = (char[])_chromosomes[index].Clone();
                 }
                 _ranks[index] = score;
                 sum += score;
@@ -147,46 +146,50 @@ namespace SoundScheduler_Logic.Engine {
         }
 
         private void GetRoulette(float totalFitnessSum) {
-            for (int index = 0; index < _chromosoneCount; index++) {
+            for (int index = 0; index < _chromosomeCount; index++) {
                 _roulette[index] = _ranks[index] / totalFitnessSum;
             }
         }
 
-        private void GenerateNewChromosones() {
-            int newChromosoneCount = 0;
-            _newChromosonesIndex.Clear();
+        private void GenerateNewchromosomes() {
+            int newchromosomeCount = 0;
+            _newchromosomesIndex.Clear();
             do {
                 PerformCopyAndMaybeCrossover();
-                MutateChromosonePair();
-                string chromosone = OutputToOneLine(_chromosonePair[0]);
-                if (!_newChromosonesIndex.Contains(chromosone)) {
-                    CopyChromosonePairToNewChromosone(0, newChromosoneCount);
-                    ++newChromosoneCount;
-                    _newChromosonesIndex.Add(chromosone);
+                MutatechromosomePair();
+                string chromosome = OutputToOneLine(_chromosomePair[0]);
+                if (IschromosomeValid(_chromosomePair[0]) && !_newchromosomesIndex.Contains(chromosome)) {
+                    int[] chrome = chromosomeToInt(_chromosomePair[0]);
+                    if (chrome[0] == 2) {
+                        bool stophere = true;
+                    }
+                    CopychromosomePairToNewchromosome(0, newchromosomeCount);
+                    ++newchromosomeCount;
+                    _newchromosomesIndex.Add(chromosome);
                 }
-            } while (newChromosoneCount < _chromosoneCount);
+            } while (newchromosomeCount < _chromosomeCount);
         }
 
         private void PerformCopyAndMaybeCrossover() {
             int swapIndex = int.MaxValue;
-            int chromosone1 = GetRandomFromRoulette();
-            int chromosone2 = GetRandomFromRoulette();
-            swapIndex = _random.Next(0, _chromosoneLength * _bitLength);
-            for (int index = 0; index < _chromosoneLength * _bitLength; index++) {
+            int chromosome1 = GetRandomFromRoulette();
+            int chromosome2 = GetRandomFromRoulette();
+            swapIndex = _random.Next(0, _chromosomeLength * _bitLength);
+            for (int index = 0; index < _chromosomeLength * _bitLength; index++) {
                 if (index > swapIndex) {
-                    _chromosonePair[0][index] = _chromosones[chromosone2][index];
+                    _chromosomePair[0][index] = _chromosomes[chromosome2][index];
                 } else {
-                    _chromosonePair[0][index] = _chromosones[chromosone1][index];
+                    _chromosomePair[0][index] = _chromosomes[chromosome1][index];
                 }
             }
         }
 
-        private void MutateChromosonePair() {
+        private void MutatechromosomePair() {
             for (int pairIndex = 0; pairIndex < 1; pairIndex++) {
-                for (int chromosoneIndex = 0; chromosoneIndex < _bitLength * _chromosoneLength; chromosoneIndex++) {
+                for (int chromosomeIndex = 0; chromosomeIndex < _bitLength * _chromosomeLength; chromosomeIndex++) {
                     int canMutate = _random.Next(0, 1001);
                     if (canMutate == 1000) {
-                        _chromosonePair[pairIndex][chromosoneIndex] = _mutateRef[_chromosonePair[pairIndex][chromosoneIndex]];
+                        _chromosomePair[pairIndex][chromosomeIndex] = _mutateRef[_chromosomePair[pairIndex][chromosomeIndex]];
                     }
                 }
             }
@@ -202,7 +205,7 @@ namespace SoundScheduler_Logic.Engine {
                     return index;
                 }
                 index++;
-            } while (index < _chromosoneCount - 1);
+            } while (index < _chromosomeCount - 1);
             return index;
         }
 
@@ -212,58 +215,58 @@ namespace SoundScheduler_Logic.Engine {
             }
         }
 
-        private float RandomFitness(int[] chromosone) {
+        private float RandomFitness(int[] chromosome, Genetic genetic) {
             float fitness = _random.Next(1, 101);
             if (fitness == 101) {
-                return this.IsSolved;
+                return genetic.IsSolved;
             } else {
                 return 1 / fitness;
             }
         }
 
-        private int[] ChromosoneToInt(char[] chromosone) {
-            int[] chromosoneAsInt = new int[_bitLength];
-            for (int chromosoneIndex = 0; chromosoneIndex < _bitLength; chromosoneIndex++) {
-                char[] chrome = new char[_chromosoneLength];
-                for (int i = 0; i < _chromosoneLength; i++) {
-                    chrome[i] = chromosone[chromosoneIndex * _chromosoneLength + i];
+        private int[] chromosomeToInt(char[] chromosome) {
+            int[] chromosomeAsInt = new int[_bitLength];
+            for (int chromosomeIndex = 0; chromosomeIndex < _bitLength; chromosomeIndex++) {
+                char[] chrome = new char[_chromosomeLength];
+                for (int i = 0; i < _chromosomeLength; i++) {
+                    chrome[i] = chromosome[chromosomeIndex * _chromosomeLength + i];
                 }
-                chromosoneAsInt[chromosoneIndex] = Convert.ToInt32(new string(chrome), 2);
+                chromosomeAsInt[chromosomeIndex] = Convert.ToInt32(new string(chrome), 2);
             }
-            return chromosoneAsInt;
+            return chromosomeAsInt;
         }
 
-        private bool IsChromosoneValid(char[] chromosone) {
-            int[] chromosoneAsInt = ChromosoneToInt(chromosone);
+        private bool IschromosomeValid(char[] chromosome) {
+            int[] chromosomeAsInt = chromosomeToInt(chromosome);
             for (int index = 0; index < _bitLength; index++) {
-                if (chromosoneAsInt[index] > _bitCount) {
+                if (chromosomeAsInt[index] >= _bitCount) {
                     return false;
                 }
             }
             return true;
         }
 
-        private void CopyNewChromosonesToCurrentChromosones() {
-            for (int i = 0; i <= _chromosones.GetUpperBound(0); i++) {
-                char[] innerValues = _chromosones[i];
+        private void CopyNewchromosomesToCurrentchromosomes() {
+            for (int i = 0; i <= _chromosomes.GetUpperBound(0); i++) {
+                char[] innerValues = _chromosomes[i];
                 for (int j = 0; j <= innerValues.GetUpperBound(0); j++) {
-                    _chromosones[i][j] = _newChromosones[i][j];
+                    _chromosomes[i][j] = _newchromosomes[i][j];
                 }
             }
         }
 
-        private void CopyChromosonePairToNewChromosone(int pairIndex, int newChromosoneIndex) {
-            for (int i = 0; i <= _newChromosones[newChromosoneIndex].GetUpperBound(0); i++) {
-                _newChromosones[newChromosoneIndex][i] = _chromosonePair[pairIndex][i];
+        private void CopychromosomePairToNewchromosome(int pairIndex, int newchromosomeIndex) {
+            for (int i = 0; i <= _newchromosomes[newchromosomeIndex].GetUpperBound(0); i++) {
+                _newchromosomes[newchromosomeIndex][i] = _chromosomePair[pairIndex][i];
             }
         }
 
         private int ReferenceCheck() {
             int count = 0;
-            for (int i = 0; i <= _chromosones.GetUpperBound(0); i++) {
-                char[] innerValues = _chromosones[i];
+            for (int i = 0; i <= _chromosomes.GetUpperBound(0); i++) {
+                char[] innerValues = _chromosomes[i];
                 for (int j = 0; j <= innerValues.GetUpperBound(0); j++) {
-                    if (_chromosones[i][j] != _newChromosones[i][j]) {
+                    if (_chromosomes[i][j] != _newchromosomes[i][j]) {
                         count++;
                     }
                 }
@@ -276,13 +279,13 @@ namespace SoundScheduler_Logic.Engine {
         }
 
         public class FitnessFunction {
-            private Func<int[], float> _fitness;
+            private Func<int[], Genetic, float> _fitness;
 
-            public float GetFitness(int[] chromosone) {
-                return _fitness(chromosone);
+            public float GetFitness(int[] chromosome, Genetic genetic) {
+                return _fitness(chromosome, genetic);
             }
 
-            public FitnessFunction(Func<int[], float> fitness) {
+            public FitnessFunction(Func<int[], Genetic, float> fitness) {
                 _fitness = fitness;
             }
         }
