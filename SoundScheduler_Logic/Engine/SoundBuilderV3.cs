@@ -49,17 +49,18 @@ namespace SoundScheduler_Logic.Engine {
         }
 
         private void FillMeetingsAll() {
-            ActionFillMeetingsAll action = new ActionFillMeetingsAll(_templates.Values, _users);
-            action.PerformAction();
+            
         }
 
-        private class ActionFillMeetingsAll {
+        public class ActionFillMeetingsAll {
             private IEnumerable<Template> _templates;
             private IEnumerable<User> _users;
+            private IEnumerable<JobConsideration> _jobConsiderations;
 
             public void PerformAction() {
                 Genetic genetic = new Genetic();
-                genetic.Begin(GetBitLength(), GetBitCount(), Fitness);
+                int[] solution = genetic.Begin(GetBitLength(), GetBitCount(), Fitness);
+                bool stopHere = true;
             }
 
             private int GetBitLength() {
@@ -75,11 +76,50 @@ namespace SoundScheduler_Logic.Engine {
             }
 
             private float Fitness(int[] chromosome, Genetic genetic) {
-                return 0;
+                int score = 50000;
+                foreach (JobConsideration consideration in _jobConsiderations) {
+                    int exceptionReduction = consideration.IsValid(chromosome);
+                    if (!consideration.IsConsiderationSoft) {
+                        //exceptionReduction *= 10;
+                    }
+                    score -= exceptionReduction;
+                }
+                if (score == 50000) {
+                    return genetic.IsSolved;
+                } else {
+                    return score;
+                }
             }
 
-            public ActionFillMeetingsAll(IEnumerable<Template> templates, IEnumerable<User> users) {
-                _templates = templates;
+            public ActionFillMeetingsAll(Builder builder) {
+                _templates = builder.Templates;
+                _users = builder.Users;
+                _jobConsiderations = builder.JobConsiderations;
+            }
+
+            public class Builder {
+                public IEnumerable<Template> Templates;
+                public IEnumerable<User> Users;
+                public IEnumerable<JobConsideration> JobConsiderations;
+
+                public Builder SetTemplates(IEnumerable<Template> templates) {
+                    this.Templates = templates;
+                    return this;
+                }
+
+                public Builder SetUsers(IEnumerable<User> users) {
+                    this.Users = users;
+                    return this;
+                }
+
+                public Builder SetJobConsiderations(IEnumerable<JobConsideration> jobConsiderations) {
+                    this.JobConsiderations = jobConsiderations;
+                    return this;
+                }
+
+                public ActionFillMeetingsAll Build() {
+                    return new ActionFillMeetingsAll(this);
+                }
             }
         }
 

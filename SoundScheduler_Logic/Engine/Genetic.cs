@@ -10,7 +10,7 @@ namespace SoundScheduler_Logic.Engine {
             get { return -1; }
         }
 
-        private int _chromosomeCount = 100;
+        private int _chromosomeCount = 500;
         private Random _random;
         private int _bitLength;
         private int _bitCount;
@@ -29,6 +29,8 @@ namespace SoundScheduler_Logic.Engine {
         private float _bestSoFarScore;
         private HashSet<string> _newchromosomesIndex;
         private int _seed;
+        private float[] _elitistScore;
+        private int[] _elitistIndex;
 
         public int[] Begin(int bitLength, int bitCount) {
             return Begin(bitLength, bitCount, -1, RandomFitness);
@@ -77,6 +79,8 @@ namespace SoundScheduler_Logic.Engine {
             _mutateRef = new Dictionary<char, char>();
             _mutateRef.Add('0', '1');
             _mutateRef.Add('1', '0');
+            _elitistScore = new float[(int)(_chromosomeCount * 0.05)];
+            _elitistIndex = new int[(int)(_chromosomeCount * 0.05)];
         }
 
         private void GenerateSeed() {
@@ -114,15 +118,16 @@ namespace SoundScheduler_Logic.Engine {
         }
 
         private void BeginGenetics() {
+            int generationCount = 0;
             do {
                 RankchromosomesInRoulette();
                 if (_stop) {
                     break;
                 } else {
                     GenerateNewchromosomes();
-                    int difference = ReferenceCheck();
                     CopyNewchromosomesToCurrentchromosomes();
                 }
+                ++generationCount;
             } while (true);
         }
 
@@ -148,26 +153,55 @@ namespace SoundScheduler_Logic.Engine {
         private void GetRoulette(float totalFitnessSum) {
             for (int index = 0; index < _chromosomeCount; index++) {
                 _roulette[index] = _ranks[index] / totalFitnessSum;
+                AddToElitist(index);
+            }
+        }
+
+        private void AddToElitist(int index) {
+            if (_elitistScore[0] < _roulette[index]) {
+                _elitistScore[0] = _roulette[index];
+                _elitistIndex[0] = index;
+            }
+            if (_elitistScore[1] < _elitistScore[0]) {
+                int elitistIndex = 1;
+                float tempScore = 0;
+                int tempIndex = 0;
+                while (elitistIndex <= _elitistIndex.GetUpperBound(0) && _elitistScore[elitistIndex] < _elitistScore[elitistIndex - 1]) {
+                    tempScore = _elitistScore[elitistIndex];
+                    tempIndex = _elitistIndex[elitistIndex];
+                    _elitistScore[elitistIndex] = _elitistScore[elitistIndex - 1];
+                    _elitistIndex[elitistIndex] = _elitistIndex[elitistIndex - 1];
+                    _elitistScore[elitistIndex - 1] = tempScore;
+                    _elitistIndex[elitistIndex - 1] = tempIndex;
+                    elitistIndex += 1;
+                }
             }
         }
 
         private void GenerateNewchromosomes() {
-            int newchromosomeCount = 0;
             _newchromosomesIndex.Clear();
+            int newchromosomeCount = CopyElitistToNewChromosomes();
             do {
                 PerformCopyAndMaybeCrossover();
                 MutatechromosomePair();
                 string chromosome = OutputToOneLine(_chromosomePair[0]);
                 if (IschromosomeValid(_chromosomePair[0]) && !_newchromosomesIndex.Contains(chromosome)) {
                     int[] chrome = chromosomeToInt(_chromosomePair[0]);
-                    if (chrome[0] == 2) {
-                        bool stophere = true;
-                    }
                     CopychromosomePairToNewchromosome(0, newchromosomeCount);
                     ++newchromosomeCount;
                     _newchromosomesIndex.Add(chromosome);
                 }
             } while (newchromosomeCount < _chromosomeCount);
+        }
+
+        private int CopyElitistToNewChromosomes() {
+            for (int elitistIndex = 0; elitistIndex <= _elitistIndex.GetUpperBound(0); elitistIndex++) {
+                for (int bitIndex = 0; bitIndex <= _newchromosomes[elitistIndex].GetUpperBound(0); bitIndex++) {
+                    _newchromosomes[elitistIndex][bitIndex] = _chromosomes[_elitistIndex[elitistIndex]][bitIndex];
+                }
+                _newchromosomesIndex.Add(OutputToOneLine(_newchromosomes[elitistIndex]));
+            }
+            return _elitistIndex.GetUpperBound(0);
         }
 
         private void PerformCopyAndMaybeCrossover() {

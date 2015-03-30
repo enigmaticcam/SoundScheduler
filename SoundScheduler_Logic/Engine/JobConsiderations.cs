@@ -10,7 +10,7 @@ namespace SoundScheduler_Logic.Engine {
 
     public abstract class JobConsideration {
         public abstract bool IsConsiderationSoft { get; }
-        public abstract bool IsValid(int[] usersInJobs);
+        public abstract int IsValid(int[] usersInJobs);
 
         private IEnumerable<Template> _templates;
         public IEnumerable<Template> Templates {
@@ -101,7 +101,7 @@ namespace SoundScheduler_Logic.Engine {
             get { return false; }
         }
 
-        public override bool IsValid(int[] usersInJobs) {
+        public override int IsValid(int[] usersInJobs) {
             BitArray solution = new BitArray(this.SolutionCount * this.Users.Count());
             for (int i = 0; i <= usersInJobs.GetUpperBound(0); i++) {
                 int position = usersInJobs[i] * this.SolutionCount + i;
@@ -109,11 +109,7 @@ namespace SoundScheduler_Logic.Engine {
             }
             BitArray cantDoJobs = solution.And(_matrix);
             int bitCount = CountBitsInBitsArray(cantDoJobs);
-            if (bitCount > 1) {
-                return false;
-            } else {
-                return true;
-            }
+            return bitCount;
         }
 
         public JobConsiderationUsersWhoCantDoJob(Builder builder) : base(builder) {
@@ -153,36 +149,34 @@ namespace SoundScheduler_Logic.Engine {
     }
 
     public class JobConsiderationUsersWhoAlreadyHaveJob : JobConsideration {
-        private BitArray _matrix;
+        private HashSet<int> _usersInDay = new HashSet<int>();
+        private int _counter;
+        private int _exceptionCount;
 
         public override bool IsConsiderationSoft {
             get { return false; }
         }
 
-        public override bool IsValid(int[] usersInJobs) {
-            int counter = 0;
-            HashSet<int> users = new HashSet<int>();
+        public override int IsValid(int[] usersInJobs) {
+            _counter = 0;
+            _exceptionCount = 0;
             foreach (Template template in this.Templates) {
-                users.Clear();
+                _usersInDay.Clear();
                 foreach (Job job in template.Jobs) {
-                    if (users.Contains(usersInJobs[counter])) {
-                        return false;
+                    if (_usersInDay.Contains(usersInJobs[_counter])) {
+                        ++_exceptionCount;
+                    } else {
+                        _usersInDay.Add(usersInJobs[_counter]);
                     }
-                    ++counter;
+                    ++_counter;
                 }
             }
-            return true;
+            return _exceptionCount;
         }
 
         public JobConsiderationUsersWhoAlreadyHaveJob(Builder builder) : base(builder) {
-            BuildMatrixOfUsersWhoAlreadyHaveJob();
+            
         }
-
-        private void BuildMatrixOfUsersWhoAlreadyHaveJob() {
-            _matrix = new BitArray(this.SolutionCount * this.Users.Count());
-        }
-
-        
 
         public class Builder : JobConsideration.BuilderBase {
             public override JobConsideration Build() {
