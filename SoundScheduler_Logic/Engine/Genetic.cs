@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,6 +9,11 @@ namespace SoundScheduler_Logic.Engine {
     public class Genetic {
         public float IsSolved {
             get { return -1; }
+        }
+
+        private int _generationCount;
+        public int GenerationCount {
+            get { return _generationCount; }
         }
 
         private int _chromosomeCount = 500;
@@ -31,6 +37,12 @@ namespace SoundScheduler_Logic.Engine {
         private int _seed;
         private float[] _elitistScore;
         private int[] _elitistIndex;
+        private ImmutableBits _immutableBits;
+        private List<ImmutableBitsVector> _immutableBitsVectors = new List<ImmutableBitsVector>();
+
+        public void AddImmutableBits(int index, int bitNumber) {
+            _immutableBitsVectors.Add(new ImmutableBitsVector(index, bitNumber));
+        }
 
         public int[] Begin(int bitLength, int bitCount) {
             return Begin(bitLength, bitCount, -1, RandomFitness);
@@ -62,6 +74,7 @@ namespace SoundScheduler_Logic.Engine {
 
         private void Instantiate() {
             GenerateSeed();
+            GenerateImmutableBits();
             _newchromosomesIndex = new HashSet<string>();
             _ranks = new float[_chromosomeCount];
             _roulette = new float[_chromosomeCount];
@@ -91,6 +104,13 @@ namespace SoundScheduler_Logic.Engine {
             }
         }
 
+        private void GenerateImmutableBits() {
+            _immutableBits = new ImmutableBits(_chromosomeLength);
+            foreach (ImmutableBitsVector vector in _immutableBitsVectors) {
+                _immutableBits.AddImmutableBits(vector.Index, vector.BitNumber);
+            }
+        }
+
         private void SetchromosomeLength() {
             int length = 0;
             bool found = false;
@@ -114,11 +134,12 @@ namespace SoundScheduler_Logic.Engine {
                     char[] bits = Convert.ToString(bitValue, 2).PadLeft(_chromosomeLength, '0').ToCharArray();
                     ReplaceInChar(ref _chromosomes[chromosomeIndex], bits, bitIndex * _chromosomeLength);
                 }
+                _immutableBits.TrasmuteImmutableBits(_chromosomes[chromosomeIndex]);
             }
         }
 
         private void BeginGenetics() {
-            int generationCount = 0;
+            _generationCount = 0;
             do {
                 RankchromosomesInRoulette();
                 if (_stop) {
@@ -127,7 +148,7 @@ namespace SoundScheduler_Logic.Engine {
                     GenerateNewchromosomes();
                     CopyNewchromosomesToCurrentchromosomes();
                 }
-                ++generationCount;
+                ++_generationCount;
             } while (true);
         }
 
@@ -184,6 +205,7 @@ namespace SoundScheduler_Logic.Engine {
             do {
                 PerformCopyAndMaybeCrossover();
                 MutatechromosomePair();
+                _immutableBits.TrasmuteImmutableBits(_chromosomePair[0]);
                 string chromosome = OutputToOneLine(_chromosomePair[0]);
                 if (IschromosomeValid(_chromosomePair[0]) && !_newchromosomesIndex.Contains(chromosome)) {
                     int[] chrome = chromosomeToInt(_chromosomePair[0]);
@@ -321,6 +343,51 @@ namespace SoundScheduler_Logic.Engine {
 
             public FitnessFunction(Func<int[], Genetic, float> fitness) {
                 _fitness = fitness;
+            }
+        }
+
+        private class ImmutableBitsVector {
+            public int Index { get; set; }
+            public int BitNumber { get; set; }
+
+            public ImmutableBitsVector(int index, int bitNumber) {
+                this.Index = index;
+                this.BitNumber = bitNumber;
+            }
+
+            public ImmutableBitsVector() {
+
+            }
+        }
+
+        private class ImmutableBits {
+            private int _bitLength;
+            private Dictionary<int, char> _immutableBits = new Dictionary<int, char>();
+
+            public void AddImmutableBits(int index, int bitNumber) {
+                string bitNumberAsBits = Convert.ToString(bitNumber, 2);
+                bitNumberAsBits = AppendZeros(bitNumberAsBits);
+                char[] bits = bitNumberAsBits.ToCharArray();
+                for (int bitIndex = 0; bitIndex <= bits.GetUpperBound(0); bitIndex++) {
+                    _immutableBits.Add(index * _bitLength + bitIndex, bits[bitIndex]);
+                }
+            }
+
+            private string AppendZeros(string bitNumberAsBits) {
+                while (bitNumberAsBits.Length < _bitLength) {
+                    bitNumberAsBits = "0" + bitNumberAsBits;
+                }
+                return bitNumberAsBits;
+            }
+
+            public void TrasmuteImmutableBits(char[] bits) {
+                foreach (int bitIndex in _immutableBits.Keys) {
+                    bits[bitIndex] = _immutableBits[bitIndex];
+                }
+            }
+
+            public ImmutableBits(int bitLength) {
+                _bitLength = bitLength;
             }
         }
     }
