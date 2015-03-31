@@ -53,13 +53,43 @@ namespace SoundScheduler_Logic.Engine {
         }
 
         public class ActionFillMeetingsAll {
-            private IEnumerable<Template> _templates;
-            private IEnumerable<User> _users;
+            private List<Template> _templates = new List<Template>();
+            private List<User> _users;
             private IEnumerable<JobConsideration> _jobConsiderations;
+            private IEnumerable<Meeting> _meetings;
+            private Genetic _genetic = new Genetic();
 
             public void PerformAction() {
-                Genetic genetic = new Genetic();
-                int[] solution = genetic.Begin(GetBitLength(), GetBitCount(), Fitness);
+                CreateTemplatesFromMeetings();
+                AddImmutableUsers();
+                PerformAlgorithm();
+            }
+
+            private void CreateTemplatesFromMeetings() {
+                foreach (Meeting meeting in _meetings) {
+                    Template template = new Template();
+                    foreach (Job job in meeting.Jobs) {
+                        template.Jobs.Add(job);
+                    }
+                    _templates.Add(template);
+                }
+            }
+
+            private void AddImmutableUsers() {
+                int index = 0;
+                foreach (Meeting meeting in _meetings) {
+                    foreach (Job job in meeting.Jobs) {
+                        User user = meeting.UserForJob(job);
+                        if (user != null) {
+                            _genetic.AddImmutableBits(index, _users.IndexOf(user));
+                        }
+                        ++index;
+                    }
+                }
+            }
+
+            private void PerformAlgorithm() {
+                int[] solution = _genetic.Begin(GetBitLength(), GetBitCount(), Fitness);
                 bool stopHere = true;
             }
 
@@ -79,9 +109,6 @@ namespace SoundScheduler_Logic.Engine {
                 int score = 50000;
                 foreach (JobConsideration consideration in _jobConsiderations) {
                     int exceptionReduction = consideration.IsValid(chromosome);
-                    if (!consideration.IsConsiderationSoft) {
-                        //exceptionReduction *= 10;
-                    }
                     score -= exceptionReduction;
                 }
                 if (score == 50000) {
@@ -92,20 +119,15 @@ namespace SoundScheduler_Logic.Engine {
             }
 
             public ActionFillMeetingsAll(Builder builder) {
-                _templates = builder.Templates;
-                _users = builder.Users;
+                _users = builder.Users.ToList();
                 _jobConsiderations = builder.JobConsiderations;
+                _meetings = builder.Meetings;
             }
 
             public class Builder {
-                public IEnumerable<Template> Templates;
                 public IEnumerable<User> Users;
                 public IEnumerable<JobConsideration> JobConsiderations;
-
-                public Builder SetTemplates(IEnumerable<Template> templates) {
-                    this.Templates = templates;
-                    return this;
-                }
+                public IEnumerable<Meeting> Meetings;
 
                 public Builder SetUsers(IEnumerable<User> users) {
                     this.Users = users;
@@ -114,6 +136,11 @@ namespace SoundScheduler_Logic.Engine {
 
                 public Builder SetJobConsiderations(IEnumerable<JobConsideration> jobConsiderations) {
                     this.JobConsiderations = jobConsiderations;
+                    return this;
+                }
+
+                public Builder SetMeetings(IEnumerable<Meeting> meetings) {
+                    this.Meetings = meetings;
                     return this;
                 }
 

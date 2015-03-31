@@ -48,6 +48,14 @@ namespace SoundScheduler_Logic.Abstract {
             _data.UserJobSlots.Add(user, job);
         }
 
+        public Template ToTemplate() {
+            Template template = new Template();
+            foreach (Job job in this.Jobs) {
+                template.Jobs.Add(job);
+            }
+            return template;
+        }
+
         public Meeting(Template templateParent) {
             _data = new Data();
             _data.TemplateParent = templateParent;

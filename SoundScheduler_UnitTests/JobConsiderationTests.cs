@@ -15,8 +15,9 @@ namespace SoundScheduler_UnitTests {
             // Arrange
             List<Job> jobs = new List<Job>();
             List<User> users = new List<User>();
-            List<Template> templates = new List<Template>();
+            List<Meeting> meetings = new List<Meeting>();
             List<JobConsideration> jobConsiderations = new List<JobConsideration>();
+            List<Template> templates = new List<Template>();
 
             Job jobSound = new Job();
             jobSound.Name = "Sound Box";
@@ -88,22 +89,28 @@ namespace SoundScheduler_UnitTests {
             userBDeaver.Jobs = new List<Job> { jobStage, jobMic1, jobMic2, jobMic3, jobMic4 };
             users.Add(userBDeaver);
 
-            Template templateSunday = new Template();
+            Meeting.Data templateSunday = new Meeting.Data();
             templateSunday.Name = "Sunday";
-            templateSunday.Jobs = new List<Job> { jobSound, jobStage, jobMic1, jobMic2, jobMic3, jobMic4 };            
+            templateSunday.Jobs = new List<Job> { jobSound, jobStage, jobMic1, jobMic2, jobMic3, jobMic4 };
 
-            Template templateTuesday = new Template();
+            Meeting.Data templateTuesday = new Meeting.Data();
             templateTuesday.Name = "Tuesday";
             templateTuesday.Jobs = new List<Job> { jobSound, jobStage, jobMic1, jobMic2 };
 
-            templates.Add(templateSunday);
-            templates.Add(templateTuesday);
-            templates.Add(templateSunday);
-            templates.Add(templateTuesday);
-            templates.Add(templateSunday);
-            templates.Add(templateTuesday);
-            templates.Add(templateSunday);
-            templates.Add(templateTuesday);
+            meetings.Add(new Meeting(templateSunday));
+            meetings.Add(new Meeting(templateTuesday));
+            meetings.Add(new Meeting(templateSunday));
+            meetings.Add(new Meeting(templateTuesday));
+            meetings.Add(new Meeting(templateSunday));
+            meetings.Add(new Meeting(templateTuesday));
+            meetings.Add(new Meeting(templateSunday));
+            meetings.Add(new Meeting(templateTuesday));
+
+            foreach (Meeting meeting in meetings) {
+                templates.Add(meeting.ToTemplate());
+            }
+
+            meetings[7].AddUserForJob(userCTangen, jobSound);
 
             JobConsideration consideration = new JobConsiderationUsersWhoAlreadyHaveJob.Builder()
                 .SetJobs(jobs)
@@ -122,10 +129,13 @@ namespace SoundScheduler_UnitTests {
             // Act
             SoundBuilderV3.ActionFillMeetingsAll action = new SoundBuilderV3.ActionFillMeetingsAll.Builder()
                 .SetJobConsiderations(jobConsiderations)
-                .SetTemplates(templates)
+                .SetMeetings(meetings)
                 .SetUsers(users)
                 .Build();
             action.PerformAction();
+
+            // Assert
+            Assert.AreEqual(true, true);
         }
 
         [TestMethod]
