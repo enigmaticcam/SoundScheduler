@@ -58,6 +58,8 @@ namespace SoundScheduler_Logic.Engine {
             private IEnumerable<JobConsideration> _jobConsiderations;
             private IEnumerable<Meeting> _meetings;
             private Genetic _genetic = new Genetic();
+            private Func<Genetic.GeneticResults, bool> _resultsFunc;
+            private Action<int[]> _solutionAction;
 
             public void PerformAction() {
                 CreateTemplatesFromMeetings();
@@ -89,8 +91,9 @@ namespace SoundScheduler_Logic.Engine {
             }
 
             private void PerformAlgorithm() {
-                int[] solution = _genetic.Begin(GetBitLength(), GetBitCount(), Fitness);
-                bool stopHere = true;
+                //int[] solution = _genetic.Begin(GetBitLength(), GetBitCount(), Fitness);
+                //bool stopHere = true;
+                _genetic.BeginAsync(GetBitLength(), GetBitCount(), Fitness, _resultsFunc, _solutionAction);
             }
 
             private int GetBitLength() {
@@ -125,12 +128,16 @@ namespace SoundScheduler_Logic.Engine {
                 _users = builder.Users.ToList();
                 _jobConsiderations = builder.JobConsiderations;
                 _meetings = builder.Meetings;
+                _resultsFunc = builder.ResultsFunc;
+                _solutionAction = builder.SolutionAction;
             }
 
             public class Builder {
                 public IEnumerable<User> Users;
                 public IEnumerable<JobConsideration> JobConsiderations;
                 public IEnumerable<Meeting> Meetings;
+                public Func<Genetic.GeneticResults, bool> ResultsFunc;
+                public Action<int[]> SolutionAction;
 
                 public Builder SetUsers(IEnumerable<User> users) {
                     this.Users = users;
@@ -144,6 +151,16 @@ namespace SoundScheduler_Logic.Engine {
 
                 public Builder SetMeetings(IEnumerable<Meeting> meetings) {
                     this.Meetings = meetings;
+                    return this;
+                }
+
+                public Builder SetResultsFunc(Func<Genetic.GeneticResults, bool> resultsFunc) {
+                    this.ResultsFunc = resultsFunc;
+                    return this;
+                }
+
+                public Builder SetSolutionAction(Action<int[]> solutionAction) {
+                    this.SolutionAction = solutionAction;
                     return this;
                 }
 

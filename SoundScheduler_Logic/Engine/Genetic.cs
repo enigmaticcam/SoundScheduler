@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace SoundScheduler_Logic.Engine {
@@ -39,9 +40,30 @@ namespace SoundScheduler_Logic.Engine {
         private int[] _elitistIndex;
         private ImmutableBits _immutableBits;
         private List<ImmutableBitsVector> _immutableBitsVectors = new List<ImmutableBitsVector>();
+        private int[] _solution;
+        private ResultsFunction _results;
+        private FinishAction _finish;
+        private System.Timers.Timer _timer;
+        private GeneticResults _lastResults;
 
         public void AddImmutableBits(int index, int bitNumber) {
             _immutableBitsVectors.Add(new ImmutableBitsVector(index, bitNumber));
+        }
+
+        public void BeginAsync(int bitLength, int bitCount, Func<int[], Genetic, float> fitness, Func<GeneticResults, bool> results, Action<int[]> finish) {
+            _results = new ResultsFunction(results);
+            _finish = new FinishAction(finish);
+            _bitLength = bitLength;
+            _bitCount = bitCount;
+            _fitness = new FitnessFunction(fitness);
+            _seed = -1;
+            Thread thread = new Thread(new ThreadStart(DoAsync));
+            thread.Start();
+        }
+
+        private void DoAsync() {
+            Core();
+            _solution = chromosomeToInt(_chromosomes[_solutionIndex]);
         }
 
         public int[] Begin(int bitLength, int bitCount) {
@@ -94,6 +116,23 @@ namespace SoundScheduler_Logic.Engine {
             _mutateRef.Add('1', '0');
             _elitistScore = new float[(int)(_chromosomeCount * 0.05)];
             _elitistIndex = new int[(int)(_chromosomeCount * 0.05)];
+            _timer = new System.Timers.Timer(1000);
+            _timer.Elapsed += new System.Timers.ElapsedEventHandler(TimerElapsed);
+            _timer.Enabled = true;
+        }
+
+        private void TimerElapsed(object sender, System.Timers.ElapsedEventArgs e) {
+            int generationsPerSecond = _generationCount;
+            if (_lastResults != null) {
+                generationsPerSecond = _generationCount - _lastResults.GenerationCount;
+            }
+            _lastResults = new GeneticResults.Builder()
+                .SetBestSolutionSoFarScore(_bestSoFarScore)
+                .SetBestSolutionSoFarSolution(chromosomeToInt(_bestSoFarChar))
+                .SetGenerationCount(_generationCount)
+                .SetGenerationsPerSecond(generationsPerSecond)
+                .Build();
+            _results.Results(_lastResults);
         }
 
         private void GenerateSeed() {
@@ -356,6 +395,30 @@ namespace SoundScheduler_Logic.Engine {
                 _fitness = fitness;
             }
         }
+        
+        public class ResultsFunction {
+            private Func<GeneticResults, bool> _results;
+
+            public bool Results(GeneticResults results) {
+                return _results(results);
+            }
+
+            public ResultsFunction(Func<GeneticResults, bool> results) {
+                _results = results;
+            }
+        }
+
+        public class FinishAction {
+            private Action<int[]> _finish;
+
+            public void Finish(int[] solution) {
+                _finish(solution);
+            }
+
+            public FinishAction(Action<int[]> finish) {
+                _finish = finish;
+            }
+        }
 
         private class ImmutableBitsVector {
             public int Index { get; set; }
@@ -399,6 +462,66 @@ namespace SoundScheduler_Logic.Engine {
 
             public ImmutableBits(int bitLength) {
                 _bitLength = bitLength;
+            }
+        }
+
+        public class GeneticResults {
+            private int[] _bestSolutionSoFarSolution;
+            public int[] BestSolutionSoFarSolution {
+                get { return _bestSolutionSoFarSolution; }
+            }
+
+            private float _bestSolutionSoFarScore;
+            public float BestSolutionSoFarScore {
+                get { return _bestSolutionSoFarScore; }
+            }
+
+            private int _generationCount;
+            public int GenerationCount {
+                get { return _generationCount; }
+            }
+
+            private int _generationsPerSecond;
+            public int GenerationsPerSecond {
+                get { return _generationsPerSecond; }
+            }
+
+            public GeneticResults(Builder builder) {
+                _bestSolutionSoFarSolution = builder.BestSolutionSoFarSolution;
+                _bestSolutionSoFarScore = builder.BestSolutionSoFarScore;
+                _generationCount = builder.GenerationCount;
+                _generationsPerSecond = builder.GenerationsPerSecond;
+            }
+
+            public class Builder {
+                public int[] BestSolutionSoFarSolution;
+                public float BestSolutionSoFarScore;
+                public int GenerationCount;
+                public int GenerationsPerSecond;
+
+                public Builder SetBestSolutionSoFarSolution(int[] bestSolutionSoFarSolution) {
+                    this.BestSolutionSoFarSolution = bestSolutionSoFarSolution;
+                    return this;
+                }
+
+                public Builder SetBestSolutionSoFarScore(float bestSolutionSoFarScore) {
+                    this.BestSolutionSoFarScore = bestSolutionSoFarScore;
+                    return this;
+                }
+
+                public Builder SetGenerationCount(int generationCount) {
+                    this.GenerationCount = generationCount;
+                    return this;
+                }
+
+                public Builder SetGenerationsPerSecond(int generationsPerSecond) {
+                    this.GenerationsPerSecond = generationsPerSecond;
+                    return this;
+                }
+
+                public GeneticResults Build() {
+                    return new GeneticResults(this);
+                }
             }
         }
     }

@@ -49,6 +49,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="frmGenetic.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frmGenetic.Designer.cs">
+      <DependentUpon>frmGenetic.cs</DependentUpon>
+    </Compile>
     <Compile Include="frmJobs.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -93,6 +99,9 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <EmbeddedResource Include="frmGenetic.resx">
+      <DependentUpon>frmGenetic.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="frmJobs.resx">
       <DependentUpon>frmJobs.cs</DependentUpon>
     </EmbeddedResource>
