@@ -162,11 +162,12 @@ namespace SoundScheduler_Logic.Engine {
                     _solutionIndex = index;
                 }
                 if (score > _bestSoFarScore) {
-                    _bestSoFarScore = score;
+                   _bestSoFarScore = score;
                     _bestSoFarChar = (char[])_chromosomes[index].Clone();
                 }
                 _ranks[index] = score;
                 sum += score;
+                AddToElitist(index);
             }
             GetRoulette(sum);
         }
@@ -174,13 +175,12 @@ namespace SoundScheduler_Logic.Engine {
         private void GetRoulette(float totalFitnessSum) {
             for (int index = 0; index < _chromosomeCount; index++) {
                 _roulette[index] = _ranks[index] / totalFitnessSum;
-                AddToElitist(index);
             }
         }
 
         private void AddToElitist(int index) {
-            if (_elitistScore[0] < _roulette[index]) {
-                _elitistScore[0] = _roulette[index];
+            if (_elitistScore[0] < _ranks[index]) {
+                _elitistScore[0] = _ranks[index];
                 _elitistIndex[0] = index;
             }
             if (_elitistScore[1] < _elitistScore[0]) {
@@ -201,7 +201,7 @@ namespace SoundScheduler_Logic.Engine {
 
         private void GenerateNewchromosomes() {
             _newchromosomesIndex.Clear();
-            int newchromosomeCount = CopyElitistToNewChromosomes();
+            int newchromosomeCount = CopyElitistToNewChromosomes() + 1;
             do {
                 PerformCopyAndMaybeCrossover();
                 MutatechromosomePair();
@@ -222,6 +222,7 @@ namespace SoundScheduler_Logic.Engine {
                     _newchromosomes[elitistIndex][bitIndex] = _chromosomes[_elitistIndex[elitistIndex]][bitIndex];
                 }
                 _newchromosomesIndex.Add(OutputToOneLine(_newchromosomes[elitistIndex]));
+                _elitistIndex[elitistIndex] = elitistIndex;
             }
             return _elitistIndex.GetUpperBound(0);
         }
@@ -230,7 +231,7 @@ namespace SoundScheduler_Logic.Engine {
             int swapIndex = int.MaxValue;
             int chromosome1 = GetRandomFromRoulette();
             int chromosome2 = GetRandomFromRoulette();
-            swapIndex = _random.Next(0, _chromosomeLength * _bitLength);
+            swapIndex = _random.Next(0, _bitLength) * _chromosomeLength;
             for (int index = 0; index < _chromosomeLength * _bitLength; index++) {
                 if (index > swapIndex) {
                     _chromosomePair[0][index] = _chromosomes[chromosome2][index];
@@ -241,11 +242,21 @@ namespace SoundScheduler_Logic.Engine {
         }
 
         private void MutatechromosomePair() {
-            for (int pairIndex = 0; pairIndex < 1; pairIndex++) {
-                for (int chromosomeIndex = 0; chromosomeIndex < _bitLength * _chromosomeLength; chromosomeIndex++) {
-                    int canMutate = _random.Next(0, 1001);
-                    if (canMutate == 1000) {
-                        _chromosomePair[pairIndex][chromosomeIndex] = _mutateRef[_chromosomePair[pairIndex][chromosomeIndex]];
+            //for (int pairIndex = 0; pairIndex < 1; pairIndex++) {
+            //    for (int chromosomeIndex = 0; chromosomeIndex < _bitLength * _chromosomeLength; chromosomeIndex++) {
+            //        int canMutate = _random.Next(0, 1001);
+            //        if (canMutate == 1000) {
+            //            _chromosomePair[pairIndex][chromosomeIndex] = _mutateRef[_chromosomePair[pairIndex][chromosomeIndex]];
+            //        }
+            //    }
+            //}
+            for (int chromosomeIndex = 0; chromosomeIndex < _bitLength; chromosomeIndex++) {
+                int canMutate = _random.Next(0, 1001);
+                if (canMutate == 1000) {
+                    int mutateTo = _random.Next(0, _bitCount);
+                    char[] mutated = Convert.ToString(mutateTo, 2).PadLeft(_chromosomeLength, '0').ToCharArray();
+                    for (int mutateIndex = 0; mutateIndex <= mutated.GetUpperBound(0); mutateIndex++) {
+                        _chromosomePair[0][chromosomeIndex * _chromosomeLength + mutateIndex] = mutated[mutateIndex];
                     }
                 }
             }

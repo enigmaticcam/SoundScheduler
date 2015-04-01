@@ -184,4 +184,81 @@ namespace SoundScheduler_Logic.Engine {
             }
         }
     }
+
+    public class JobConsiderationEvenUserDistributionPerJob : JobConsideration {
+        private Dictionary<Job, Dictionary<int, int>> _matrix = new Dictionary<Job, Dictionary<int, int>>();
+        private int _counter;
+        private int _minMaxTotal;
+        private int _minMaxSubTotal;
+        private int _min;
+        private int _max;
+
+        public override bool IsConsiderationSoft {
+            get { return true; }
+        }
+
+        public override int IsValid(int[] usersInJobs) {
+            ResetToZeros();
+            CountUsersPerJob(usersInJobs);
+            return CountMinMax();
+        }
+
+        private void ResetToZeros() {
+            foreach (Job job in this.Jobs) {
+                for (int user = 0; user < this.Users.Count(); user++) {
+                    _matrix[job][user] = 0;
+                }
+            }
+        }
+
+        private void CountUsersPerJob(int[] usersInJobs) {
+            _counter = 0;
+            foreach (Template template in this.Templates) {
+                foreach (Job job in template.Jobs) {
+                    _matrix[job][usersInJobs[_counter]] += 1;
+                    ++_counter;
+                }
+            }
+        }
+
+        private int CountMinMax() {
+            _minMaxTotal = 0;
+            foreach (Job job in this.Jobs) {
+                _min = int.MaxValue;
+                _max = int.MinValue;
+                foreach (int user in _matrix[job].Keys) {
+                    if (_matrix[job][user] < _min) {
+                        _min = _matrix[job][user];
+                    }
+                    if (_matrix[job][user] > _max) {
+                        _max = _matrix[job][user];
+                    }
+                }
+                _minMaxSubTotal = _max - _min;
+                if (_minMaxSubTotal > 1) {
+                    _minMaxTotal += (_minMaxSubTotal - 1);
+                }
+            }
+            return _minMaxTotal;
+        }
+
+        public JobConsiderationEvenUserDistributionPerJob(Builder builder) : base(builder) {
+            InstantiateMatrix();
+        }
+
+        private void InstantiateMatrix() {
+            foreach (Job job in this.Jobs) {
+                _matrix.Add(job, new Dictionary<int, int>());
+                for (int i = 0; i < this.Users.Count(); i++) {
+                    _matrix[job].Add(i, 0);
+                }
+            }
+        }
+
+        public class Builder : JobConsideration.BuilderBase {
+            public override JobConsideration Build() {
+                return new JobConsiderationEvenUserDistributionPerJob(this);
+            }
+        }
+    }
 }
