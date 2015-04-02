@@ -25,6 +25,7 @@
         private void InitializeComponent() {
             this.cmdGo = new System.Windows.Forms.Button();
             this.txtResults = new System.Windows.Forms.TextBox();
+            this.cmdStop = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // cmdGo
@@ -43,14 +44,26 @@
             this.txtResults.Multiline = true;
             this.txtResults.Name = "txtResults";
             this.txtResults.ReadOnly = true;
+            this.txtResults.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
             this.txtResults.Size = new System.Drawing.Size(768, 518);
             this.txtResults.TabIndex = 1;
+            // 
+            // cmdStop
+            // 
+            this.cmdStop.Location = new System.Drawing.Point(95, 12);
+            this.cmdStop.Name = "cmdStop";
+            this.cmdStop.Size = new System.Drawing.Size(75, 23);
+            this.cmdStop.TabIndex = 2;
+            this.cmdStop.Text = "Stop";
+            this.cmdStop.UseVisualStyleBackColor = true;
+            this.cmdStop.Click += new System.EventHandler(this.cmdStop_Click);
             // 
             // frmGenetic
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(793, 573);
+            this.Controls.Add(this.cmdStop);
             this.Controls.Add(this.txtResults);
             this.Controls.Add(this.cmdGo);
             this.Name = "frmGenetic";
@@ -64,5 +77,6 @@
 
         private System.Windows.Forms.Button cmdGo;
         private System.Windows.Forms.TextBox txtResults;
+        private System.Windows.Forms.Button cmdStop;
     }
 }

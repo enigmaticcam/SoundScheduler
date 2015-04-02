@@ -64,6 +64,8 @@ namespace SoundScheduler_Logic.Engine {
         private void DoAsync() {
             Core();
             _solution = chromosomeToInt(_chromosomes[_solutionIndex]);
+            _timer.Stop();
+            _finish.Finish(_solution);
         }
 
         public int[] Begin(int bitLength, int bitCount) {
@@ -132,7 +134,9 @@ namespace SoundScheduler_Logic.Engine {
                 .SetGenerationCount(_generationCount)
                 .SetGenerationsPerSecond(generationsPerSecond)
                 .Build();
-            _results.Results(_lastResults);
+            if (!_results.Results(_lastResults)) {
+                _stop = true;
+            }
         }
 
         private void GenerateSeed() {

@@ -13,6 +13,13 @@ using SoundScheduler_Logic.Engine;
 namespace SoundScheduler_Win {
     public partial class frmGenetic : Form {
         private delegate void UpdateResultsDelegate(Genetic.GeneticResults results);
+        private delegate void UpdateResultsFinishedDelegate(int[] solution);
+        private bool _stop;
+        private List<Job> _jobs;
+        private List<User> _users;
+        private List<Meeting> _meetings;
+        private List<JobConsideration> _jobConsiderations;
+        private List<Template> _templates;
 
         public frmGenetic() {
             InitializeComponent();
@@ -20,153 +27,189 @@ namespace SoundScheduler_Win {
 
         private bool Results(Genetic.GeneticResults results) {
             txtResults.BeginInvoke(new UpdateResultsDelegate(UpdateResults), new object[] { results });
-            return false;
+            return !_stop;
         }
 
         private void Finish(int[] solution) {
-
+            txtResults.BeginInvoke(new UpdateResultsFinishedDelegate(UpdateResultsFinished), new object[] { solution });
         }
 
         private void UpdateResults(Genetic.GeneticResults results) {
             StringBuilder text = new StringBuilder();
-            text.AppendLine("Best Solution So Far: " + results.BestSolutionSoFarSolution);
+            text.AppendLine("Best Solution So Far: " + IntArrayToString(results.BestSolutionSoFarSolution));
             text.AppendLine("Best Solution Score So Far: " + results.BestSolutionSoFarScore);
             text.AppendLine("Generation Count: " + results.GenerationCount);
             text.AppendLine("Generations Per Second: " + results.GenerationsPerSecond);
             txtResults.Text = text.ToString();
         }
 
+        private string IntArrayToString(int[] intArray) {
+            StringBuilder text = new StringBuilder();
+            bool started = false;
+            for (int i = 0; i <= intArray.GetUpperBound(0); i++) {
+                if (!started) {
+                    started = true;
+                } else {
+                    text.Append(",");
+                }
+                text.Append(intArray[i]);
+            }
+            return text.ToString();
+        }
+
+        private void UpdateResultsFinished(int[] solution) {
+            int counter = 0;
+            int day = 1;
+            StringBuilder text = new StringBuilder();
+            foreach (Template template in _templates) {
+                text.AppendLine("");
+                text.AppendLine("Day " + day);
+                foreach (Job job in template.Jobs) {
+                    text.AppendLine("Job: " + job.Name + " User: " + _users[solution[counter]].Name);
+                    counter++;
+                }
+                day++;
+            }
+            txtResults.Text += text.ToString();
+        }
+
         private void cmdGo_Click(object sender, EventArgs e) {
+            _stop = false;
+
             // Arrange
-            List<Job> jobs = new List<Job>();
-            List<User> users = new List<User>();
-            List<Meeting> meetings = new List<Meeting>();
-            List<JobConsideration> jobConsiderations = new List<JobConsideration>();
-            List<Template> templates = new List<Template>();
+            _jobs = new List<Job>();
+            _users = new List<User>();
+            _meetings = new List<Meeting>();
+            _jobConsiderations = new List<JobConsideration>();
+            _templates = new List<Template>();
 
             Job jobSound = new Job();
             jobSound.Name = "Sound Box";
-            jobs.Add(jobSound);
+            _jobs.Add(jobSound);
             jobSound.IsVoidedOnSoftException = true;
 
             Job jobStage = new Job();
             jobStage.Name = "Stage";
-            jobs.Add(jobStage);
+            _jobs.Add(jobStage);
             jobStage.IsVoidedOnSoftException = false;
 
             Job jobMic1 = new Job();
             jobMic1.Name = "Mic 1";
-            jobs.Add(jobMic1);
+            _jobs.Add(jobMic1);
             jobMic1.IsVoidedOnSoftException = true;
 
             Job jobMic2 = new Job();
             jobMic2.Name = "Mic 2";
-            jobs.Add(jobMic2);
+            _jobs.Add(jobMic2);
             jobMic2.IsVoidedOnSoftException = true;
 
             Job jobMic3 = new Job();
             jobMic3.Name = "Mic 3";
-            jobs.Add(jobMic3);
+            _jobs.Add(jobMic3);
             jobMic3.IsVoidedOnSoftException = true;
 
             Job jobMic4 = new Job();
             jobMic4.Name = "Mic 4";
-            jobs.Add(jobMic4);
+            _jobs.Add(jobMic4);
             jobMic4.IsVoidedOnSoftException = true;
 
             User userCTangen = new User();
             userCTangen.Name = "Cameron Tangen";
             userCTangen.Jobs = new List<Job> { jobSound, jobStage, jobMic1, jobMic2, jobMic3, jobMic4 };
-            users.Add(userCTangen);
+            _users.Add(userCTangen);
 
             User userESavelberg = new User();
             userESavelberg.Name = "Eric Savelberg";
             userESavelberg.Jobs = new List<Job> { jobSound, jobStage, jobMic1, jobMic2, jobMic3, jobMic4 };
-            users.Add(userESavelberg);
+            _users.Add(userESavelberg);
 
             User userDCook = new User();
             userDCook.Name = "Dennis Cook";
             userDCook.Jobs = new List<Job> { jobSound, jobStage, jobMic1, jobMic2, jobMic3, jobMic4 };
-            users.Add(userDCook);
+            _users.Add(userDCook);
 
             User userDLopez = new User();
             userDLopez.Name = "David Lopez";
             userDLopez.Jobs = new List<Job> { jobSound, jobStage, jobMic1, jobMic2, jobMic3, jobMic4 };
-            users.Add(userDLopez);
+            _users.Add(userDLopez);
 
             User userEWilder = new User();
             userEWilder.Name = "Ethan Wilder";
             userEWilder.Jobs = new List<Job> { jobSound, jobStage, jobMic1, jobMic2, jobMic3, jobMic4 };
-            users.Add(userEWilder);
+            _users.Add(userEWilder);
 
             User userRStubbs = new User();
             userRStubbs.Name = "Reed Stubbs";
             userRStubbs.Jobs = new List<Job> { jobMic1, jobMic2, jobMic3, jobMic4 };
-            users.Add(userRStubbs);
+            _users.Add(userRStubbs);
 
             User userDKeil = new User();
             userDKeil.Name = "David Keil";
             userDKeil.Jobs = new List<Job> { jobMic1, jobMic2, jobMic3, jobMic4 };
-            users.Add(userDKeil);
+            _users.Add(userDKeil);
 
             User userBDeaver = new User();
             userBDeaver.Name = "Beau Deaver";
             userBDeaver.Jobs = new List<Job> { jobStage, jobMic1, jobMic2, jobMic3, jobMic4 };
-            users.Add(userBDeaver);
+            _users.Add(userBDeaver);
 
-            Meeting.Data templateSunday = new Meeting.Data();
+            Template templateSunday = new Template();
             templateSunday.Name = "Sunday";
             templateSunday.Jobs = new List<Job> { jobSound, jobStage, jobMic1, jobMic2, jobMic3, jobMic4 };
 
-            Meeting.Data templateTuesday = new Meeting.Data();
+            Template templateTuesday = new Template();
             templateTuesday.Name = "Tuesday";
             templateTuesday.Jobs = new List<Job> { jobSound, jobStage, jobMic1, jobMic2 };
 
-            meetings.Add(new Meeting(templateSunday));
-            meetings.Add(new Meeting(templateTuesday));
-            meetings.Add(new Meeting(templateSunday));
-            meetings.Add(new Meeting(templateTuesday));
-            meetings.Add(new Meeting(templateSunday));
-            meetings.Add(new Meeting(templateTuesday));
-            meetings.Add(new Meeting(templateSunday));
-            meetings.Add(new Meeting(templateTuesday));
+            _meetings.Add(templateSunday.ToMeeting(DateTime.Parse("1/1/2015")));
+            _meetings.Add(templateTuesday.ToMeeting(DateTime.Parse("1/1/2015")));
+            _meetings.Add(templateSunday.ToMeeting(DateTime.Parse("1/1/2015")));
+            _meetings.Add(templateTuesday.ToMeeting(DateTime.Parse("1/1/2015")));
+            _meetings.Add(templateSunday.ToMeeting(DateTime.Parse("1/1/2015")));
+            _meetings.Add(templateTuesday.ToMeeting(DateTime.Parse("1/1/2015")));
+            _meetings.Add(templateSunday.ToMeeting(DateTime.Parse("1/1/2015")));
+            _meetings.Add(templateTuesday.ToMeeting(DateTime.Parse("1/1/2015")));
 
-            foreach (Meeting meeting in meetings) {
-                templates.Add(meeting.ToTemplate());
+            foreach (Meeting meeting in _meetings) {
+                _templates.Add(meeting.ToTemplate());
             }
 
-            meetings[7].AddUserForJob(userCTangen, jobSound);
+            _meetings[7].AddUserForJob(userCTangen, jobSound);
 
             JobConsideration consideration = new JobConsiderationUsersWhoAlreadyHaveJob.Builder()
-                .SetJobs(jobs)
-                .SetTemplates(templates)
-                .SetUsers(users)
+                .SetJobs(_jobs)
+                .SetTemplates(_templates)
+                .SetUsers(_users)
                 .Build();
-            jobConsiderations.Add(consideration);
+            _jobConsiderations.Add(consideration);
 
             consideration = new JobConsiderationUsersWhoCantDoJob.Builder()
-                .SetJobs(jobs)
-                .SetTemplates(templates)
-                .SetUsers(users)
+                .SetJobs(_jobs)
+                .SetTemplates(_templates)
+                .SetUsers(_users)
                 .Build();
-            jobConsiderations.Add(consideration);
+            _jobConsiderations.Add(consideration);
 
             consideration = new JobConsiderationEvenUserDistributionPerJob.Builder()
-                .SetJobs(jobs)
-                .SetTemplates(templates)
-                .SetUsers(users)
+                .SetJobs(_jobs)
+                .SetTemplates(_templates)
+                .SetUsers(_users)
                 .Build();
-            jobConsiderations.Add(consideration);
+            _jobConsiderations.Add(consideration);
 
             // Act
             SoundBuilderV3.ActionFillMeetingsAll action = new SoundBuilderV3.ActionFillMeetingsAll.Builder()
-                .SetJobConsiderations(jobConsiderations)
-                .SetMeetings(meetings)
-                .SetUsers(users)
+                .SetJobConsiderations(_jobConsiderations)
+                .SetMeetings(_meetings)
+                .SetUsers(_users)
                 .SetResultsFunc(Results)
                 .SetSolutionAction(Finish)
                 .Build();
             action.PerformAction();
+        }
+
+        private void cmdStop_Click(object sender, EventArgs e) {
+            _stop = true;
         }
     }
 }
