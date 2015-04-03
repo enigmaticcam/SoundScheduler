@@ -61,6 +61,13 @@ namespace SoundScheduler_Win {
             int counter = 0;
             int day = 1;
             StringBuilder text = new StringBuilder();
+            foreach (JobConsideration consideration in _jobConsiderations) {
+                int score = consideration.IsValid(solution);
+                if (score != 0) {
+                    text.AppendLine("");
+                    text.AppendLine(consideration.JobName + ": -" + score + " points");
+                }
+            }
             foreach (Template template in _templates) {
                 text.AppendLine("");
                 text.AppendLine("Day " + day);
@@ -191,6 +198,14 @@ namespace SoundScheduler_Win {
             _jobConsiderations.Add(consideration);
 
             consideration = new JobConsiderationEvenUserDistributionPerJob.Builder()
+                .SetJobs(_jobs)
+                .SetTemplates(_templates)
+                .SetUsers(_users)
+                .Build();
+            _jobConsiderations.Add(consideration);
+
+            consideration = new JobConsiderationGiveUsersABreak.Builder()
+                .SetGiveBreakOnDay(4)
                 .SetJobs(_jobs)
                 .SetTemplates(_templates)
                 .SetUsers(_users)

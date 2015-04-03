@@ -11,6 +11,7 @@ namespace SoundScheduler_Logic.Engine {
     public abstract class JobConsideration {
         public abstract bool IsConsiderationSoft { get; }
         public abstract int IsValid(int[] usersInJobs);
+        public abstract string JobName { get; }
 
         private IEnumerable<Template> _templates;
         public IEnumerable<Template> Templates {
@@ -97,6 +98,10 @@ namespace SoundScheduler_Logic.Engine {
     public class JobConsiderationUsersWhoCantDoJob : JobConsideration {
         private BitArray _matrix;
 
+        public override string JobName {
+            get { return "Users Who Can't Do Job"; }
+        }
+
         public override bool IsConsiderationSoft {
             get { return false; }
         }
@@ -153,6 +158,10 @@ namespace SoundScheduler_Logic.Engine {
         private int _counter;
         private int _exceptionCount;
 
+        public override string JobName {
+            get { return "Users Who Already Have Job"; }
+        }
+
         public override bool IsConsiderationSoft {
             get { return false; }
         }
@@ -192,6 +201,10 @@ namespace SoundScheduler_Logic.Engine {
         private int _minMaxSubTotal;
         private int _min;
         private int _max;
+
+        public override string JobName {
+            get { return "Even Distribution Per Job"; }
+        }
 
         public override bool IsConsiderationSoft {
             get { return true; }
@@ -268,6 +281,10 @@ namespace SoundScheduler_Logic.Engine {
         private int _giveBreakOnDay;
         private int _dayCountPerOverlap;
         private BitArray _bitCount;
+
+        public override string JobName {
+            get { return "Give Users A Break"; }
+        }
 
         public override bool IsConsiderationSoft {
             get { return true; }

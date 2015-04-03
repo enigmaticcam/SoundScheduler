@@ -133,6 +133,14 @@ namespace SoundScheduler_UnitTests {
                 .Build();
             jobConsiderations.Add(consideration);
 
+            consideration = new JobConsiderationGiveUsersABreak.Builder()
+                .SetGiveBreakOnDay(4)
+                .SetJobs(jobs)
+                .SetTemplates(templates)
+                .SetUsers(users)
+                .Build();
+            jobConsiderations.Add(consideration);
+
             // Act
             SoundBuilderV3.ActionFillMeetingsAll action = new SoundBuilderV3.ActionFillMeetingsAll.Builder()
                 .SetJobConsiderations(jobConsiderations)
