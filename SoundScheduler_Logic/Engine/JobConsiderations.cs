@@ -261,4 +261,123 @@ namespace SoundScheduler_Logic.Engine {
             }
         }
     }
+
+    public class JobConsiderationGiveUsersABreak : JobConsideration {
+        private BitArray[] _matrix;
+        private List<List<OverlapVector>> _overlapReference;
+        private int _giveBreakOnDay;
+        private int _dayCountPerOverlap;
+        private BitArray _bitCount;
+
+        public override bool IsConsiderationSoft {
+            get { return true; }
+        }
+
+        public override int IsValid(int[] usersInJobs) {
+            SetAllToZero();
+            BuildMatrixFromSolution(usersInJobs);
+            return PerforANDandCount();
+        }
+
+        private void SetAllToZero() {
+            _bitCount.SetAll(false);
+            for (int matrixIndex = 0; matrixIndex <= _matrix.GetUpperBound(0); matrixIndex++) {
+                _matrix[matrixIndex].SetAll(false);
+            }
+        }
+
+        private void BuildMatrixFromSolution(int[] solution) {
+            int counter = 0;
+            int day = 0;
+            foreach (Template template in this.Templates) {
+                foreach (Job job in template.Jobs) {
+                    foreach (OverlapVector vector in _overlapReference[day]) {
+                        _matrix[vector.Y].Set(this.Users.Count() * vector.X + solution[counter], true);
+                    }
+                    ++counter;
+                }
+                ++day;
+            }
+        }
+
+        private int PerforANDandCount() {
+            _bitCount = _matrix[0].And(_matrix[1]);
+            for (int day = 2; day < _giveBreakOnDay; day++) {
+                _bitCount = _bitCount.And(_matrix[day]);
+            }
+            return this.CountBitsInBitsArray(_bitCount);
+        }
+
+        private string OutputToOneLine(BitArray bitArray) {
+            StringBuilder text = new StringBuilder();
+            for (int i = 0; i < bitArray.Count; i++) {
+                if (bitArray.Get(i) == true) {
+                    text.Append("1");
+                } else {
+                    text.Append("0");
+                }
+            }
+            return text.ToString();
+        }
+
+        public JobConsiderationGiveUsersABreak(Builder builder) : base(builder) {
+            _giveBreakOnDay = builder.GiveBreakOnDay;
+            _bitCount = new BitArray(_dayCountPerOverlap * this.Users.Count());
+            InstantiateMatrix();
+            BuildOverlapReference();
+        }
+
+        private void InstantiateMatrix() {
+            _matrix = new BitArray[_giveBreakOnDay];
+            _dayCountPerOverlap = this.Templates.Count() - _giveBreakOnDay + 1;
+            for (int matrixIndex = 0; matrixIndex <= _matrix.GetUpperBound(0); matrixIndex++) {
+                _matrix[matrixIndex] = new BitArray((_dayCountPerOverlap + 1) * this.Users.Count());
+            }
+        }
+
+        private void BuildOverlapReference() {
+            InstantiateOverlapReference();
+            for (int day = 0; day <= _dayCountPerOverlap; day++) {
+                for (int daysForward = day; daysForward < _giveBreakOnDay + day; daysForward++) {
+                    if (daysForward < _overlapReference.Count) {
+                        OverlapVector vector = new OverlapVector(day, daysForward - day);
+                        _overlapReference[daysForward].Add(vector);
+                    }
+                }
+            }
+        }
+
+        private void InstantiateOverlapReference() {
+            _overlapReference = new List<List<OverlapVector>>();
+            for (int i = 0; i < this.Templates.Count(); i++) {
+                _overlapReference.Add(new List<OverlapVector>());
+            }
+        }
+
+        private class OverlapVector {
+            private int _x;
+            public int X { get { return _x; } }
+
+            private int _y;
+            public int Y { get { return _y; } }
+
+            public OverlapVector(int x, int y) {
+                _x = x;
+                _y = y;
+            }
+        }
+
+        public class Builder : JobConsideration.BuilderBase {
+            public int GiveBreakOnDay;
+
+            public Builder SetGiveBreakOnDay(int giveBreakOnDay) {
+                this.GiveBreakOnDay = giveBreakOnDay;
+                return this;
+            }
+
+            public override JobConsideration Build() {
+                return new JobConsiderationGiveUsersABreak(this);
+            }
+        }
+    }
 }

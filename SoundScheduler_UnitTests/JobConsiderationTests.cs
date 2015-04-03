@@ -298,5 +298,70 @@ namespace SoundScheduler_UnitTests {
             Assert.AreEqual(2, invalidCount1);
             Assert.AreEqual(0, invalidCount2);
         }
+
+        [TestMethod]
+        public void JobConsideration_GiveUsersABreak() {
+
+            // Arrange
+            List<Job> jobs = new List<Job> { new Job(), new Job() };
+            List<User> users = new List<User> { new User(), new User(), new User(), new User() };
+
+            Template template1 = new Template();
+            template1.Jobs.Add(jobs[0]);
+            template1.Jobs.Add(jobs[1]);
+            List<Template> templates = new List<Template> { template1, template1, template1, template1, template1, template1, template1, template1 };
+
+            int[] solution1 = new int[jobs.Count * templates.Count];
+            int[] solution2 = new int[jobs.Count * templates.Count];
+
+            solution1[0 + jobs.IndexOf(jobs[0])] = users.IndexOf(users[2]);
+            solution1[0 + jobs.IndexOf(jobs[1])] = users.IndexOf(users[3]);
+            solution1[2 + jobs.IndexOf(jobs[0])] = users.IndexOf(users[0]);
+            solution1[2 + jobs.IndexOf(jobs[1])] = users.IndexOf(users[1]);
+            solution1[4 + jobs.IndexOf(jobs[0])] = users.IndexOf(users[0]);
+            solution1[4 + jobs.IndexOf(jobs[1])] = users.IndexOf(users[1]);
+            solution1[6 + jobs.IndexOf(jobs[0])] = users.IndexOf(users[0]);
+            solution1[6 + jobs.IndexOf(jobs[1])] = users.IndexOf(users[1]);
+            solution1[8 + jobs.IndexOf(jobs[0])] = users.IndexOf(users[0]);
+            solution1[8 + jobs.IndexOf(jobs[1])] = users.IndexOf(users[1]);
+            solution1[10 + jobs.IndexOf(jobs[0])] = users.IndexOf(users[0]);
+            solution1[10 + jobs.IndexOf(jobs[1])] = users.IndexOf(users[1]);
+            solution1[12 + jobs.IndexOf(jobs[0])] = users.IndexOf(users[0]);
+            solution1[12 + jobs.IndexOf(jobs[1])] = users.IndexOf(users[1]);
+            solution1[14 + jobs.IndexOf(jobs[0])] = users.IndexOf(users[2]);
+            solution1[14 + jobs.IndexOf(jobs[1])] = users.IndexOf(users[3]);
+
+
+            solution2[0 + jobs.IndexOf(jobs[0])] = users.IndexOf(users[0]);
+            solution2[0 + jobs.IndexOf(jobs[1])] = users.IndexOf(users[1]);
+            solution2[2 + jobs.IndexOf(jobs[0])] = users.IndexOf(users[0]);
+            solution2[2 + jobs.IndexOf(jobs[1])] = users.IndexOf(users[1]);
+            solution2[4 + jobs.IndexOf(jobs[0])] = users.IndexOf(users[2]);
+            solution2[4 + jobs.IndexOf(jobs[1])] = users.IndexOf(users[3]);
+            solution2[6 + jobs.IndexOf(jobs[0])] = users.IndexOf(users[0]);
+            solution2[6 + jobs.IndexOf(jobs[1])] = users.IndexOf(users[1]);
+            solution2[8 + jobs.IndexOf(jobs[0])] = users.IndexOf(users[0]);
+            solution2[8 + jobs.IndexOf(jobs[1])] = users.IndexOf(users[1]);
+            solution2[10 + jobs.IndexOf(jobs[0])] = users.IndexOf(users[0]);
+            solution2[10 + jobs.IndexOf(jobs[1])] = users.IndexOf(users[1]);
+            solution2[12 + jobs.IndexOf(jobs[0])] = users.IndexOf(users[2]);
+            solution2[12 + jobs.IndexOf(jobs[1])] = users.IndexOf(users[3]);
+            solution2[14 + jobs.IndexOf(jobs[0])] = users.IndexOf(users[0]);
+            solution2[14 + jobs.IndexOf(jobs[1])] = users.IndexOf(users[1]);
+
+            // Act
+            JobConsideration consideration = new JobConsiderationGiveUsersABreak.Builder()
+                .SetGiveBreakOnDay(4)
+                .SetJobs(jobs)
+                .SetTemplates(templates)
+                .SetUsers(users)
+                .Build();
+            int invalidCount1 = consideration.IsValid(solution1);
+            int invalidCount2 = consideration.IsValid(solution2);
+
+            // Assert
+            Assert.AreEqual(6, invalidCount1);
+            Assert.AreEqual(0, invalidCount2);
+        }
     }
 }
