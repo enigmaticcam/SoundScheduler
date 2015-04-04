@@ -253,11 +253,14 @@ namespace SoundScheduler_UnitTests {
         }
 
         [TestMethod]
-        public void JobConsideration_EvenUserDistributionPerJob() {
+        public void JobConsideration_EvenUserDistributionPerJob_WithoutSameJobs() {
 
             // Arrange
             List<Job> jobs = new List<Job> { new Job(), new Job() };
             List<User> users = new List<User> { new User(), new User(), new User(), new User(), new User() };
+
+            jobs[0].Name = "Job0";
+            jobs[1].Name = "Job1";
 
             users[0].Jobs.Add(jobs[0]);
             users[1].Jobs.Add(jobs[0]);
@@ -304,6 +307,88 @@ namespace SoundScheduler_UnitTests {
 
             // Assert
             Assert.AreEqual(2, invalidCount1);
+            Assert.AreEqual(0, invalidCount2);
+        }
+
+        [TestMethod]
+        public void JobConsideration_EvenUserDistributionPerJob_WithSameJobs() {
+
+            // Arrange
+            List<Job> jobs = new List<Job> { new Job(), new Job(), new Job(), new Job() };
+            List<User> users = new List<User> { new User(), new User(), new User(), new User(), new User() };
+
+            jobs[0].Name = "Job0";
+            jobs[1].Name = "Job1";
+            jobs[2].Name = "Job2";
+            jobs[3].Name = "Job3";
+
+            jobs[0].AddSameJob(jobs[1]);
+
+            users[0].Jobs.Add(jobs[0]);
+            users[1].Jobs.Add(jobs[0]);
+            users[2].Jobs.Add(jobs[0]);
+            users[0].Jobs.Add(jobs[2]);
+            users[1].Jobs.Add(jobs[2]);
+            users[2].Jobs.Add(jobs[2]);
+            users[2].Jobs.Add(jobs[1]);
+            users[3].Jobs.Add(jobs[1]);
+            users[4].Jobs.Add(jobs[1]);
+
+            Template template1 = new Template();
+            template1.Jobs.Add(jobs[0]);
+            template1.Jobs.Add(jobs[1]);
+            template1.Jobs.Add(jobs[2]);
+            template1.Jobs.Add(jobs[3]);
+            List<Template> templates = new List<Template> { template1, template1, template1, template1 };
+
+            int[] solution1 = new int[jobs.Count * templates.Count];
+            int[] solution2 = new int[jobs.Count * templates.Count];
+
+            solution1[0 + jobs.IndexOf(jobs[0])] = users.IndexOf(users[0]);
+            solution1[0 + jobs.IndexOf(jobs[1])] = users.IndexOf(users[1]);
+            solution1[0 + jobs.IndexOf(jobs[2])] = users.IndexOf(users[2]);
+            solution1[0 + jobs.IndexOf(jobs[3])] = users.IndexOf(users[0]);
+            solution1[4 + jobs.IndexOf(jobs[0])] = users.IndexOf(users[4]);
+            solution1[4 + jobs.IndexOf(jobs[1])] = users.IndexOf(users[0]);
+            solution1[4 + jobs.IndexOf(jobs[2])] = users.IndexOf(users[1]);
+            solution1[4 + jobs.IndexOf(jobs[3])] = users.IndexOf(users[2]);
+            solution1[8 + jobs.IndexOf(jobs[0])] = users.IndexOf(users[3]);
+            solution1[8 + jobs.IndexOf(jobs[1])] = users.IndexOf(users[4]);
+            solution1[8 + jobs.IndexOf(jobs[2])] = users.IndexOf(users[0]);
+            solution1[8 + jobs.IndexOf(jobs[3])] = users.IndexOf(users[1]);
+            solution1[12 + jobs.IndexOf(jobs[0])] = users.IndexOf(users[0]);
+            solution1[12 + jobs.IndexOf(jobs[1])] = users.IndexOf(users[3]);
+            solution1[12 + jobs.IndexOf(jobs[2])] = users.IndexOf(users[4]);
+            solution1[12 + jobs.IndexOf(jobs[3])] = users.IndexOf(users[0]);
+
+            solution2[0 + jobs.IndexOf(jobs[0])] = users.IndexOf(users[0]);
+            solution2[0 + jobs.IndexOf(jobs[1])] = users.IndexOf(users[1]);
+            solution2[0 + jobs.IndexOf(jobs[2])] = users.IndexOf(users[2]);
+            solution2[0 + jobs.IndexOf(jobs[3])] = users.IndexOf(users[3]);
+            solution2[4 + jobs.IndexOf(jobs[0])] = users.IndexOf(users[4]);
+            solution2[4 + jobs.IndexOf(jobs[1])] = users.IndexOf(users[0]);
+            solution2[4 + jobs.IndexOf(jobs[2])] = users.IndexOf(users[1]);
+            solution2[4 + jobs.IndexOf(jobs[3])] = users.IndexOf(users[2]);
+            solution2[8 + jobs.IndexOf(jobs[0])] = users.IndexOf(users[3]);
+            solution2[8 + jobs.IndexOf(jobs[1])] = users.IndexOf(users[4]);
+            solution2[8 + jobs.IndexOf(jobs[2])] = users.IndexOf(users[0]);
+            solution2[8 + jobs.IndexOf(jobs[3])] = users.IndexOf(users[1]);
+            solution2[12 + jobs.IndexOf(jobs[0])] = users.IndexOf(users[2]);
+            solution2[12 + jobs.IndexOf(jobs[1])] = users.IndexOf(users[3]);
+            solution2[12 + jobs.IndexOf(jobs[2])] = users.IndexOf(users[4]);
+            solution2[12 + jobs.IndexOf(jobs[3])] = users.IndexOf(users[0]);
+
+            // Act
+            JobConsideration consideration = new JobConsiderationEvenUserDistributionPerJob.Builder()
+                .SetJobs(jobs)
+                .SetTemplates(templates)
+                .SetUsers(users)
+                .Build();
+            int invalidCount1 = consideration.IsValid(solution1);
+            int invalidCount2 = consideration.IsValid(solution2);
+
+            // Assert
+            Assert.AreEqual(3, invalidCount1);
             Assert.AreEqual(0, invalidCount2);
         }
 

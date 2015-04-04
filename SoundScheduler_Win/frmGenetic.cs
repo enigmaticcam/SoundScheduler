@@ -120,6 +120,13 @@ namespace SoundScheduler_Win {
             _jobs.Add(jobMic4);
             jobMic4.IsVoidedOnSoftException = true;
 
+            jobMic1.AddSameJob(jobMic2);
+            jobMic1.AddSameJob(jobMic3);
+            jobMic1.AddSameJob(jobMic4);
+            jobMic2.AddSameJob(jobMic3);
+            jobMic2.AddSameJob(jobMic4);
+            jobMic3.AddSameJob(jobMic4);
+
             User userCTangen = new User();
             userCTangen.Name = "Cameron Tangen";
             userCTangen.Jobs = new List<Job> { jobSound, jobStage, jobMic1, jobMic2, jobMic3, jobMic4 };
@@ -160,13 +167,28 @@ namespace SoundScheduler_Win {
             userBDeaver.Jobs = new List<Job> { jobStage, jobMic1, jobMic2, jobMic3, jobMic4 };
             _users.Add(userBDeaver);
 
+            User userBTaylor = new User();
+            userBTaylor.Name = "Bobby Taylor";
+            userBTaylor.Jobs = new List<Job> { jobMic1, jobMic2, jobMic3, jobMic4 };
+            _users.Add(userBTaylor);
+
+            User userBBabbe = new User();
+            userBBabbe.Name = "Bob Babbe";
+            userBBabbe.Jobs = new List<Job> { jobMic1, jobMic2, jobMic3, jobMic4 };
+            _users.Add(userBBabbe);
+
+            User userDBecker = new User();
+            userDBecker.Name = "Dave Becker";
+            userDBecker.Jobs = new List<Job> { jobMic1, jobMic2, jobMic3, jobMic4 };
+            _users.Add(userDBecker);
+
             Template templateSunday = new Template();
             templateSunday.Name = "Sunday";
             templateSunday.Jobs = new List<Job> { jobSound, jobStage, jobMic1, jobMic2, jobMic3, jobMic4 };
 
             Template templateTuesday = new Template();
             templateTuesday.Name = "Tuesday";
-            templateTuesday.Jobs = new List<Job> { jobSound, jobStage, jobMic1, jobMic2 };
+            templateTuesday.Jobs = new List<Job> { jobSound, jobStage, jobMic1, jobMic2, jobMic3, jobMic4 };
 
             _meetings.Add(templateSunday.ToMeeting(DateTime.Parse("1/1/2015")));
             _meetings.Add(templateTuesday.ToMeeting(DateTime.Parse("1/1/2015")));
