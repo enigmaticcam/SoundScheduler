@@ -155,9 +155,10 @@ namespace SoundScheduler_Logic.Engine {
 
     public class JobConsiderationUsersWhoAlreadyHaveJob : JobConsideration {
         private Dictionary<int, bool> _usersInDay = new Dictionary<int, bool>();
-        private Dictionary<bool, float> _softExceptionToValue = new Dictionary<bool, float>();
+        private Dictionary<bool, Dictionary<bool, bool>> _softExceptionChange = new Dictionary<bool, Dictionary<bool, bool>>();
         private int _counter;
         private float _exceptionCount;
+        private float _zeroPointFive = (float)0.5;
 
         public override string JobName {
             get { return "Users Who Already Have Job"; }
@@ -174,7 +175,12 @@ namespace SoundScheduler_Logic.Engine {
                 _usersInDay.Clear();
                 foreach (Job job in template.Jobs) {
                     if (_usersInDay.ContainsKey(usersInJobs[_counter])) {
-                        _exceptionCount += _softExceptionToValue[job.IsVoidedOnSoftException];
+                        if (!_usersInDay[usersInJobs[_counter]] || !job.IsVoidedOnSoftException) {
+                            _exceptionCount += _zeroPointFive;
+                        } else {
+                            _exceptionCount += 1;
+                        }
+                        _usersInDay[usersInJobs[_counter]] = _softExceptionChange[_usersInDay[usersInJobs[_counter]]][job.IsVoidedOnSoftException];
                     } else {
                         _usersInDay.Add(usersInJobs[_counter], job.IsVoidedOnSoftException);
                     }
@@ -185,8 +191,18 @@ namespace SoundScheduler_Logic.Engine {
         }
 
         public JobConsiderationUsersWhoAlreadyHaveJob(Builder builder) : base(builder) {
-            _softExceptionToValue.Add(true, 1);
-            _softExceptionToValue.Add(false, (float)0.5);
+            BuildSoftExceptionChange();
+        }
+
+        private void BuildSoftExceptionChange() {
+            // this ensures that regardless if the first job that is added to _usersInDay is or is not a soft exception,
+            // if a hard exception is found, it's changed to a hard exception.
+            _softExceptionChange.Add(true, new Dictionary<bool, bool>());
+            _softExceptionChange.Add(false, new Dictionary<bool, bool>());
+            _softExceptionChange[true].Add(true, true);
+            _softExceptionChange[true].Add(false, true);
+            _softExceptionChange[false].Add(true, true);
+            _softExceptionChange[false].Add(false, false);
         }
 
         public class Builder : JobConsideration.BuilderBase {
