@@ -10,7 +10,7 @@ namespace SoundScheduler_Logic.Engine {
 
     public abstract class JobConsideration {
         public abstract bool IsConsiderationSoft { get; }
-        public abstract int IsValid(int[] usersInJobs);
+        public abstract float IsValid(int[] usersInJobs);
         public abstract string JobName { get; }
 
         private IEnumerable<Template> _templates;
@@ -106,7 +106,7 @@ namespace SoundScheduler_Logic.Engine {
             get { return false; }
         }
 
-        public override int IsValid(int[] usersInJobs) {
+        public override float IsValid(int[] usersInJobs) {
             BitArray solution = new BitArray(this.SolutionCount * this.Users.Count());
             for (int i = 0; i <= usersInJobs.GetUpperBound(0); i++) {
                 int position = usersInJobs[i] * this.SolutionCount + i;
@@ -154,9 +154,10 @@ namespace SoundScheduler_Logic.Engine {
     }
 
     public class JobConsiderationUsersWhoAlreadyHaveJob : JobConsideration {
-        private HashSet<int> _usersInDay = new HashSet<int>();
+        private Dictionary<int, bool> _usersInDay = new Dictionary<int, bool>();
+        private Dictionary<bool, float> _softExceptionToValue = new Dictionary<bool, float>();
         private int _counter;
-        private int _exceptionCount;
+        private float _exceptionCount;
 
         public override string JobName {
             get { return "Users Who Already Have Job"; }
@@ -166,16 +167,16 @@ namespace SoundScheduler_Logic.Engine {
             get { return false; }
         }
 
-        public override int IsValid(int[] usersInJobs) {
+        public override float IsValid(int[] usersInJobs) {
             _counter = 0;
             _exceptionCount = 0;
             foreach (Template template in this.Templates) {
                 _usersInDay.Clear();
                 foreach (Job job in template.Jobs) {
-                    if (_usersInDay.Contains(usersInJobs[_counter])) {
-                        ++_exceptionCount;
+                    if (_usersInDay.ContainsKey(usersInJobs[_counter])) {
+                        _exceptionCount += _softExceptionToValue[job.IsVoidedOnSoftException];
                     } else {
-                        _usersInDay.Add(usersInJobs[_counter]);
+                        _usersInDay.Add(usersInJobs[_counter], job.IsVoidedOnSoftException);
                     }
                     ++_counter;
                 }
@@ -184,7 +185,8 @@ namespace SoundScheduler_Logic.Engine {
         }
 
         public JobConsiderationUsersWhoAlreadyHaveJob(Builder builder) : base(builder) {
-            
+            _softExceptionToValue.Add(true, 1);
+            _softExceptionToValue.Add(false, (float)0.5);
         }
 
         public class Builder : JobConsideration.BuilderBase {
@@ -211,7 +213,7 @@ namespace SoundScheduler_Logic.Engine {
             get { return true; }
         }
 
-        public override int IsValid(int[] usersInJobs) {
+        public override float IsValid(int[] usersInJobs) {
             ResetToZeros();
             CountUsersPerJob(usersInJobs);
             return CountMinMax();
@@ -317,7 +319,7 @@ namespace SoundScheduler_Logic.Engine {
             get { return true; }
         }
 
-        public override int IsValid(int[] usersInJobs) {
+        public override float IsValid(int[] usersInJobs) {
             SetAllToZero();
             BuildMatrixFromSolution(usersInJobs);
             return PerforANDandCount();

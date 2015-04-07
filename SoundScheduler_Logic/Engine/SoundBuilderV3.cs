@@ -109,9 +109,9 @@ namespace SoundScheduler_Logic.Engine {
             }
 
             private float Fitness(int[] chromosome, Genetic genetic) {
-                int score = 100000;
+                float score = 100000;
                 foreach (JobConsideration consideration in _jobConsiderations) {
-                    int exceptionReduction = consideration.IsValid(chromosome);
+                    float exceptionReduction = consideration.IsValid(chromosome);
                     if (!consideration.IsConsiderationSoft) {
                         exceptionReduction *= 100;
                     }

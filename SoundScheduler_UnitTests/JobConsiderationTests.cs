@@ -200,8 +200,8 @@ namespace SoundScheduler_UnitTests {
                 .SetTemplates(templates)
                 .SetUsers(users)
                 .Build();
-            int invalidCount1 = consideration.IsValid(solution1);
-            int invalidCount2 = consideration.IsValid(solution2);
+            float invalidCount1 = consideration.IsValid(solution1);
+            float invalidCount2 = consideration.IsValid(solution2);
 
             // Assert
             Assert.AreEqual(3, invalidCount1);
@@ -215,6 +215,12 @@ namespace SoundScheduler_UnitTests {
             List<Job> jobs = new List<Job> { new Job(), new Job(), new Job(), new Job(), new Job() };
             List<User> users = new List<User> { new User(), new User(), new User(), new User(), new User() };
 
+            jobs[0].IsVoidedOnSoftException = true;
+            jobs[1].IsVoidedOnSoftException = true;
+            jobs[2].IsVoidedOnSoftException = true;
+            jobs[3].IsVoidedOnSoftException = false;
+            jobs[4].IsVoidedOnSoftException = true;
+
             Template template1 = new Template();
             template1.Jobs.Add(jobs[0]);
             template1.Jobs.Add(jobs[1]);
@@ -226,7 +232,7 @@ namespace SoundScheduler_UnitTests {
             int[] solution1 = new int[jobs.Count];
             int[] solution2 = new int[jobs.Count];
 
-            solution1[jobs.IndexOf(jobs[0])] = users.IndexOf(users[0]);
+            solution1[jobs.IndexOf(jobs[0])] = users.IndexOf(users[3]);
             solution1[jobs.IndexOf(jobs[1])] = users.IndexOf(users[1]);
             solution1[jobs.IndexOf(jobs[2])] = users.IndexOf(users[2]);
             solution1[jobs.IndexOf(jobs[3])] = users.IndexOf(users[1]);
@@ -244,11 +250,11 @@ namespace SoundScheduler_UnitTests {
                 .SetTemplates(templates)
                 .SetUsers(users)
                 .Build();
-            int invalidCount1 = consideration.IsValid(solution1);
-            int invalidCount2 = consideration.IsValid(solution2);
+            float invalidCount1 = consideration.IsValid(solution1);
+            float invalidCount2 = consideration.IsValid(solution2);
 
             // Assert
-            Assert.AreEqual(1, invalidCount1);
+            Assert.AreEqual(1.5, invalidCount1);
             Assert.AreEqual(0, invalidCount2);
         }
 
@@ -302,8 +308,8 @@ namespace SoundScheduler_UnitTests {
                 .SetTemplates(templates)
                 .SetUsers(users)
                 .Build();
-            int invalidCount1 = consideration.IsValid(solution1);
-            int invalidCount2 = consideration.IsValid(solution2);
+            float invalidCount1 = consideration.IsValid(solution1);
+            float invalidCount2 = consideration.IsValid(solution2);
 
             // Assert
             Assert.AreEqual(2, invalidCount1);
@@ -384,8 +390,8 @@ namespace SoundScheduler_UnitTests {
                 .SetTemplates(templates)
                 .SetUsers(users)
                 .Build();
-            int invalidCount1 = consideration.IsValid(solution1);
-            int invalidCount2 = consideration.IsValid(solution2);
+            float invalidCount1 = consideration.IsValid(solution1);
+            float invalidCount2 = consideration.IsValid(solution2);
 
             // Assert
             Assert.AreEqual(3, invalidCount1);
@@ -449,8 +455,8 @@ namespace SoundScheduler_UnitTests {
                 .SetTemplates(templates)
                 .SetUsers(users)
                 .Build();
-            int invalidCount1 = consideration.IsValid(solution1);
-            int invalidCount2 = consideration.IsValid(solution2);
+            float invalidCount1 = consideration.IsValid(solution1);
+            float invalidCount2 = consideration.IsValid(solution2);
 
             // Assert
             Assert.AreEqual(6, invalidCount1);

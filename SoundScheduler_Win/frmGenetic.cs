@@ -62,7 +62,7 @@ namespace SoundScheduler_Win {
             int day = 1;
             StringBuilder text = new StringBuilder();
             foreach (JobConsideration consideration in _jobConsiderations) {
-                int score = consideration.IsValid(solution);
+                float score = consideration.IsValid(solution);
                 if (score != 0) {
                     text.AppendLine("");
                     text.AppendLine(consideration.JobName + ": -" + score + " points");
