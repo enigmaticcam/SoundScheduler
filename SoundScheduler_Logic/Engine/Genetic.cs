@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 
 namespace SoundScheduler_Logic.Engine {
     public class Genetic {
+        public float ScoreSolveValue { get; set; }
         public float IsSolved {
             get { return -1; }
         }
@@ -132,7 +133,7 @@ namespace SoundScheduler_Logic.Engine {
                 generationsPerSecond = _generationCount - _lastResults.GenerationCount;
             }
             _lastResults = new GeneticResults.Builder()
-                .SetBestSolutionSoFarScore(_bestSoFarScore)
+                .SetBestSolutionSoFarScore((_bestSoFarScore / this.ScoreSolveValue) * 100)
                 .SetBestSolutionSoFarSolution(chromosomeToInt(_bestSoFarChar, tempChrome))
                 .SetGenerationCount(_generationCount)
                 .SetGenerationsPerSecond(generationsPerSecond)

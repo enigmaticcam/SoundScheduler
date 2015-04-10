@@ -12,6 +12,7 @@ namespace SoundScheduler_Logic.Engine {
         public abstract bool IsConsiderationSoft { get; }
         public abstract float IsValid(int[] usersInJobs);
         public abstract string JobName { get; }
+        public int JobRank { get; set; }
 
         private IEnumerable<Template> _templates;
         public IEnumerable<Template> Templates {

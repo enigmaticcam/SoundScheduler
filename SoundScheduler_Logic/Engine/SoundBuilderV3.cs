@@ -60,11 +60,19 @@ namespace SoundScheduler_Logic.Engine {
             private Genetic _genetic = new Genetic();
             private Func<Genetic.GeneticResults, bool> _resultsFunc;
             private Action<int[]> _solutionAction;
+            private float _solve = 10000;
 
             public void PerformAction() {
+                RankJobConsiderations();
                 CreateTemplatesFromMeetings();
                 AddImmutableUsers();
                 PerformAlgorithm();
+            }
+
+            private void RankJobConsiderations() {
+                for (int i = 0; i < _jobConsiderations.Count(); i++) {
+                    _jobConsiderations.ElementAt(i).JobRank = i + 1;
+                }
             }
 
             private void CreateTemplatesFromMeetings() {
@@ -91,8 +99,7 @@ namespace SoundScheduler_Logic.Engine {
             }
 
             private void PerformAlgorithm() {
-                //int[] solution = _genetic.Begin(GetBitLength(), GetBitCount(), Fitness);
-                //bool stopHere = true;
+                _genetic.ScoreSolveValue = _solve;
                 _genetic.BeginAsync(GetBitLength(), GetBitCount(), Fitness, _resultsFunc, _solutionAction);
             }
 
@@ -109,15 +116,17 @@ namespace SoundScheduler_Logic.Engine {
             }
 
             private float Fitness(int[] chromosome, Genetic genetic) {
-                float score = 100000;
+                float score = _solve;
                 foreach (JobConsideration consideration in _jobConsiderations) {
                     float exceptionReduction = consideration.IsValid(chromosome);
                     if (!consideration.IsConsiderationSoft) {
                         exceptionReduction *= 100;
+                    } else {
+                        exceptionReduction *= consideration.JobRank;
                     }
                     score -= exceptionReduction;
                 }
-                if (score == 100000) {
+                if (score == _solve) {
                     return genetic.IsSolved;
                 } else {
                     return score;

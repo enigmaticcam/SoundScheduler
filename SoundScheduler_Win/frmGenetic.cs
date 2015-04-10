@@ -14,6 +14,7 @@ namespace SoundScheduler_Win {
     public partial class frmGenetic : Form {
         private delegate void UpdateResultsDelegate(Genetic.GeneticResults results);
         private delegate void UpdateResultsFinishedDelegate(int[] solution);
+        private System.Diagnostics.Stopwatch _timer;
         private bool _stop;
         private List<Job> _jobs;
         private List<User> _users;
@@ -31,15 +32,17 @@ namespace SoundScheduler_Win {
         }
 
         private void Finish(int[] solution) {
+            _timer.Stop();
             txtResults.BeginInvoke(new UpdateResultsFinishedDelegate(UpdateResultsFinished), new object[] { solution });
         }
 
         private void UpdateResults(Genetic.GeneticResults results) {
             StringBuilder text = new StringBuilder();
             text.AppendLine("Best Solution So Far: " + IntArrayToString(results.BestSolutionSoFarSolution));
-            text.AppendLine("Best Solution Score So Far: " + results.BestSolutionSoFarScore);
+            text.AppendLine("Best Solution Score So Far: " + results.BestSolutionSoFarScore + "%");
             text.AppendLine("Generation Count: " + results.GenerationCount);
             text.AppendLine("Generations Per Second: " + results.GenerationsPerSecond);
+            text.AppendLine("Elapsed Time: " + _timer.Elapsed.Hours.ToString().PadLeft(2, '0') + ":" + _timer.Elapsed.Minutes.ToString().PadLeft(2, '0') + ":" + _timer.Elapsed.Seconds.ToString().PadLeft(2, '0'));
             txtResults.Text = text.ToString();
         }
 
@@ -205,21 +208,16 @@ namespace SoundScheduler_Win {
 
             _meetings[7].AddUserForJob(userCTangen, jobSound);
 
-            JobConsideration consideration = new JobConsiderationUsersWhoAlreadyHaveJob.Builder()
-                .SetJobs(_jobs)
-                .SetTemplates(_templates)
-                .SetUsers(_users)
-                .Build();
-            _jobConsiderations.Add(consideration);
-
-            consideration = new JobConsiderationUsersWhoCantDoJob.Builder()
-                .SetJobs(_jobs)
-                .SetTemplates(_templates)
-                .SetUsers(_users)
-                .Build();
-            _jobConsiderations.Add(consideration);
+            JobConsideration consideration = null;
 
             consideration = new JobConsiderationEvenUserDistributionPerJob.Builder()
+                .SetJobs(_jobs)
+                .SetTemplates(_templates)
+                .SetUsers(_users)
+                .Build();
+            _jobConsiderations.Add(consideration);
+
+            consideration = new JobConsiderationUsersWhoDidSameJobLastMeeting.Builder()
                 .SetJobs(_jobs)
                 .SetTemplates(_templates)
                 .SetUsers(_users)
@@ -234,14 +232,20 @@ namespace SoundScheduler_Win {
                 .Build();
             _jobConsiderations.Add(consideration);
 
-            consideration = new JobConsiderationUsersWhoDidSameJobLastMeeting.Builder()
+            consideration = new JobConsiderationUsersWhoAlreadyHaveJob.Builder()
                 .SetJobs(_jobs)
                 .SetTemplates(_templates)
                 .SetUsers(_users)
                 .Build();
             _jobConsiderations.Add(consideration);
 
-            // Act
+            consideration = new JobConsiderationUsersWhoCantDoJob.Builder()
+                .SetJobs(_jobs)
+                .SetTemplates(_templates)
+                .SetUsers(_users)
+                .Build();
+            _jobConsiderations.Add(consideration);
+            
             SoundBuilderV3.ActionFillMeetingsAll action = new SoundBuilderV3.ActionFillMeetingsAll.Builder()
                 .SetJobConsiderations(_jobConsiderations)
                 .SetMeetings(_meetings)
@@ -250,6 +254,9 @@ namespace SoundScheduler_Win {
                 .SetSolutionAction(Finish)
                 .Build();
             action.PerformAction();
+
+            _timer = new System.Diagnostics.Stopwatch();
+            _timer.Start();
         }
 
         private void cmdStop_Click(object sender, EventArgs e) {
