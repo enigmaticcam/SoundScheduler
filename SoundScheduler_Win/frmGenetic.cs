@@ -234,6 +234,13 @@ namespace SoundScheduler_Win {
                 .Build();
             _jobConsiderations.Add(consideration);
 
+            consideration = new JobConsiderationUsersWhoDidSameJobLastMeeting.Builder()
+                .SetJobs(_jobs)
+                .SetTemplates(_templates)
+                .SetUsers(_users)
+                .Build();
+            _jobConsiderations.Add(consideration);
+
             // Act
             SoundBuilderV3.ActionFillMeetingsAll action = new SoundBuilderV3.ActionFillMeetingsAll.Builder()
                 .SetJobConsiderations(_jobConsiderations)

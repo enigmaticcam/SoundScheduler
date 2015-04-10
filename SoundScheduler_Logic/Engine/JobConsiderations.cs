@@ -415,4 +415,47 @@ namespace SoundScheduler_Logic.Engine {
             }
         }
     }
+
+    public class JobConsiderationUsersWhoDidSameJobLastMeeting : JobConsideration {
+        private Dictionary<int, Job> _usersLastJob = new Dictionary<int, Job>();
+        private int _counter;
+
+        public override bool IsConsiderationSoft {
+            get { return true; }
+        }
+
+        public override string JobName {
+            get { return "Users Who Did Same Job Last Meeting"; }
+        }
+
+        public override float IsValid(int[] usersInJobs) {
+            _usersLastJob.Clear();
+            _counter = 0;
+            int sameJobCount = 0;
+            foreach (Template template in this.Templates) {
+                foreach (Job job in template.Jobs) {
+                    if (_usersLastJob.ContainsKey(usersInJobs[_counter])) {
+                        if (_usersLastJob[usersInJobs[_counter]] == job || _usersLastJob[usersInJobs[_counter]].IsSameJob(job)) {
+                            ++sameJobCount;
+                        }
+                        _usersLastJob[usersInJobs[_counter]] = job;
+                    } else {
+                        _usersLastJob.Add(usersInJobs[_counter], job);
+                    }
+                    ++_counter;
+                }
+            }
+            return sameJobCount;
+        }
+
+        public JobConsiderationUsersWhoDidSameJobLastMeeting(Builder builder) : base(builder) {
+
+        }
+
+        public class Builder : JobConsideration.BuilderBase {
+            public override JobConsideration Build() {
+                return new JobConsiderationUsersWhoDidSameJobLastMeeting(this);
+            }
+        }
+    }
 }

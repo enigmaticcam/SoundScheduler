@@ -380,5 +380,61 @@ namespace SoundScheduler_UnitTests {
             Assert.AreEqual(6, invalidCount1);
             Assert.AreEqual(0, invalidCount2);
         }
+
+        [TestMethod]
+        public void JobConsideration_UsersWhoDidSameJobLastMeeting() {
+
+            // Arrange
+            List<Job> jobs = new List<Job> { new Job(), new Job(), new Job(), };
+            List<User> users = new List<User> { new User(), new User(), new User(), new User(), new User() };
+
+            jobs[0].AddSameJob(jobs[2]);
+
+            jobs[0].Name = "Job 0";
+            jobs[1].Name = "Job 1";
+            jobs[2].Name = "Job 2";
+
+            Template template1 = new Template();
+            template1.Jobs.Add(jobs[0]);
+            template1.Jobs.Add(jobs[1]);
+            template1.Jobs.Add(jobs[2]);
+            List<Template> templates = new List<Template> { template1, template1, template1 };
+
+            int[] solution1 = new int[jobs.Count * templates.Count];
+            int[] solution2 = new int[jobs.Count * templates.Count];
+
+            solution1[0 + jobs.IndexOf(jobs[0])] = users.IndexOf(users[0]);
+            solution1[0 + jobs.IndexOf(jobs[1])] = users.IndexOf(users[1]);
+            solution1[0 + jobs.IndexOf(jobs[2])] = users.IndexOf(users[2]);
+            solution1[3 + jobs.IndexOf(jobs[0])] = users.IndexOf(users[0]);
+            solution1[3 + jobs.IndexOf(jobs[1])] = users.IndexOf(users[1]);
+            solution1[3 + jobs.IndexOf(jobs[2])] = users.IndexOf(users[2]);
+            solution1[6 + jobs.IndexOf(jobs[0])] = users.IndexOf(users[3]);
+            solution1[6 + jobs.IndexOf(jobs[1])] = users.IndexOf(users[2]);
+            solution1[6 + jobs.IndexOf(jobs[2])] = users.IndexOf(users[0]);
+
+            solution2[0 + jobs.IndexOf(jobs[0])] = users.IndexOf(users[0]);
+            solution2[0 + jobs.IndexOf(jobs[1])] = users.IndexOf(users[1]);
+            solution2[0 + jobs.IndexOf(jobs[2])] = users.IndexOf(users[2]);
+            solution2[3 + jobs.IndexOf(jobs[0])] = users.IndexOf(users[3]);
+            solution2[3 + jobs.IndexOf(jobs[1])] = users.IndexOf(users[0]);
+            solution2[3 + jobs.IndexOf(jobs[2])] = users.IndexOf(users[1]);
+            solution2[6 + jobs.IndexOf(jobs[0])] = users.IndexOf(users[0]);
+            solution2[6 + jobs.IndexOf(jobs[1])] = users.IndexOf(users[1]);
+            solution2[6 + jobs.IndexOf(jobs[2])] = users.IndexOf(users[4]);
+
+            // Act
+            JobConsideration consideration = new JobConsiderationUsersWhoDidSameJobLastMeeting.Builder()
+                .SetJobs(jobs)
+                .SetTemplates(templates)
+                .SetUsers(users)
+                .Build();
+            float invalidCount1 = consideration.IsValid(solution1);
+            float invalidCount2 = consideration.IsValid(solution2);
+
+            // Assert
+            Assert.AreEqual(4, invalidCount1);
+            Assert.AreEqual(0, invalidCount2);
+        }
     }
 }
