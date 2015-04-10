@@ -25,6 +25,7 @@ namespace SoundScheduler_Logic.Engine {
         private int _chromosomeLength;
         private char[][] _chromosomes;
         private char[][] _newchromosomes;
+        private char[] _tempChrome;
         private int[][] _chromosomesAsInt;
         private float[] _ranks;
         private float[] _roulette;
@@ -121,16 +122,18 @@ namespace SoundScheduler_Logic.Engine {
             _timer = new System.Timers.Timer(1000);
             _timer.Elapsed += new System.Timers.ElapsedEventHandler(TimerElapsed);
             _timer.Enabled = true;
+            _tempChrome = new char[_chromosomeLength];
         }
 
         private void TimerElapsed(object sender, System.Timers.ElapsedEventArgs e) {
+            char[] tempChrome = new char[_chromosomeLength];
             int generationsPerSecond = _generationCount;
             if (_lastResults != null) {
                 generationsPerSecond = _generationCount - _lastResults.GenerationCount;
             }
             _lastResults = new GeneticResults.Builder()
                 .SetBestSolutionSoFarScore(_bestSoFarScore)
-                .SetBestSolutionSoFarSolution(chromosomeToInt(_bestSoFarChar))
+                .SetBestSolutionSoFarSolution(chromosomeToInt(_bestSoFarChar, tempChrome))
                 .SetGenerationCount(_generationCount)
                 .SetGenerationsPerSecond(generationsPerSecond)
                 .Build();
@@ -285,14 +288,6 @@ namespace SoundScheduler_Logic.Engine {
         }
 
         private void MutatechromosomePair() {
-            //for (int pairIndex = 0; pairIndex < 1; pairIndex++) {
-            //    for (int chromosomeIndex = 0; chromosomeIndex < _bitLength * _chromosomeLength; chromosomeIndex++) {
-            //        int canMutate = _random.Next(0, 1001);
-            //        if (canMutate == 1000) {
-            //            _chromosomePair[pairIndex][chromosomeIndex] = _mutateRef[_chromosomePair[pairIndex][chromosomeIndex]];
-            //        }
-            //    }
-            //}
             for (int chromosomeIndex = 0; chromosomeIndex < _bitLength; chromosomeIndex++) {
                 int canMutate = _random.Next(0, 1001);
                 if (canMutate == 1000) {
@@ -335,13 +330,16 @@ namespace SoundScheduler_Logic.Engine {
         }
 
         private int[] chromosomeToInt(char[] chromosome) {
+            return chromosomeToInt(chromosome, _tempChrome);
+        }
+        
+        private int[] chromosomeToInt(char[] chromosome, char[] tempChrome) {            
             int[] chromosomeAsInt = new int[_bitLength];
             for (int chromosomeIndex = 0; chromosomeIndex < _bitLength; chromosomeIndex++) {
-                char[] chrome = new char[_chromosomeLength];
                 for (int i = 0; i < _chromosomeLength; i++) {
-                    chrome[i] = chromosome[chromosomeIndex * _chromosomeLength + i];
+                    tempChrome[i] = chromosome[chromosomeIndex * _chromosomeLength + i];
                 }
-                chromosomeAsInt[chromosomeIndex] = Convert.ToInt32(new string(chrome), 2);
+                chromosomeAsInt[chromosomeIndex] = Convert.ToInt32(new string(tempChrome), 2);
             }
             return chromosomeAsInt;
         }

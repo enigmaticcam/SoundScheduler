@@ -213,8 +213,7 @@ namespace SoundScheduler_Logic.Engine {
     }
 
     public class JobConsiderationEvenUserDistributionPerJob : JobConsideration {
-        private Dictionary<int, Dictionary<int, int>> _matrix = new Dictionary<int, Dictionary<int, int>>();
-        private Dictionary<Job, int> _sameJobMapping = new Dictionary<Job, int>();
+        private Dictionary<Job, Dictionary<int, int>> _matrix = new Dictionary<Job, Dictionary<int, int>>();
         private int _counter;
         private int _minMaxTotal;
         private int _minMaxSubTotal;
@@ -236,7 +235,7 @@ namespace SoundScheduler_Logic.Engine {
         }
 
         private void ResetToZeros() {
-            foreach (int jobIndex in _matrix.Keys) {
+            foreach (Job jobIndex in _matrix.Keys) {
                 for (int user = 0; user < this.Users.Count(); user++) {
                     _matrix[jobIndex][user] = 0;
                 }
@@ -247,7 +246,7 @@ namespace SoundScheduler_Logic.Engine {
             _counter = 0;
             foreach (Template template in this.Templates) {
                 foreach (Job job in template.Jobs) {
-                    _matrix[_sameJobMapping[job]][usersInJobs[_counter]] += 1;
+                    _matrix[job][usersInJobs[_counter]] += 1;
                     ++_counter;
                 }
             }
@@ -255,7 +254,7 @@ namespace SoundScheduler_Logic.Engine {
 
         private int CountMinMax() {
             _minMaxTotal = 0;
-            foreach (int jobIndex in _matrix.Keys) {
+            foreach (Job jobIndex in _matrix.Keys) {
                 _min = int.MaxValue;
                 _max = int.MinValue;
                 foreach (int user in _matrix[jobIndex].Keys) {
@@ -275,40 +274,14 @@ namespace SoundScheduler_Logic.Engine {
         }
 
         public JobConsiderationEvenUserDistributionPerJob(Builder builder) : base(builder) {
-            InstantiateSameJobMapping();
             InstantiateMatrix();
         }
 
-        private void InstantiateSameJobMapping() {
-            int sameJobIndex = 0;
-            foreach (Job job in this.Jobs) {
-                bool foundSameJob = false;
-                for (int index = 0; index < _sameJobMapping.Count; index++) {
-                    Job mapJob = _sameJobMapping.Keys.ElementAt(index);
-                    if (job.IsSameJob(mapJob)) {
-                        foundSameJob = true;
-                        _sameJobMapping.Add(job, index);
-                        break;
-                    }
-                }
-                if (!foundSameJob) {
-                    _sameJobMapping.Add(job, sameJobIndex);
-                    sameJobIndex++;
-                }
-            }
-        }
-
         private void InstantiateMatrix() {
-            int max = 0;
-            foreach (Job job in _sameJobMapping.Keys) {
-                if (_sameJobMapping[job] > max) {
-                    max = _sameJobMapping[job];
-                }
-            }
-            for (int matrixIndex = 0; matrixIndex <= max; matrixIndex++) {
-                _matrix.Add(matrixIndex, new Dictionary<int, int>());
-                for (int userIndex = 0; userIndex < this.Users.Count(); userIndex++) {
-                    _matrix[matrixIndex].Add(userIndex, 0);
+            foreach (Job job in this.Jobs) {
+                _matrix.Add(job, new Dictionary<int, int>());
+                for (int i = 0; i < this.Users.Count(); i++) {
+                    _matrix[job].Add(i, 0);
                 }
             }
         }
