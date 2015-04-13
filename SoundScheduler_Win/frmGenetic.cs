@@ -21,6 +21,7 @@ namespace SoundScheduler_Win {
         private List<Meeting> _meetings;
         private List<JobConsideration> _jobConsiderations;
         private List<Template> _templates;
+        private List<BestScoreEntry> _bestScores;
 
         public frmGenetic() {
             InitializeComponent();
@@ -37,13 +38,32 @@ namespace SoundScheduler_Win {
         }
 
         private void UpdateResults(Genetic.GeneticResults results) {
+            string elapsedTime = _timer.Elapsed.Hours.ToString().PadLeft(2, '0') + ":" + _timer.Elapsed.Minutes.ToString().PadLeft(2, '0') + ":" + _timer.Elapsed.Seconds.ToString().PadLeft(2, '0');
             StringBuilder text = new StringBuilder();
             text.AppendLine("Best Solution So Far: " + IntArrayToString(results.BestSolutionSoFarSolution));
             text.AppendLine("Best Solution Score So Far: " + results.BestSolutionSoFarScore + "%");
             text.AppendLine("Generation Count: " + results.GenerationCount);
             text.AppendLine("Generations Per Second: " + results.GenerationsPerSecond);
-            text.AppendLine("Elapsed Time: " + _timer.Elapsed.Hours.ToString().PadLeft(2, '0') + ":" + _timer.Elapsed.Minutes.ToString().PadLeft(2, '0') + ":" + _timer.Elapsed.Seconds.ToString().PadLeft(2, '0'));
+            text.AppendLine("Elapsed Time: " + elapsedTime);
+            text.Append(BestScoresSoFarText(results.BestSolutionSoFarScore, elapsedTime));
             txtResults.Text = text.ToString();
+        }
+
+        private string BestScoresSoFarText(float scoreToBeat, string secondsSinceStart) {
+            StringBuilder text = new StringBuilder();
+            if (_bestScores.Count > 0) {
+                if (scoreToBeat > _bestScores[0].Score) {
+                    _bestScores.Insert(0, new BestScoreEntry(secondsSinceStart, scoreToBeat));
+                }
+                foreach (BestScoreEntry entry in _bestScores) {
+                    text.AppendLine("");
+                    text.AppendLine("Previous Best: " + entry.Score);
+                    text.AppendLine("Best at: " + entry.TimeSinceStart);
+                }
+            } else {
+                _bestScores.Insert(0, new BestScoreEntry(secondsSinceStart, scoreToBeat));
+            }
+            return text.ToString();
         }
 
         private string IntArrayToString(int[] intArray) {
@@ -71,10 +91,11 @@ namespace SoundScheduler_Win {
                     text.AppendLine(consideration.JobName + ": -" + score + " points");
                 }
             }
-            foreach (Template template in _templates) {
+            foreach (Meeting meeting in _meetings) {
                 text.AppendLine("");
                 text.AppendLine("Day " + day);
-                foreach (Job job in template.Jobs) {
+                text.AppendLine("Date: " + meeting.Date.ToShortDateString());
+                foreach (Job job in meeting.Jobs) {
                     text.AppendLine("Job: " + job.Name + " User: " + _users[solution[counter]].Name);
                     counter++;
                 }
@@ -85,6 +106,7 @@ namespace SoundScheduler_Win {
 
         private void cmdGo_Click(object sender, EventArgs e) {
             _stop = false;
+            _bestScores = new List<BestScoreEntry>();
 
             // Arrange
             _jobs = new List<Job>();
@@ -193,20 +215,41 @@ namespace SoundScheduler_Win {
             templateTuesday.Name = "Tuesday";
             templateTuesday.Jobs = new List<Job> { jobSound, jobStage, jobMic1, jobMic2, jobMic3, jobMic4 };
 
-            _meetings.Add(templateSunday.ToMeeting(DateTime.Parse("1/1/2015")));
-            _meetings.Add(templateTuesday.ToMeeting(DateTime.Parse("1/1/2015")));
-            _meetings.Add(templateSunday.ToMeeting(DateTime.Parse("1/1/2015")));
-            _meetings.Add(templateTuesday.ToMeeting(DateTime.Parse("1/1/2015")));
-            _meetings.Add(templateSunday.ToMeeting(DateTime.Parse("1/1/2015")));
-            _meetings.Add(templateTuesday.ToMeeting(DateTime.Parse("1/1/2015")));
-            _meetings.Add(templateSunday.ToMeeting(DateTime.Parse("1/1/2015")));
-            _meetings.Add(templateTuesday.ToMeeting(DateTime.Parse("1/1/2015")));
+            Template templateTuesdayOld = new Template();
+            templateTuesday.Name = "TuesdayOld";
+            templateTuesday.Jobs = new List<Job> { jobSound, jobStage, jobMic1, jobMic2 };
+
+            _meetings.Add(templateSunday.ToMeeting(DateTime.Parse("4/14/2015")));
+            _meetings.Add(templateTuesdayOld.ToMeeting(DateTime.Parse("4/19/2015")));
+            _meetings.Add(templateSunday.ToMeeting(DateTime.Parse("4/21/2015")));
+            _meetings.Add(templateTuesday.ToMeeting(DateTime.Parse("4/26/2015")));
+            _meetings.Add(templateSunday.ToMeeting(DateTime.Parse("4/28/2015")));
+            _meetings.Add(templateTuesday.ToMeeting(DateTime.Parse("5/3/2015")));
+            _meetings.Add(templateSunday.ToMeeting(DateTime.Parse("5/5/2015")));
+            _meetings.Add(templateTuesday.ToMeeting(DateTime.Parse("5/10/2015")));
+
+            _meetings.Add(templateSunday.ToMeeting(DateTime.Parse("5/12/2015")));
+            _meetings.Add(templateTuesday.ToMeeting(DateTime.Parse("5/17/2015")));
+            _meetings.Add(templateSunday.ToMeeting(DateTime.Parse("5/19/2015")));
+            _meetings.Add(templateTuesday.ToMeeting(DateTime.Parse("5/24/2015")));
+            _meetings.Add(templateSunday.ToMeeting(DateTime.Parse("5/26/2015")));
+            _meetings.Add(templateTuesday.ToMeeting(DateTime.Parse("5/31/2015")));
 
             foreach (Meeting meeting in _meetings) {
                 _templates.Add(meeting.ToTemplate());
             }
 
-            _meetings[7].AddUserForJob(userCTangen, jobSound);
+            _meetings[0].AddUserForJob(userDLopez, jobSound);
+            _meetings[0].AddUserForJob(userBDeaver, jobStage);
+            _meetings[0].AddUserForJob(userDKeil, jobMic1);
+            _meetings[0].AddUserForJob(userDCook, jobMic2);
+
+            _meetings[1].AddUserForJob(userEWilder, jobSound);
+            _meetings[1].AddUserForJob(userCTangen, jobStage);
+            _meetings[1].AddUserForJob(userRStubbs, jobMic1);
+            _meetings[1].AddUserForJob(userBDeaver, jobMic2);
+            _meetings[1].AddUserForJob(userDLopez, jobMic3);
+            _meetings[1].AddUserForJob(userESavelberg, jobMic4);
 
             JobConsideration consideration = null;
 
@@ -261,6 +304,23 @@ namespace SoundScheduler_Win {
 
         private void cmdStop_Click(object sender, EventArgs e) {
             _stop = true;
+        }
+
+        private class BestScoreEntry {
+            private string _timeSinceStart;
+            public string TimeSinceStart {
+                get { return _timeSinceStart; }
+            }
+
+            private float _score;
+            public float Score {
+                get { return _score; }
+            }
+
+            public BestScoreEntry(string timeSinceStart, float score) {
+                _timeSinceStart = timeSinceStart;
+                _score = score;
+            }
         }
     }
 }
