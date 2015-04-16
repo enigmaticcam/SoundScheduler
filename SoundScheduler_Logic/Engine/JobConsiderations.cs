@@ -155,11 +155,19 @@ namespace SoundScheduler_Logic.Engine {
     }
 
     public class JobConsiderationUsersWhoAlreadyHaveJob : JobConsideration {
-        private Dictionary<int, bool> _usersInDay = new Dictionary<int, bool>();
-        private Dictionary<bool, Dictionary<bool, bool>> _softExceptionChange = new Dictionary<bool, Dictionary<bool, bool>>();
+        private Dictionary<Job, Dictionary<Job, float>> _jobComboToPoints = new Dictionary<Job, Dictionary<Job, float>>();
+        private Dictionary<ulong, float> _jobComboAsBitToPoints = new Dictionary<ulong, float>();
+        private Dictionary<Job, ulong> _jobToBit = new Dictionary<Job, ulong>();
+        private Dictionary<int, ulong> _userCombos = new Dictionary<int, ulong>();
+        private Dictionary<int, Dictionary<int, float>> _exceptions = new Dictionary<int, Dictionary<int, float>>();
+        private Dictionary<Job, float> _jobToException = new Dictionary<Job, float>();
+        private HashSet<int> _usersForDay = new HashSet<int>();
+        private List<Job> _jobsForCombo = new List<Job>();
         private int _counter;
-        private float _exceptionCount;
-        private float _zeroPointFive = (float)0.5;
+        private ulong _bit;
+        private float _score;
+        private float _tempScore;
+        private int _day;
 
         public override string JobName {
             get { return "Users Who Already Have Job"; }
@@ -169,41 +177,126 @@ namespace SoundScheduler_Logic.Engine {
             get { return false; }
         }
 
-        public override float IsValid(int[] usersInJobs) {
-            _counter = 0;
-            _exceptionCount = 0;
-            foreach (Template template in this.Templates) {
-                _usersInDay.Clear();
-                foreach (Job job in template.Jobs) {
-                    if (_usersInDay.ContainsKey(usersInJobs[_counter])) {
-                        if (!_usersInDay[usersInJobs[_counter]] || !job.IsVoidedOnSoftException) {
-                            _exceptionCount += _zeroPointFive;
-                        } else {
-                            _exceptionCount += 1;
-                        }
-                        _usersInDay[usersInJobs[_counter]] = _softExceptionChange[_usersInDay[usersInJobs[_counter]]][job.IsVoidedOnSoftException];
-                    } else {
-                        _usersInDay.Add(usersInJobs[_counter], job.IsVoidedOnSoftException);
-                    }
-                    ++_counter;
+        public void AddException(int templateIndex, int userIndex, float reductionCoefficient) {
+            _exceptions[templateIndex][userIndex] = reductionCoefficient;
+        }
+
+        public void AddJobToException(Job job, float reduction) {
+            _jobToException[job] = reduction;
+        }
+
+        public void AddSingleJobCombo(Job job1, Job job2, float reduction) {
+            AddJobComboPoints(job1, job2, reduction);
+            AddJobComboPoints(job2, job1, reduction);
+        }
+
+        public void AddAllJobCombos(Job job1, float reduction) {
+            foreach (Job job2 in this.Jobs) {
+                if (job1 != job2) {
+                    AddJobComboPoints(job1, job2, reduction);
+                    AddJobComboPoints(job2, job1, reduction);
                 }
             }
-            return _exceptionCount;
+        }
+
+        private void AddJobComboPoints(Job job1, Job job2, float reduction) {
+            if (!_jobComboToPoints.ContainsKey(job1)) {
+                _jobComboToPoints.Add(job1, new Dictionary<Job, float>());
+            }
+            _jobComboToPoints[job1].Add(job2, reduction);
+        }
+
+        public override float IsValid(int[] usersInJobs) {
+            _score = 0;
+            _counter = 0;
+            _day = 0;
+            foreach (Template template in this.Templates) {
+                _usersForDay.Clear();
+                foreach (Job job in template.Jobs) {
+                    _score += AddJobToDayJobCombo(job, usersInJobs[_counter]);
+                    if (_exceptions[_day][usersInJobs[_counter]] > 0) {
+                        _score += Math.Max(_exceptions[_day][usersInJobs[_counter]], _jobToException[job]);
+                    }
+                    _usersForDay.Add(usersInJobs[_counter]);
+                    ++_counter;
+                }
+                foreach (int user in _usersForDay) {
+                    _score += ScoreForDay(template, _userCombos[user]);
+                    _userCombos[user] = 0;
+                }
+                ++_day;
+            }
+            return _score;
+        }
+        
+        private float AddJobToDayJobCombo(Job job, int userComboIndex) {
+            _bit = _jobToBit[job];
+            if ((_userCombos[userComboIndex] & _bit) == _bit) {
+                return 1;
+            } else {
+                _userCombos[userComboIndex] += _bit;
+                return 0;
+            }
+        }
+
+        private float ScoreForDay(Template template, ulong combo) {
+            if (!_jobComboAsBitToPoints.ContainsKey(combo)) {
+                _jobsForCombo.Clear();
+                foreach (Job job in template.Jobs) {
+                    if ((_jobToBit[job] & combo) == _jobToBit[job]) {
+                        _jobsForCombo.Add(job);
+                    }
+                }
+                _jobComboAsBitToPoints.Add(combo, ScoreForJobCombo(_jobsForCombo));
+            }
+            return _jobComboAsBitToPoints[combo];
+        }
+
+        private float ScoreForJobCombo(List<Job> jobs) {
+            _tempScore = 0;
+            int jobIndex = 0;
+            foreach (Job job in jobs) {
+                for (int jobAgainstIndex = jobIndex + 1; jobAgainstIndex < jobs.Count; jobAgainstIndex++) {
+                    if (_jobComboToPoints.ContainsKey(job) && _jobComboToPoints[job].ContainsKey(jobs[jobAgainstIndex])) {
+                        _tempScore += _jobComboToPoints[job][jobs[jobAgainstIndex]];
+                    } else {
+                        _tempScore += 1;
+                    }
+                }
+                ++jobIndex;
+            }
+            return _tempScore;
         }
 
         public JobConsiderationUsersWhoAlreadyHaveJob(Builder builder) : base(builder) {
-            BuildSoftExceptionChange();
+            BuildJobIndex();
+            BuildUserCombos();
+            BuildExceptions();
         }
 
-        private void BuildSoftExceptionChange() {
-            // this ensures that regardless if the first job that is added to _usersInDay is or is not a soft exception,
-            // if a hard exception is found, it's changed to a hard exception.
-            _softExceptionChange.Add(true, new Dictionary<bool, bool>());
-            _softExceptionChange.Add(false, new Dictionary<bool, bool>());
-            _softExceptionChange[true].Add(true, true);
-            _softExceptionChange[true].Add(false, true);
-            _softExceptionChange[false].Add(true, true);
-            _softExceptionChange[false].Add(false, false);
+        private void BuildJobIndex() {
+            for (int jobIndex = 0; jobIndex < this.Jobs.Count(); jobIndex++) {
+                ulong bit = (ulong)Math.Pow(2, jobIndex);
+                _jobToBit.Add(this.Jobs.ElementAt(jobIndex), bit);
+            }
+        }
+
+        private void BuildUserCombos() {
+            for (int userIndex = 0; userIndex < this.Users.Count(); userIndex++) {
+                _userCombos.Add(userIndex, 0);
+            }
+        }
+
+        private void BuildExceptions() {
+            for (int templateIndex = 0; templateIndex < this.Templates.Count(); templateIndex++) {
+                _exceptions.Add(templateIndex, new Dictionary<int, float>());
+                for (int userIndex = 0; userIndex < this.Users.Count(); userIndex++) {
+                    _exceptions[templateIndex].Add(userIndex, 0);
+                }
+            }
+            foreach (Job job in this.Jobs) {
+                _jobToException.Add(job, 1);
+            }
         }
 
         public class Builder : JobConsideration.BuilderBase {

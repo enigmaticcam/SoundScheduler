@@ -406,8 +406,16 @@ namespace SoundScheduler_Logic.Engine {
                 return _results(results);
             }
 
+            private bool Default(GeneticResults results) {
+                return true;
+            }
+
             public ResultsFunction(Func<GeneticResults, bool> results) {
-                _results = results;
+                if (results == null) {
+                    _results = Default;
+                } else {
+                    _results = results;
+                }
             }
         }
 

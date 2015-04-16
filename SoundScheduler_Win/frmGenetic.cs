@@ -217,7 +217,7 @@ namespace SoundScheduler_Win {
 
             Template templateTuesdayOld = new Template();
             templateTuesday.Name = "TuesdayOld";
-            templateTuesday.Jobs = new List<Job> { jobSound, jobStage, jobMic1, jobMic2 };
+            templateTuesdayOld.Jobs = new List<Job> { jobSound, jobStage, jobMic1, jobMic2 };
 
             _meetings.Add(templateSunday.ToMeeting(DateTime.Parse("4/14/2015")));
             _meetings.Add(templateTuesdayOld.ToMeeting(DateTime.Parse("4/19/2015")));
@@ -280,6 +280,8 @@ namespace SoundScheduler_Win {
                 .SetTemplates(_templates)
                 .SetUsers(_users)
                 .Build();
+            ((JobConsiderationUsersWhoAlreadyHaveJob)consideration).AddException(5, _users.IndexOf(userRStubbs), (float)0.5);
+            ((JobConsiderationUsersWhoAlreadyHaveJob)consideration).AddException(5, _users.IndexOf(userESavelberg), (float)0.5);
             _jobConsiderations.Add(consideration);
 
             consideration = new JobConsiderationUsersWhoCantDoJob.Builder()
