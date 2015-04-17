@@ -234,6 +234,7 @@ namespace SoundScheduler_Win {
             _meetings.Add(templateTuesday.ToMeeting(DateTime.Parse("5/24/2015")));
             _meetings.Add(templateSunday.ToMeeting(DateTime.Parse("5/26/2015")));
             _meetings.Add(templateTuesday.ToMeeting(DateTime.Parse("5/31/2015")));
+            _meetings.Add(templateTuesday.ToMeeting(DateTime.Parse("6/2/2015")));
 
             foreach (Meeting meeting in _meetings) {
                 _templates.Add(meeting.ToTemplate());
@@ -280,8 +281,20 @@ namespace SoundScheduler_Win {
                 .SetTemplates(_templates)
                 .SetUsers(_users)
                 .Build();
+            ((JobConsiderationUsersWhoAlreadyHaveJob)consideration).AddJobToException(jobStage, (float)0.5);
+            ((JobConsiderationUsersWhoAlreadyHaveJob)consideration).AddException(2, _users.IndexOf(userESavelberg), (float)0.5);
             ((JobConsiderationUsersWhoAlreadyHaveJob)consideration).AddException(5, _users.IndexOf(userRStubbs), (float)0.5);
             ((JobConsiderationUsersWhoAlreadyHaveJob)consideration).AddException(5, _users.IndexOf(userESavelberg), (float)0.5);
+            ((JobConsiderationUsersWhoAlreadyHaveJob)consideration).AddException(6, _users.IndexOf(userDCook), 1);
+            ((JobConsiderationUsersWhoAlreadyHaveJob)consideration).AddException(7, _users.IndexOf(userBBabbe), (float)0.5);
+            ((JobConsiderationUsersWhoAlreadyHaveJob)consideration).AddException(7, _users.IndexOf(userESavelberg), 1);
+            ((JobConsiderationUsersWhoAlreadyHaveJob)consideration).AddException(10, _users.IndexOf(userESavelberg), 1);
+            ((JobConsiderationUsersWhoAlreadyHaveJob)consideration).AddException(10, _users.IndexOf(userBBabbe), (float)0.5);
+            ((JobConsiderationUsersWhoAlreadyHaveJob)consideration).AddException(11, _users.IndexOf(userESavelberg), (float)0.5);
+            ((JobConsiderationUsersWhoAlreadyHaveJob)consideration).AddException(11, _users.IndexOf(userDCook), (float)0.5);
+            ((JobConsiderationUsersWhoAlreadyHaveJob)consideration).AddException(14, _users.IndexOf(userBBabbe), (float)0.5);
+            ((JobConsiderationUsersWhoAlreadyHaveJob)consideration).AddException(14, _users.IndexOf(userESavelberg), (float)0.5);
+            ((JobConsiderationUsersWhoAlreadyHaveJob)consideration).AddException(14, _users.IndexOf(userCTangen), (float)0.5);
             _jobConsiderations.Add(consideration);
 
             consideration = new JobConsiderationUsersWhoCantDoJob.Builder()
