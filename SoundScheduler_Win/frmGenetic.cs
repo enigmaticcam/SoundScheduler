@@ -38,15 +38,17 @@ namespace SoundScheduler_Win {
         }
 
         private void UpdateResults(Genetic.GeneticResults results) {
-            string elapsedTime = _timer.Elapsed.Hours.ToString().PadLeft(2, '0') + ":" + _timer.Elapsed.Minutes.ToString().PadLeft(2, '0') + ":" + _timer.Elapsed.Seconds.ToString().PadLeft(2, '0');
-            StringBuilder text = new StringBuilder();
-            text.AppendLine("Best Solution So Far: " + IntArrayToString(results.BestSolutionSoFarSolution));
-            text.AppendLine("Best Solution Score So Far: " + results.BestSolutionSoFarScore + "%");
-            text.AppendLine("Generation Count: " + results.GenerationCount);
-            text.AppendLine("Generations Per Second: " + results.GenerationsPerSecond);
-            text.AppendLine("Elapsed Time: " + elapsedTime);
-            text.Append(BestScoresSoFarText(results.BestSolutionSoFarScore, elapsedTime));
-            txtResults.Text = text.ToString();
+            if (results.BestSolutionSoFarSolution != null) {
+                string elapsedTime = _timer.Elapsed.Hours.ToString().PadLeft(2, '0') + ":" + _timer.Elapsed.Minutes.ToString().PadLeft(2, '0') + ":" + _timer.Elapsed.Seconds.ToString().PadLeft(2, '0');
+                StringBuilder text = new StringBuilder();
+                text.AppendLine("Best Solution So Far: " + IntArrayToString(results.BestSolutionSoFarSolution));
+                text.AppendLine("Best Solution Score So Far: " + results.BestSolutionSoFarScore + "%");
+                text.AppendLine("Generation Count: " + results.GenerationCount);
+                text.AppendLine("Generations Per Second: " + results.GenerationsPerSecond);
+                text.AppendLine("Elapsed Time: " + elapsedTime);
+                text.Append(BestScoresSoFarText(results.BestSolutionSoFarScore, elapsedTime));
+                txtResults.Text = text.ToString();
+            }
         }
 
         private string BestScoresSoFarText(float scoreToBeat, string secondsSinceStart) {
@@ -216,24 +218,24 @@ namespace SoundScheduler_Win {
             templateTuesday.Jobs = new List<Job> { jobSound, jobStage, jobMic1, jobMic2, jobMic3, jobMic4 };
 
             Template templateTuesdayOld = new Template();
-            templateTuesday.Name = "TuesdayOld";
+            templateTuesdayOld.Name = "TuesdayOld";
             templateTuesdayOld.Jobs = new List<Job> { jobSound, jobStage, jobMic1, jobMic2 };
 
-            _meetings.Add(templateSunday.ToMeeting(DateTime.Parse("4/14/2015")));
-            _meetings.Add(templateTuesdayOld.ToMeeting(DateTime.Parse("4/19/2015")));
-            _meetings.Add(templateSunday.ToMeeting(DateTime.Parse("4/21/2015")));
-            _meetings.Add(templateTuesday.ToMeeting(DateTime.Parse("4/26/2015")));
-            _meetings.Add(templateSunday.ToMeeting(DateTime.Parse("4/28/2015")));
-            _meetings.Add(templateTuesday.ToMeeting(DateTime.Parse("5/3/2015")));
-            _meetings.Add(templateSunday.ToMeeting(DateTime.Parse("5/5/2015")));
-            _meetings.Add(templateTuesday.ToMeeting(DateTime.Parse("5/10/2015")));
+            _meetings.Add(templateTuesdayOld.ToMeeting(DateTime.Parse("4/14/2015")));
+            _meetings.Add(templateSunday.ToMeeting(DateTime.Parse("4/19/2015")));
+            _meetings.Add(templateTuesday.ToMeeting(DateTime.Parse("4/21/2015")));
+            _meetings.Add(templateSunday.ToMeeting(DateTime.Parse("4/26/2015")));
+            _meetings.Add(templateTuesday.ToMeeting(DateTime.Parse("4/28/2015")));
+            _meetings.Add(templateSunday.ToMeeting(DateTime.Parse("5/3/2015")));
+            _meetings.Add(templateTuesday.ToMeeting(DateTime.Parse("5/5/2015")));
+            _meetings.Add(templateSunday.ToMeeting(DateTime.Parse("5/10/2015")));
 
-            _meetings.Add(templateSunday.ToMeeting(DateTime.Parse("5/12/2015")));
-            _meetings.Add(templateTuesday.ToMeeting(DateTime.Parse("5/17/2015")));
-            _meetings.Add(templateSunday.ToMeeting(DateTime.Parse("5/19/2015")));
-            _meetings.Add(templateTuesday.ToMeeting(DateTime.Parse("5/24/2015")));
-            _meetings.Add(templateSunday.ToMeeting(DateTime.Parse("5/26/2015")));
-            _meetings.Add(templateTuesday.ToMeeting(DateTime.Parse("5/31/2015")));
+            _meetings.Add(templateTuesday.ToMeeting(DateTime.Parse("5/12/2015")));
+            _meetings.Add(templateSunday.ToMeeting(DateTime.Parse("5/17/2015")));
+            _meetings.Add(templateTuesday.ToMeeting(DateTime.Parse("5/19/2015")));
+            _meetings.Add(templateSunday.ToMeeting(DateTime.Parse("5/24/2015")));
+            _meetings.Add(templateTuesday.ToMeeting(DateTime.Parse("5/26/2015")));
+            _meetings.Add(templateSunday.ToMeeting(DateTime.Parse("5/31/2015")));
             _meetings.Add(templateTuesday.ToMeeting(DateTime.Parse("6/2/2015")));
 
             foreach (Meeting meeting in _meetings) {

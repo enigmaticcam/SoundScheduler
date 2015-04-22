@@ -12,6 +12,7 @@ namespace SoundScheduler_Logic.Engine {
         public abstract bool IsConsiderationSoft { get; }
         public abstract float IsValid(int[] usersInJobs);
         public abstract string JobName { get; }
+        public abstract JobConsideration ToCopy();
         public int JobRank { get; set; }
 
         private IEnumerable<Template> _templates;
@@ -70,6 +71,7 @@ namespace SoundScheduler_Logic.Engine {
             _templates = builder.Templates;
             _users = builder.Users;
             _jobs = builder.Jobs;
+            this.JobRank = builder.JobRank;
             _solutionCount = GetSolutionCount();
         }
 
@@ -78,6 +80,7 @@ namespace SoundScheduler_Logic.Engine {
             public IEnumerable<Template> Templates;
             public IEnumerable<User> Users;
             public IEnumerable<Job> Jobs;
+            public int JobRank = 1;
 
             public BuilderBase SetTemplates(IEnumerable<Template> templates) {
                 this.Templates = templates;
@@ -91,6 +94,11 @@ namespace SoundScheduler_Logic.Engine {
 
             public BuilderBase SetJobs(IEnumerable<Job> jobs) {
                 this.Jobs = jobs;
+                return this;
+            }
+
+            public BuilderBase SetJobRank(int jobRank) {
+                this.JobRank = jobRank;
                 return this;
             }
         }
@@ -151,6 +159,16 @@ namespace SoundScheduler_Logic.Engine {
             public override JobConsideration Build() {
                 return new JobConsiderationUsersWhoCantDoJob(this);
             }
+        }
+
+        public override JobConsideration ToCopy() {
+            JobConsiderationUsersWhoCantDoJob consideration = (JobConsiderationUsersWhoCantDoJob)new JobConsiderationUsersWhoCantDoJob.Builder()
+                .SetJobs(this.Jobs)
+                .SetTemplates(this.Templates)
+                .SetUsers(this.Users)
+                .SetJobRank(this.JobRank)
+                .Build();
+            return consideration;
         }
     }
 
@@ -304,6 +322,29 @@ namespace SoundScheduler_Logic.Engine {
                 return new JobConsiderationUsersWhoAlreadyHaveJob(this);
             }
         }
+
+        public override JobConsideration ToCopy() {
+            JobConsiderationUsersWhoAlreadyHaveJob consideration = (JobConsiderationUsersWhoAlreadyHaveJob)new JobConsiderationUsersWhoAlreadyHaveJob.Builder()
+                .SetJobs(this.Jobs)
+                .SetTemplates(this.Templates)
+                .SetUsers(this.Users)
+                .SetJobRank(this.JobRank)
+                .Build();
+            foreach (int templateIndex in _exceptions.Keys) {
+                foreach (int userIndex in _exceptions[templateIndex].Keys) {
+                    consideration.AddException(templateIndex, userIndex, _exceptions[templateIndex][userIndex]);
+                }
+            }
+            foreach (Job job in _jobToException.Keys) {
+                consideration.AddJobToException(job, _jobToException[job]);
+            }
+            foreach (Job job1 in _jobComboToPoints.Keys) {
+                foreach (Job job2 in _jobComboToPoints[job1].Keys) {
+                    consideration.AddJobComboPoints(job1, job2, _jobComboToPoints[job1][job2]);
+                }
+            }
+            return consideration;   
+        }
     }
 
     public class JobConsiderationEvenUserDistributionPerJob : JobConsideration {
@@ -384,6 +425,16 @@ namespace SoundScheduler_Logic.Engine {
             public override JobConsideration Build() {
                 return new JobConsiderationEvenUserDistributionPerJob(this);
             }
+        }
+
+        public override JobConsideration ToCopy() {
+            JobConsiderationEvenUserDistributionPerJob consideration = (JobConsiderationEvenUserDistributionPerJob)new JobConsiderationEvenUserDistributionPerJob.Builder()
+                .SetJobs(this.Jobs)
+                .SetTemplates(this.Templates)
+                .SetUsers(this.Users)
+                .SetJobRank(this.JobRank)
+                .Build();
+            return consideration;
         }
     }
 
@@ -508,6 +559,17 @@ namespace SoundScheduler_Logic.Engine {
                 return new JobConsiderationGiveUsersABreak(this);
             }
         }
+
+        public override JobConsideration ToCopy() {
+            JobConsiderationGiveUsersABreak consideration = (JobConsiderationGiveUsersABreak)new JobConsiderationGiveUsersABreak.Builder()
+                .SetGiveBreakOnDay(_giveBreakOnDay)
+                .SetJobs(this.Jobs)
+                .SetTemplates(this.Templates)
+                .SetUsers(this.Users)
+                .SetJobRank(this.JobRank)
+                .Build();
+            return consideration;
+        }
     }
 
     public class JobConsiderationUsersWhoDidSameJobLastMeeting : JobConsideration {
@@ -550,6 +612,16 @@ namespace SoundScheduler_Logic.Engine {
             public override JobConsideration Build() {
                 return new JobConsiderationUsersWhoDidSameJobLastMeeting(this);
             }
+        }
+
+        public override JobConsideration ToCopy() {
+            JobConsiderationUsersWhoDidSameJobLastMeeting consideration = (JobConsiderationUsersWhoDidSameJobLastMeeting)new JobConsiderationUsersWhoDidSameJobLastMeeting.Builder()
+                .SetJobs(this.Jobs)
+                .SetTemplates(this.Templates)
+                .SetUsers(this.Users)
+                .SetJobRank(this.JobRank)
+                .Build();
+            return consideration;
         }
     }
 }

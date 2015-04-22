@@ -5,6 +5,7 @@ using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using SoundScheduler_Logic.Abstract;
 
@@ -61,6 +62,8 @@ namespace SoundScheduler_Logic.Engine {
             private Func<Genetic.GeneticResults, bool> _resultsFunc;
             private Action<int[]> _solutionAction;
             private float _solve = 10000;
+            private Dictionary<int, List<JobConsideration>> _jobConsiderationsInThreads = new Dictionary<int, List<JobConsideration>>();
+            static readonly object _object = new object();
 
             public void PerformAction() {
                 RankJobConsiderations();
@@ -117,7 +120,8 @@ namespace SoundScheduler_Logic.Engine {
 
             private float Fitness(int[] chromosome, Genetic genetic) {
                 float score = _solve;
-                foreach (JobConsideration consideration in _jobConsiderations) {
+                CopyJobConsiderationsToThread();
+                foreach (JobConsideration consideration in _jobConsiderationsInThreads[Thread.CurrentThread.ManagedThreadId]) {
                     float exceptionReduction = consideration.IsValid(chromosome);
                     if (!consideration.IsConsiderationSoft) {
                         exceptionReduction *= 100;
@@ -130,6 +134,17 @@ namespace SoundScheduler_Logic.Engine {
                     return genetic.IsSolved;
                 } else {
                     return score;
+                }
+            }
+
+            private void CopyJobConsiderationsToThread() {
+                if (!_jobConsiderationsInThreads.ContainsKey(Thread.CurrentThread.ManagedThreadId)) {
+                    lock (_object) {
+                        _jobConsiderationsInThreads.Add(Thread.CurrentThread.ManagedThreadId, new List<JobConsideration>());
+                    }
+                    foreach (JobConsideration consideration in _jobConsiderations) {
+                        _jobConsiderationsInThreads[Thread.CurrentThread.ManagedThreadId].Add(consideration.ToCopy());
+                    }
                 }
             }
 

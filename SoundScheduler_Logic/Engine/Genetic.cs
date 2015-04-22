@@ -8,6 +8,11 @@ using System.Threading.Tasks;
 
 namespace SoundScheduler_Logic.Engine {
     public class Genetic {
+        private enum ThreadJob {
+            RunFitnessScores = 0,
+            Wait
+        }
+
         public float ScoreSolveValue { get; set; }
         public float IsSolved {
             get { return -1; }
@@ -44,6 +49,12 @@ namespace SoundScheduler_Logic.Engine {
         private FinishAction _finish;
         private System.Timers.Timer _timer;
         private GeneticResults _lastResults;
+
+        private bool _threadsEnd;
+        private Thread[] _threads;
+        private Dictionary<int, ThreadJob> _threadJobs;
+        private Dictionary<int, ThreadRange> _threadRanges;
+        private int _threadMain = Thread.CurrentThread.ManagedThreadId;
 
         public void AddImmutableBits(int index, int bitNumber) {
             _immutableBitsVectors.Add(new ImmutableBitsVector(index, bitNumber));
@@ -90,6 +101,7 @@ namespace SoundScheduler_Logic.Engine {
 
         private void Core() {
             Instantiate();
+            InstantiateThreads();
             GenerateRandomchromosomes();
             BeginGenetics();
         }
@@ -115,6 +127,61 @@ namespace SoundScheduler_Logic.Engine {
             _timer = new System.Timers.Timer(1000);
             _timer.Elapsed += new System.Timers.ElapsedEventHandler(TimerElapsed);
             _timer.Enabled = true;
+        }
+
+        private void InstantiateThreads() {
+            int threadCount = Environment.ProcessorCount - 1;
+            _threads = new Thread[threadCount];
+            _threadJobs = new Dictionary<int,ThreadJob>();
+            for (int i = 0; i < threadCount; i++) {
+                _threads[i] = new Thread(new ThreadStart(ThreadDoWork));
+                _threadJobs.Add(_threads[i].ManagedThreadId, ThreadJob.Wait);
+                _threads[i].Start();
+            }
+            InstantiateThreadRanges();
+        }
+
+        private void InstantiateThreadRanges() {
+            int threadRangeCount = _chromosomeCount / (_threads.GetUpperBound(0) + 1);
+            _threadRanges = new Dictionary<int, ThreadRange>();
+            for (int i = 0; i <= _threads.GetUpperBound(0); i++) {
+                int threadStart = i * threadRangeCount;
+                int threadEnd = ((i + 1) * threadRangeCount) - 1;
+                if (i == _threads.GetUpperBound(0)) {
+                    threadEnd = _chromosomeCount - 1;
+                }
+                _threadRanges.Add(_threads[i].ManagedThreadId, new ThreadRange(threadStart, threadEnd));
+            }
+        }
+
+        private void ThreadDoWork() {
+            while (!_threadsEnd) {
+                switch (_threadJobs[Thread.CurrentThread.ManagedThreadId]) {
+                    case ThreadJob.RunFitnessScores:
+                        RankChromosomesInRoulette_Thread();
+                        _threadJobs[Thread.CurrentThread.ManagedThreadId] = ThreadJob.Wait;
+                        break;
+                }
+            }
+        }
+
+        private void RunThreads(ThreadJob job) {
+            for (int i = 0; i < _threads.Count(); i++) {
+                _threadJobs[_threads[i].ManagedThreadId] = job;
+            }
+            bool isFinished = false;
+            do {
+                isFinished = true;
+                for (int i = 0; i < _threads.Count(); i++) {
+                    if (_threadJobs[_threads[i].ManagedThreadId] != ThreadJob.Wait) {
+                        isFinished = false;
+                    }
+                }
+            } while (isFinished == false);
+        }
+
+        private void EndThreads() {
+            _threadsEnd = true;
         }
 
         private void TimerElapsed(object sender, System.Timers.ElapsedEventArgs e) {
@@ -162,6 +229,7 @@ namespace SoundScheduler_Logic.Engine {
         private void BeginGenetics() {
             _generationCount = 0;
             do {
+                RunThreads(ThreadJob.RunFitnessScores);
                 RankchromosomesInRoulette();
                 if (_stop) {
                     break;
@@ -171,12 +239,20 @@ namespace SoundScheduler_Logic.Engine {
                 }
                 ++_generationCount;
             } while (true);
+            EndThreads();
+        }
+
+        private void RankChromosomesInRoulette_Thread() {
+            ThreadRange range = _threadRanges[Thread.CurrentThread.ManagedThreadId];
+            for (int index = range.Start; index <= range.Stop; index++) {
+                _ranks[index] = _fitness.GetFitness(_chromosomes[index], this);
+            }
         }
 
         private void RankchromosomesInRoulette() {
             float sum = 0;
             for (int index = 0; index < _chromosomeCount; index++) {
-                float score = _fitness.GetFitness(_chromosomes[index], this);
+                float score = _ranks[index];
                 if (score == this.IsSolved) {
                     _stop = true;
                     _solutionIndex = index;
@@ -185,7 +261,6 @@ namespace SoundScheduler_Logic.Engine {
                    _bestSoFarScore = score;
                     _bestSoFarChar = (int[])_chromosomes[index].Clone();
                 }
-                _ranks[index] = score;
                 sum += score;
                 AddToElitist(index);
             }
@@ -474,6 +549,23 @@ namespace SoundScheduler_Logic.Engine {
                 public GeneticResults Build() {
                     return new GeneticResults(this);
                 }
+            }
+        }
+
+        private class ThreadRange {
+            private int _start;
+            public int Start {
+                get { return _start; }
+            }
+
+            private int _stop;
+            public int Stop {
+                get { return _stop; }
+            }
+
+            public ThreadRange(int start, int stop) {
+                _start = start;
+                _stop = stop;
             }
         }
     }
