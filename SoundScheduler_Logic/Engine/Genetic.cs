@@ -57,7 +57,7 @@ namespace SoundScheduler_Logic.Engine {
         private Thread[] _threads;
         private Dictionary<int, ThreadJob> _threadJobs;
         private Dictionary<int, ThreadRange> _threadRanges;
-        private int _threadMain = Thread.CurrentThread.ManagedThreadId;
+        private int _threadMain;
         static readonly object _object = new object();
 
         public void AddImmutableBits(int index, int bitNumber) {
@@ -135,14 +135,18 @@ namespace SoundScheduler_Logic.Engine {
         }
 
         private void InstantiateThreads() {
-            int threadCount = Environment.ProcessorCount - 1;
+            int threadCount = Environment.ProcessorCount;
             _threads = new Thread[threadCount];
             _threadJobs = new Dictionary<int,ThreadJob>();
             for (int i = 0; i < threadCount; i++) {
-                _threads[i] = new Thread(new ThreadStart(ThreadDoWork));
-                _threads[i].IsBackground = true;
-                _threadJobs.Add(_threads[i].ManagedThreadId, ThreadJob.Wait);
-                _threads[i].Start();
+                if (i == 0) {
+                    _threads[i] = Thread.CurrentThread;
+                    _threadJobs.Add(_threads[i].ManagedThreadId, ThreadJob.Wait);
+                } else {
+                    _threads[i] = new Thread(new ThreadStart(ThreadDoWork));
+                    _threadJobs.Add(_threads[i].ManagedThreadId, ThreadJob.Wait);
+                    _threads[i].Start();
+                }
             }
             InstantiateThreadRanges();
         }
@@ -161,7 +165,11 @@ namespace SoundScheduler_Logic.Engine {
         }
 
         private void ThreadDoWork() {
-            while (!_threadsEnd) {
+            ThreadDoWork(false);
+        }
+
+        private void ThreadDoWork(bool runOnce) {
+            do {
                 switch (_threadJobs[Thread.CurrentThread.ManagedThreadId]) {
                     case ThreadJob.RunFitnessScores:
                         RankChromosomesInRoulette_Thread();
@@ -172,13 +180,15 @@ namespace SoundScheduler_Logic.Engine {
                         _threadJobs[Thread.CurrentThread.ManagedThreadId] = ThreadJob.Wait;
                         break;
                 }
-            }
+            } while (!_threadsEnd && !runOnce);
         }
 
         private void RunThreads(ThreadJob job) {
             for (int i = 0; i < _threads.Count(); i++) {
                 _threadJobs[_threads[i].ManagedThreadId] = job;
             }
+            _threadMain = Thread.CurrentThread.ManagedThreadId;
+            ThreadDoWork(true);
             bool isFinished = false;
             do {
                 isFinished = true;
@@ -204,6 +214,7 @@ namespace SoundScheduler_Logic.Engine {
                 .SetBestSolutionSoFarSolution(_bestSoFarChar)
                 .SetGenerationCount(_generationCount)
                 .SetGenerationsPerSecond(generationsPerSecond)
+                .SetCPUCoreCount(_threads.GetUpperBound(0) + 1)
                 .Build();
             if (!_results.Results(_lastResults)) {
                 _stop = true;
@@ -246,7 +257,6 @@ namespace SoundScheduler_Logic.Engine {
                     break;
                 } else {
                     GenerateNewchromosomes();
-                    //CopyNewchromosomesToCurrentchromosomes();
                     RunThreads(ThreadJob.CopyNewChromomesToCurrent);
                 }
                 ++_generationCount;
@@ -324,7 +334,7 @@ namespace SoundScheduler_Logic.Engine {
                 MutatechromosomePair();
                 _immutableBits.TrasmuteImmutableBits(_chromosomePair[0]);
                 string chromosome = OutputToOneLine(_chromosomePair[0]);
-                if (IschromosomeValid(_chromosomePair[0]) && !_newchromosomesIndex.Contains(chromosome)) {
+                if (!_newchromosomesIndex.Contains(chromosome)) {
                     CopychromosomePairToNewchromosome(0, newchromosomeCount);
                     _chromosomesAsString[newchromosomeCount] = chromosome;
                     ++newchromosomeCount;
@@ -395,15 +405,6 @@ namespace SoundScheduler_Logic.Engine {
             } else {
                 return 1 / fitness;
             }
-        }
-
-        private bool IschromosomeValid(int[] chromosome) {
-            for (int index = 0; index < _bitLength; index++) {
-                if (chromosome[index] >= _bitCount) {
-                    return false;
-                }
-            }
-            return true;
         }
 
         private void CopyNewchromosomesToCurrentchromosomes() {
@@ -546,11 +547,17 @@ namespace SoundScheduler_Logic.Engine {
                 get { return _generationsPerSecond; }
             }
 
+            private int _cpuCoreCount;
+            public int CPUCoreCount {
+                get { return _cpuCoreCount; }
+            }
+
             public GeneticResults(Builder builder) {
                 _bestSolutionSoFarSolution = builder.BestSolutionSoFarSolution;
                 _bestSolutionSoFarScore = builder.BestSolutionSoFarScore;
                 _generationCount = builder.GenerationCount;
                 _generationsPerSecond = builder.GenerationsPerSecond;
+                _cpuCoreCount = builder.CPUCoreCount;
             }
 
             public class Builder {
@@ -558,6 +565,7 @@ namespace SoundScheduler_Logic.Engine {
                 public float BestSolutionSoFarScore;
                 public int GenerationCount;
                 public int GenerationsPerSecond;
+                public int CPUCoreCount;
 
                 public Builder SetBestSolutionSoFarSolution(int[] bestSolutionSoFarSolution) {
                     this.BestSolutionSoFarSolution = bestSolutionSoFarSolution;
@@ -576,6 +584,11 @@ namespace SoundScheduler_Logic.Engine {
 
                 public Builder SetGenerationsPerSecond(int generationsPerSecond) {
                     this.GenerationsPerSecond = generationsPerSecond;
+                    return this;
+                }
+
+                public Builder SetCPUCoreCount(int cpuCoreCount) {
+                    this.CPUCoreCount = cpuCoreCount;
                     return this;
                 }
 

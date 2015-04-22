@@ -46,6 +46,7 @@ namespace SoundScheduler_Win {
                 text.AppendLine("Generation Count: " + results.GenerationCount);
                 text.AppendLine("Generations Per Second: " + results.GenerationsPerSecond);
                 text.AppendLine("Elapsed Time: " + elapsedTime);
+                text.AppendLine("Utilizing " + results.CPUCoreCount + " CPU Cores");
                 text.Append(BestScoresSoFarText(results.BestSolutionSoFarScore, elapsedTime));
                 txtResults.Text = text.ToString();
             }
