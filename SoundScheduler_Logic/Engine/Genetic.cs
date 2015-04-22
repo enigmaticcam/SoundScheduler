@@ -10,6 +10,7 @@ namespace SoundScheduler_Logic.Engine {
     public class Genetic {
         private enum ThreadJob {
             RunFitnessScores = 0,
+            CopyNewChromomesToCurrent,
             Wait
         }
 
@@ -166,6 +167,10 @@ namespace SoundScheduler_Logic.Engine {
                         RankChromosomesInRoulette_Thread();
                         _threadJobs[Thread.CurrentThread.ManagedThreadId] = ThreadJob.Wait;
                         break;
+                    case ThreadJob.CopyNewChromomesToCurrent:
+                        CopyNewChromosomesToCurrentChromomes_Thread();
+                        _threadJobs[Thread.CurrentThread.ManagedThreadId] = ThreadJob.Wait;
+                        break;
                 }
             }
         }
@@ -241,7 +246,8 @@ namespace SoundScheduler_Logic.Engine {
                     break;
                 } else {
                     GenerateNewchromosomes();
-                    CopyNewchromosomesToCurrentchromosomes();
+                    //CopyNewchromosomesToCurrentchromosomes();
+                    RunThreads(ThreadJob.CopyNewChromomesToCurrent);
                 }
                 ++_generationCount;
             } while (true);
@@ -405,6 +411,16 @@ namespace SoundScheduler_Logic.Engine {
                 int[] innerValues = _chromosomes[i];
                 for (int j = 0; j <= innerValues.GetUpperBound(0); j++) {
                     _chromosomes[i][j] = _newchromosomes[i][j];
+                }
+            }
+        }
+
+        private void CopyNewChromosomesToCurrentChromomes_Thread() {
+            ThreadRange range = _threadRanges[Thread.CurrentThread.ManagedThreadId];
+            for (int index = range.Start; index <= range.Stop; index++) {
+                int[] innerValues = _chromosomes[index];
+                for (int j = 0; j <= innerValues.GetUpperBound(0); j++) {
+                    _chromosomes[index][j] = _newchromosomes[index][j];
                 }
             }
         }
