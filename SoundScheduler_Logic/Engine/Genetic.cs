@@ -39,6 +39,8 @@ namespace SoundScheduler_Logic.Engine {
         private int[] _bestSoFarChar;
         private float _bestSoFarScore;
         private HashSet<string> _newchromosomesIndex;
+        private Dictionary<string, float> _previousScores = new Dictionary<string, float>();
+        private string[] _chromosomesAsString;
         private int _seed;
         private float[] _elitistScore;
         private int[] _elitistIndex;
@@ -55,6 +57,7 @@ namespace SoundScheduler_Logic.Engine {
         private Dictionary<int, ThreadJob> _threadJobs;
         private Dictionary<int, ThreadRange> _threadRanges;
         private int _threadMain = Thread.CurrentThread.ManagedThreadId;
+        static readonly object _object = new object();
 
         public void AddImmutableBits(int index, int bitNumber) {
             _immutableBitsVectors.Add(new ImmutableBitsVector(index, bitNumber));
@@ -113,6 +116,7 @@ namespace SoundScheduler_Logic.Engine {
             _ranks = new float[_chromosomeCount];
             _roulette = new float[_chromosomeCount];
             _newchromosomes = new int[_chromosomeCount][];
+            _chromosomesAsString = new string[_chromosomeCount];
             _chromosomePair = new int[2][];
             _chromosomePair[0] = new int[_bitLength];
             _chromosomePair[1] = new int[_bitLength];
@@ -135,6 +139,7 @@ namespace SoundScheduler_Logic.Engine {
             _threadJobs = new Dictionary<int,ThreadJob>();
             for (int i = 0; i < threadCount; i++) {
                 _threads[i] = new Thread(new ThreadStart(ThreadDoWork));
+                _threads[i].IsBackground = true;
                 _threadJobs.Add(_threads[i].ManagedThreadId, ThreadJob.Wait);
                 _threads[i].Start();
             }
@@ -223,6 +228,7 @@ namespace SoundScheduler_Logic.Engine {
                     _chromosomes[chromosomeIndex][bitIndex] = _random.Next(0, _bitCount);
                 }
                 _immutableBits.TrasmuteImmutableBits(_chromosomes[chromosomeIndex]);
+                _chromosomesAsString[chromosomeIndex] = OutputToOneLine(_chromosomes[chromosomeIndex]);
             }
         }
 
@@ -245,7 +251,17 @@ namespace SoundScheduler_Logic.Engine {
         private void RankChromosomesInRoulette_Thread() {
             ThreadRange range = _threadRanges[Thread.CurrentThread.ManagedThreadId];
             for (int index = range.Start; index <= range.Stop; index++) {
-                _ranks[index] = _fitness.GetFitness(_chromosomes[index], this);
+                if (_previousScores.ContainsKey(_chromosomesAsString[index])) {
+                    _ranks[index] = _previousScores[_chromosomesAsString[index]];
+                } else {
+                    _ranks[index] = _fitness.GetFitness(_chromosomes[index], this);
+                    lock (_object) {
+                        if (_previousScores.Count == 500000) {
+                            _previousScores.Remove(_previousScores.Keys.ElementAt(0));
+                        }
+                        _previousScores.Add(_chromosomesAsString[index], _ranks[index]);
+                    }
+                }
             }
         }
 
@@ -304,6 +320,7 @@ namespace SoundScheduler_Logic.Engine {
                 string chromosome = OutputToOneLine(_chromosomePair[0]);
                 if (IschromosomeValid(_chromosomePair[0]) && !_newchromosomesIndex.Contains(chromosome)) {
                     CopychromosomePairToNewchromosome(0, newchromosomeCount);
+                    _chromosomesAsString[newchromosomeCount] = chromosome;
                     ++newchromosomeCount;
                     _newchromosomesIndex.Add(chromosome);
                 }
