@@ -11,6 +11,7 @@ namespace SoundScheduler_Logic.Engine {
         private enum ThreadJob {
             RunFitnessScores = 0,
             CopyNewChromomesToCurrent,
+            CreateNewChromosomes,
             Wait
         }
 
@@ -26,7 +27,6 @@ namespace SoundScheduler_Logic.Engine {
 
         private int _threadCount = Environment.ProcessorCount;
         private int _chromosomeCount = 500;
-        private Random _random;
         private int _bitLength;
         private int _bitCount;
         private FitnessFunction _fitness;
@@ -34,13 +34,11 @@ namespace SoundScheduler_Logic.Engine {
         private int[][] _newchromosomes;
         private float[] _ranks;
         private float[] _roulette;
-        private int[][] _chromosomePair;
         private Dictionary<char, char> _mutateRef;
         private bool _stop;
         private int _solutionIndex;
         private int[] _bestSoFarChar;
         private float _bestSoFarScore;
-        private HashSet<string> _newchromosomesIndex;
         private string[] _chromosomesAsString;
         private int _seed;
         private float[] _elitistScore;
@@ -108,16 +106,11 @@ namespace SoundScheduler_Logic.Engine {
         }
 
         private void Instantiate() {
-            GenerateSeed();
             GenerateImmutableBits();
-            _newchromosomesIndex = new HashSet<string>();
             _ranks = new float[_chromosomeCount];
             _roulette = new float[_chromosomeCount];
             _newchromosomes = new int[_chromosomeCount][];
             _chromosomesAsString = new string[_chromosomeCount];
-            _chromosomePair = new int[2][];
-            _chromosomePair[0] = new int[_bitLength];
-            _chromosomePair[1] = new int[_bitLength];
             for (int i = 0; i < _chromosomeCount; i++) {
                 _newchromosomes[i] = new int[_bitLength];
             }
@@ -132,7 +125,12 @@ namespace SoundScheduler_Logic.Engine {
         }
 
         private void InstantiateThreads() {
-            _threadData = new ThreadData(_threadCount, ThreadDoWork);
+            _threadData = new ThreadData.Builder()
+                .SetThreadCount(_threadCount)
+                .SetThreadDoWork(ThreadDoWork)
+                .SetChromosomeLength(_bitLength)
+                .SetRandomSeed(_seed)
+                .Build();
             InstantiateThreadRanges();
             _threadData.StartThreads();
         }
@@ -141,11 +139,15 @@ namespace SoundScheduler_Logic.Engine {
             int threadRangeCount = _chromosomeCount / (_threadData.ThreadCount);
             for (int i = 0; i < _threadData.ThreadCount; i++) {
                 int threadStart = i * threadRangeCount;
+                int threadStartElitist = threadStart;
                 int threadEnd = ((i + 1) * threadRangeCount) - 1;
                 if (i == _threadData.ThreadCount - 1) {
                     threadEnd = _chromosomeCount - 1;
                 }
-                _threadData.AddThreadRange(_threadData.Threads.ElementAt(i).ManagedThreadId, new ThreadRange(threadStart, threadEnd));
+                if (i == 0) {
+                    threadStartElitist = (int)(_chromosomeCount * 0.05) + 1;
+                }
+                _threadData.AddThreadRange(_threadData.Threads.ElementAt(i).ManagedThreadId, new ThreadRange(threadStart, threadStartElitist, threadEnd));
             }
         }
 
@@ -162,6 +164,10 @@ namespace SoundScheduler_Logic.Engine {
                         break;
                     case ThreadJob.CopyNewChromomesToCurrent:
                         CopyNewChromosomesToCurrentChromomes_Thread();
+                        _threadData.ThreadJob = ThreadJob.Wait;
+                        break;
+                    case ThreadJob.CreateNewChromosomes:
+                        GenerateNewChromosome_Threaded();
                         _threadData.ThreadJob = ThreadJob.Wait;
                         break;
                 }
@@ -206,14 +212,6 @@ namespace SoundScheduler_Logic.Engine {
             }
         }
 
-        private void GenerateSeed() {
-            if (_seed != -1) {
-                _random = new Random(_seed);
-            } else {
-                _random = new Random();
-            }
-        }
-
         private void GenerateImmutableBits() {
             _immutableBits = new ImmutableBits(_bitLength);
             foreach (ImmutableBitsVector vector in _immutableBitsVectors) {
@@ -226,7 +224,7 @@ namespace SoundScheduler_Logic.Engine {
             for (int chromosomeIndex = 0; chromosomeIndex < _chromosomeCount; chromosomeIndex++) {
                 _chromosomes[chromosomeIndex] = new int[_bitLength];
                 for (int bitIndex = 0; bitIndex < _bitLength; bitIndex++) {
-                    _chromosomes[chromosomeIndex][bitIndex] = _random.Next(0, _bitCount);
+                    _chromosomes[chromosomeIndex][bitIndex] = _threadData.GetRandom.Next(0, _bitCount);
                 }
                 _immutableBits.TrasmuteImmutableBits(_chromosomes[chromosomeIndex]);
                 _chromosomesAsString[chromosomeIndex] = OutputToOneLine(_chromosomes[chromosomeIndex]);
@@ -241,7 +239,9 @@ namespace SoundScheduler_Logic.Engine {
                 if (_stop) {
                     break;
                 } else {
-                    GenerateNewchromosomes();
+                    _threadData.ClearUniqueChromosomes();
+                    CopyElitistToNewChromosomes();
+                    RunThreads(ThreadJob.CreateNewChromosomes);
                     RunThreads(ThreadJob.CopyNewChromomesToCurrent);
                 }
                 ++_generationCount;
@@ -306,60 +306,61 @@ namespace SoundScheduler_Logic.Engine {
             }
         }
 
-        private void GenerateNewchromosomes() {
-            _newchromosomesIndex.Clear();
-            int newchromosomeCount = CopyElitistToNewChromosomes() + 1;
-            do {
-                PerformCopyAndMaybeCrossover();
-                MutatechromosomePair();
-                _immutableBits.TrasmuteImmutableBits(_chromosomePair[0]);
-                string chromosome = OutputToOneLine(_chromosomePair[0]);
-                if (!_newchromosomesIndex.Contains(chromosome)) {
-                    CopychromosomePairToNewchromosome(0, newchromosomeCount);
-                    _chromosomesAsString[newchromosomeCount] = chromosome;
-                    ++newchromosomeCount;
-                    _newchromosomesIndex.Add(chromosome);
-                }
-            } while (newchromosomeCount < _chromosomeCount);
-        }
-
-        private int CopyElitistToNewChromosomes() {
+        private void CopyElitistToNewChromosomes() {
             for (int elitistIndex = 0; elitistIndex <= _elitistIndex.GetUpperBound(0); elitistIndex++) {
                 for (int bitIndex = 0; bitIndex <= _newchromosomes[elitistIndex].GetUpperBound(0); bitIndex++) {
                     _newchromosomes[elitistIndex][bitIndex] = _chromosomes[_elitistIndex[elitistIndex]][bitIndex];
                 }
-                _newchromosomesIndex.Add(OutputToOneLine(_newchromosomes[elitistIndex]));
+                _threadData.AddUniqueChromosomeToAllThreads(OutputToOneLine(_newchromosomes[elitistIndex]));
                 _elitistIndex[elitistIndex] = elitistIndex;
             }
-            return _elitistIndex.GetUpperBound(0);
         }
 
-        private void PerformCopyAndMaybeCrossover() {
+        private void GenerateNewChromosome_Threaded() {
+            ThreadRange threadRange = _threadData.Range;
+            int count = threadRange.StartAfterElitist;
+            do {
+                int[] newChromosome = _threadData.CurrentChromosome;
+                PerformCopyAndCrossover(newChromosome);
+                MutatechromosomePair(newChromosome);
+                _immutableBits.TrasmuteImmutableBits(newChromosome);
+                string newChromsomeAsString = OutputToOneLine(newChromosome);
+                if (!_threadData.HasUniqueChromosome(newChromsomeAsString)) {
+                    CopychromosomePairToNewchromosome(count);
+                    _chromosomesAsString[count] = newChromsomeAsString;
+                    count++;
+                    _threadData.AddUniqueChromosome(newChromsomeAsString);
+                }
+
+            } while (count <= threadRange.Stop);
+        }
+
+        private void PerformCopyAndCrossover(int[] currentChromosome) {
             int swapIndex = int.MaxValue;
             int chromosome1 = GetRandomFromRoulette();
             int chromosome2 = GetRandomFromRoulette();
-            swapIndex = _random.Next(0, _bitLength);
+            swapIndex = _threadData.GetRandom.Next(0, _bitLength);
             for (int index = 0; index < _bitLength; index++) {
                 if (index > swapIndex) {
-                    _chromosomePair[0][index] = _chromosomes[chromosome2][index];
+                    currentChromosome[index] = _chromosomes[chromosome2][index];
                 } else {
-                    _chromosomePair[0][index] = _chromosomes[chromosome1][index];
+                    currentChromosome[index] = _chromosomes[chromosome1][index];
                 }
             }
         }
 
-        private void MutatechromosomePair() {
+        private void MutatechromosomePair(int[] currentChromosome) {
             for (int chromosomeIndex = 0; chromosomeIndex < _bitLength; chromosomeIndex++) {
-                int canMutate = _random.Next(0, 501);
+                int canMutate = _threadData.GetRandom.Next(0, 501);
                 if (canMutate == 500) {
-                    int mutateTo = _random.Next(0, _bitCount);
-                    _chromosomePair[0][chromosomeIndex] = mutateTo;
+                    int mutateTo = _threadData.GetRandom.Next(0, _bitCount);
+                    currentChromosome[chromosomeIndex] = mutateTo;
                 }
             }
         }
 
         private int GetRandomFromRoulette() {
-            double threshold = _random.NextDouble();
+            double threshold = _threadData.GetRandom.NextDouble();
             double sum = 0;
             int index = 0;
             do {
@@ -379,7 +380,7 @@ namespace SoundScheduler_Logic.Engine {
         }
 
         private float RandomFitness(int[] chromosome, Genetic genetic) {
-            float fitness = _random.Next(1, 101);
+            float fitness = _threadData.GetRandom.Next(1, 101);
             if (fitness == 101) {
                 return genetic.IsSolved;
             } else {
@@ -406,9 +407,10 @@ namespace SoundScheduler_Logic.Engine {
             }
         }
 
-        private void CopychromosomePairToNewchromosome(int pairIndex, int newchromosomeIndex) {
+        private void CopychromosomePairToNewchromosome(int newchromosomeIndex) {
+            int[] currentChromosome = _threadData.CurrentChromosome;
             for (int i = 0; i <= _newchromosomes[newchromosomeIndex].GetUpperBound(0); i++) {
-                _newchromosomes[newchromosomeIndex][i] = _chromosomePair[pairIndex][i];
+                _newchromosomes[newchromosomeIndex][i] = currentChromosome[i];
             }
         }
 
@@ -589,18 +591,27 @@ namespace SoundScheduler_Logic.Engine {
                 get { return _stop; }
             }
 
-            public ThreadRange(int start, int stop) {
+            private int _startAfterElitist;
+            public int StartAfterElitist {
+                get { return _startAfterElitist; }
+            }
+
+            public ThreadRange(int start, int startAfterElitist, int stop) {
                 _start = start;
                 _stop = stop;
+                _startAfterElitist = startAfterElitist;
             }
         }
 
         private class ThreadData {
             private int _previousScoreCount = 500000;
             private int _previousScoreCountPerThread;
+            private int _chromosomeLength;
+            private int _randomSeed;
             private List<Thread> _threads;
             private Action _threadDoWork;
             private Dictionary<int, Dictionary<string, float>> _previousScores = new Dictionary<int,Dictionary<string,float>>();
+            private Dictionary<int, HashSet<string>> _uniqueChromosomes = new Dictionary<int, HashSet<string>>();
 
             public bool ThreadsEnd { get; set; }
 
@@ -617,11 +628,21 @@ namespace SoundScheduler_Logic.Engine {
             private Dictionary<int, ThreadRange> _threadRanges = new Dictionary<int, ThreadRange>();
             public ThreadRange Range {
                 get { return _threadRanges[Thread.CurrentThread.ManagedThreadId]; }
-            }            
+            }
+
+            private Dictionary<int, int[]> _currentChromosome = new Dictionary<int, int[]>();
+            public int[] CurrentChromosome {
+                get { return _currentChromosome[Thread.CurrentThread.ManagedThreadId]; }
+            }
 
             private int _threadCount;
             public int ThreadCount {
                 get { return _threadCount; }
+            }
+
+            private Dictionary<int, Random> _random = new Dictionary<int, Random>();
+            public Random GetRandom {
+                get { return _random[Thread.CurrentThread.ManagedThreadId]; }
             }
 
             public void AddThreadRange(int threadId, ThreadRange threadRange) {
@@ -648,6 +669,26 @@ namespace SoundScheduler_Logic.Engine {
                 return _previousScores[Thread.CurrentThread.ManagedThreadId][key];
             }
 
+            public void ClearUniqueChromosomes() {
+                foreach (Thread thread in this.Threads) {
+                    _uniqueChromosomes[thread.ManagedThreadId].Clear();
+                }
+            }
+
+            public bool HasUniqueChromosome(string chromosome) {
+                return _uniqueChromosomes[Thread.CurrentThread.ManagedThreadId].Contains(chromosome);
+            }
+
+            public void AddUniqueChromosome(string chromosome) {
+                _uniqueChromosomes[Thread.CurrentThread.ManagedThreadId].Add(chromosome);
+            }
+
+            public void AddUniqueChromosomeToAllThreads(string chromosome) {
+                foreach (Thread thread in this.Threads) {
+                    _uniqueChromosomes[thread.ManagedThreadId].Add(chromosome);
+                }
+            }
+
             public ThreadJob GetThreadJob(int threadId) {
                 return _threadJobs[threadId];
             }
@@ -658,9 +699,11 @@ namespace SoundScheduler_Logic.Engine {
                 }
             }
 
-            public ThreadData(int threadCount, Action threadDoWork) {
-                _threadCount = threadCount;
-                _threadDoWork = threadDoWork;
+            public ThreadData(Builder builder) {
+                _threadCount = builder.ThreadCount;
+                _threadDoWork = builder.ThreadDoWork;
+                _chromosomeLength = builder.ChromosomeLength;
+                _randomSeed = builder.RandomSeed;
                 InstantiateThreads();
                 InstantiateThreadData();
             }
@@ -682,6 +725,45 @@ namespace SoundScheduler_Logic.Engine {
                 _previousScoreCountPerThread = _previousScoreCount / _threadCount;
                 foreach (Thread thread in this.Threads) {
                     _previousScores.Add(thread.ManagedThreadId, new Dictionary<string,float>());
+                    _currentChromosome.Add(thread.ManagedThreadId, new int[_chromosomeLength]);
+                    _uniqueChromosomes.Add(thread.ManagedThreadId, new HashSet<string>());
+                    if (_randomSeed != -1) {
+                        _random.Add(thread.ManagedThreadId, new Random(_randomSeed));
+                    } else {
+                        _random.Add(thread.ManagedThreadId, new Random());
+                    }
+                    
+                }
+            }
+
+            public class Builder {
+                public int ThreadCount;
+                public Action ThreadDoWork;
+                public int ChromosomeLength;
+                public int RandomSeed;
+
+                public Builder SetThreadCount(int threadCount) {
+                    this.ThreadCount = threadCount;
+                    return this;
+                }
+
+                public Builder SetThreadDoWork(Action threadDoWork) {
+                    this.ThreadDoWork = threadDoWork;
+                    return this;
+                }
+
+                public Builder SetChromosomeLength(int chromosomeLength) {
+                    this.ChromosomeLength = chromosomeLength;
+                    return this;
+                }
+
+                public Builder SetRandomSeed(int randomSeed) {
+                    this.RandomSeed = randomSeed;
+                    return this;
+                }
+
+                public ThreadData Build() {
+                    return new ThreadData(this);
                 }
             }
         }
