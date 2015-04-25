@@ -24,6 +24,7 @@ namespace SoundScheduler_Logic.Engine {
             get { return _generationCount; }
         }
 
+        private int _threadCount = Environment.ProcessorCount;
         private int _chromosomeCount = 500;
         private Random _random;
         private int _bitLength;
@@ -40,7 +41,6 @@ namespace SoundScheduler_Logic.Engine {
         private int[] _bestSoFarChar;
         private float _bestSoFarScore;
         private HashSet<string> _newchromosomesIndex;
-        private Dictionary<string, float> _previousScores = new Dictionary<string, float>();
         private string[] _chromosomesAsString;
         private int _seed;
         private float[] _elitistScore;
@@ -53,10 +53,7 @@ namespace SoundScheduler_Logic.Engine {
         private System.Timers.Timer _timer;
         private GeneticResults _lastResults;
 
-        private bool _threadsEnd;
-        private Thread[] _threads;
-        private Dictionary<int, ThreadJob> _threadJobs;
-        private Dictionary<int, ThreadRange> _threadRanges;
+        private ThreadData _threadData;
         private int _threadMain;
         static readonly object _object = new object();
 
@@ -135,32 +132,20 @@ namespace SoundScheduler_Logic.Engine {
         }
 
         private void InstantiateThreads() {
-            int threadCount = Environment.ProcessorCount;
-            _threads = new Thread[threadCount];
-            _threadJobs = new Dictionary<int,ThreadJob>();
-            for (int i = 0; i < threadCount; i++) {
-                if (i == 0) {
-                    _threads[i] = Thread.CurrentThread;
-                    _threadJobs.Add(_threads[i].ManagedThreadId, ThreadJob.Wait);
-                } else {
-                    _threads[i] = new Thread(new ThreadStart(ThreadDoWork));
-                    _threadJobs.Add(_threads[i].ManagedThreadId, ThreadJob.Wait);
-                    _threads[i].Start();
-                }
-            }
+            _threadData = new ThreadData(_threadCount, ThreadDoWork);
             InstantiateThreadRanges();
+            _threadData.StartThreads();
         }
 
         private void InstantiateThreadRanges() {
-            int threadRangeCount = _chromosomeCount / (_threads.GetUpperBound(0) + 1);
-            _threadRanges = new Dictionary<int, ThreadRange>();
-            for (int i = 0; i <= _threads.GetUpperBound(0); i++) {
+            int threadRangeCount = _chromosomeCount / (_threadData.ThreadCount);
+            for (int i = 0; i < _threadData.ThreadCount; i++) {
                 int threadStart = i * threadRangeCount;
                 int threadEnd = ((i + 1) * threadRangeCount) - 1;
-                if (i == _threads.GetUpperBound(0)) {
+                if (i == _threadData.ThreadCount - 1) {
                     threadEnd = _chromosomeCount - 1;
                 }
-                _threadRanges.Add(_threads[i].ManagedThreadId, new ThreadRange(threadStart, threadEnd));
+                _threadData.AddThreadRange(_threadData.Threads.ElementAt(i).ManagedThreadId, new ThreadRange(threadStart, threadEnd));
             }
         }
 
@@ -170,30 +155,30 @@ namespace SoundScheduler_Logic.Engine {
 
         private void ThreadDoWork(bool runOnce) {
             do {
-                switch (_threadJobs[Thread.CurrentThread.ManagedThreadId]) {
+                switch (_threadData.ThreadJob) {
                     case ThreadJob.RunFitnessScores:
                         RankChromosomesInRoulette_Thread();
-                        _threadJobs[Thread.CurrentThread.ManagedThreadId] = ThreadJob.Wait;
+                        _threadData.ThreadJob = ThreadJob.Wait;
                         break;
                     case ThreadJob.CopyNewChromomesToCurrent:
                         CopyNewChromosomesToCurrentChromomes_Thread();
-                        _threadJobs[Thread.CurrentThread.ManagedThreadId] = ThreadJob.Wait;
+                        _threadData.ThreadJob = ThreadJob.Wait;
                         break;
                 }
-            } while (!_threadsEnd && !runOnce);
+            } while (!_threadData.ThreadsEnd && !runOnce);
         }
 
         private void RunThreads(ThreadJob job) {
-            for (int i = 0; i < _threads.Count(); i++) {
-                _threadJobs[_threads[i].ManagedThreadId] = job;
+            foreach (Thread thread in _threadData.Threads) {
+                _threadData.SetThreadJob(thread.ManagedThreadId, job);
             }
             _threadMain = Thread.CurrentThread.ManagedThreadId;
             ThreadDoWork(true);
             bool isFinished = false;
             do {
                 isFinished = true;
-                for (int i = 0; i < _threads.Count(); i++) {
-                    if (_threadJobs[_threads[i].ManagedThreadId] != ThreadJob.Wait) {
+                foreach (Thread thread in _threadData.Threads) {
+                    if (_threadData.GetThreadJob(thread.ManagedThreadId) != ThreadJob.Wait) {
                         isFinished = false;
                     }
                 }
@@ -201,7 +186,7 @@ namespace SoundScheduler_Logic.Engine {
         }
 
         private void EndThreads() {
-            _threadsEnd = true;
+            _threadData.ThreadsEnd = true;
         }
 
         private void TimerElapsed(object sender, System.Timers.ElapsedEventArgs e) {
@@ -214,7 +199,7 @@ namespace SoundScheduler_Logic.Engine {
                 .SetBestSolutionSoFarSolution(_bestSoFarChar)
                 .SetGenerationCount(_generationCount)
                 .SetGenerationsPerSecond(generationsPerSecond)
-                .SetCPUCoreCount(_threads.GetUpperBound(0) + 1)
+                .SetCPUCoreCount(_threadCount)
                 .Build();
             if (!_results.Results(_lastResults)) {
                 _stop = true;
@@ -265,18 +250,13 @@ namespace SoundScheduler_Logic.Engine {
         }
 
         private void RankChromosomesInRoulette_Thread() {
-            ThreadRange range = _threadRanges[Thread.CurrentThread.ManagedThreadId];
+            ThreadRange range = _threadData.Range;
             for (int index = range.Start; index <= range.Stop; index++) {
-                if (_previousScores.ContainsKey(_chromosomesAsString[index])) {
-                    _ranks[index] = _previousScores[_chromosomesAsString[index]];
+                if (_threadData.HasPreviousScore(_chromosomesAsString[index])) {
+                    _ranks[index] = _threadData.GetPreviousScore(_chromosomesAsString[index]);
                 } else {
                     _ranks[index] = _fitness.GetFitness(_chromosomes[index], this);
-                    lock (_object) {
-                        if (_previousScores.Count == 500000) {
-                            _previousScores.Remove(_previousScores.Keys.ElementAt(0));
-                        }
-                        _previousScores.Add(_chromosomesAsString[index], _ranks[index]);
-                    }
+                    _threadData.AddPreviousScore(_chromosomesAsString[index], _ranks[index]);
                 }
             }
         }
@@ -417,7 +397,7 @@ namespace SoundScheduler_Logic.Engine {
         }
 
         private void CopyNewChromosomesToCurrentChromomes_Thread() {
-            ThreadRange range = _threadRanges[Thread.CurrentThread.ManagedThreadId];
+            ThreadRange range = _threadData.Range;
             for (int index = range.Start; index <= range.Stop; index++) {
                 int[] innerValues = _chromosomes[index];
                 for (int j = 0; j <= innerValues.GetUpperBound(0); j++) {
@@ -612,6 +592,97 @@ namespace SoundScheduler_Logic.Engine {
             public ThreadRange(int start, int stop) {
                 _start = start;
                 _stop = stop;
+            }
+        }
+
+        private class ThreadData {
+            private int _previousScoreCount = 500000;
+            private int _previousScoreCountPerThread;
+            private List<Thread> _threads;
+            private Action _threadDoWork;
+            private Dictionary<int, Dictionary<string, float>> _previousScores = new Dictionary<int,Dictionary<string,float>>();
+
+            public bool ThreadsEnd { get; set; }
+
+            public IEnumerable<Thread> Threads {
+                get { return _threads; }
+            }
+
+            private Dictionary<int, ThreadJob> _threadJobs = new Dictionary<int, ThreadJob>();
+            public ThreadJob ThreadJob {
+                get { return _threadJobs[Thread.CurrentThread.ManagedThreadId]; }
+                set { _threadJobs[Thread.CurrentThread.ManagedThreadId] = value; }
+            }
+
+            private Dictionary<int, ThreadRange> _threadRanges = new Dictionary<int, ThreadRange>();
+            public ThreadRange Range {
+                get { return _threadRanges[Thread.CurrentThread.ManagedThreadId]; }
+            }            
+
+            private int _threadCount;
+            public int ThreadCount {
+                get { return _threadCount; }
+            }
+
+            public void AddThreadRange(int threadId, ThreadRange threadRange) {
+                _threadRanges.Add(threadId, threadRange);
+            }
+
+            public void SetThreadJob(int threadId, ThreadJob job) {
+                _threadJobs[threadId] = job;
+            }
+
+            public void AddPreviousScore(string key, float score) {
+                Dictionary<string, float> previousScore = _previousScores[Thread.CurrentThread.ManagedThreadId];
+                if (previousScore.Count == _previousScoreCountPerThread) {
+                    previousScore.Remove(previousScore.Keys.ElementAt(0));
+                }
+                previousScore.Add(key, score);
+            }
+
+            public bool HasPreviousScore(string key) {
+                return _previousScores[Thread.CurrentThread.ManagedThreadId].ContainsKey(key);
+            }
+
+            public float GetPreviousScore(string key) {
+                return _previousScores[Thread.CurrentThread.ManagedThreadId][key];
+            }
+
+            public ThreadJob GetThreadJob(int threadId) {
+                return _threadJobs[threadId];
+            }
+
+            public void StartThreads() {
+                for (int i = 1; i < _threadCount; i++) {
+                    _threads[i].Start();
+                }
+            }
+
+            public ThreadData(int threadCount, Action threadDoWork) {
+                _threadCount = threadCount;
+                _threadDoWork = threadDoWork;
+                InstantiateThreads();
+                InstantiateThreadData();
+            }
+
+            private void InstantiateThreads() {
+                _threads = new List<Thread>();
+                for (int i = 0; i < _threadCount; i++) {
+                    if (i == 0) {
+                        _threads.Add(Thread.CurrentThread);
+                        _threadJobs.Add(_threads[i].ManagedThreadId, ThreadJob.Wait);
+                    } else {
+                        _threads.Add(new Thread(new ThreadStart(_threadDoWork)));
+                        _threadJobs.Add(_threads[i].ManagedThreadId, ThreadJob.Wait);
+                    }
+                }
+            }
+
+            private void InstantiateThreadData() {
+                _previousScoreCountPerThread = _previousScoreCount / _threadCount;
+                foreach (Thread thread in this.Threads) {
+                    _previousScores.Add(thread.ManagedThreadId, new Dictionary<string,float>());
+                }
             }
         }
     }
