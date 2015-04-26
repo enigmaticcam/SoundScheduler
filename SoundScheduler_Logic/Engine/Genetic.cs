@@ -27,6 +27,8 @@ namespace SoundScheduler_Logic.Engine {
 
         private int _threadCount = Environment.ProcessorCount;
         private int _chromosomeCount = 500;
+        private int _mutationRate = 500;
+        private int _mutationRateDiff;
         private int _bitLength;
         private int _bitCount;
         private FitnessFunction _fitness;
@@ -122,6 +124,7 @@ namespace SoundScheduler_Logic.Engine {
             _timer = new System.Timers.Timer(1000);
             _timer.Elapsed += new System.Timers.ElapsedEventHandler(TimerElapsed);
             _timer.Enabled = true;
+            _mutationRateDiff = _mutationRate + 1 - _bitLength;
         }
 
         private void InstantiateThreads() {
@@ -251,6 +254,7 @@ namespace SoundScheduler_Logic.Engine {
 
         private void RankChromosomesInRoulette_Thread() {
             ThreadRange range = _threadData.Range;
+            float sum = 0;
             for (int index = range.Start; index <= range.Stop; index++) {
                 if (_threadData.HasPreviousScore(_chromosomesAsString[index])) {
                     _ranks[index] = _threadData.GetPreviousScore(_chromosomesAsString[index]);
@@ -258,29 +262,23 @@ namespace SoundScheduler_Logic.Engine {
                     _ranks[index] = _fitness.GetFitness(_chromosomes[index], this);
                     _threadData.AddPreviousScore(_chromosomesAsString[index], _ranks[index]);
                 }
+                sum += _ranks[index];
             }
+            _threadData.ScoreSum = sum;
         }
 
         private void RankchromosomesInRoulette() {
-            float sum = 0;
+            float totalFitnessSum = _threadData.ScoreSumAllThreads;
             for (int index = 0; index < _chromosomeCount; index++) {
-                float score = _ranks[index];
-                if (score == this.IsSolved) {
+                if (_ranks[index] == this.IsSolved) {
                     _stop = true;
                     _solutionIndex = index;
                 }
-                if (score > _bestSoFarScore) {
-                   _bestSoFarScore = score;
+                if (_ranks[index] > _bestSoFarScore) {
+                    _bestSoFarScore = _ranks[index];
                     _bestSoFarChar = (int[])_chromosomes[index].Clone();
                 }
-                sum += score;
                 AddToElitist(index);
-            }
-            GetRoulette(sum);
-        }
-
-        private void GetRoulette(float totalFitnessSum) {
-            for (int index = 0; index < _chromosomeCount; index++) {
                 _roulette[index] = _ranks[index] / totalFitnessSum;
             }
         }
@@ -348,15 +346,25 @@ namespace SoundScheduler_Logic.Engine {
                 }
             }
         }
-
+        
         private void MutatechromosomePair(int[] currentChromosome) {
             for (int chromosomeIndex = 0; chromosomeIndex < _bitLength; chromosomeIndex++) {
-                int canMutate = _threadData.GetRandom.Next(0, 501);
-                if (canMutate == 500) {
-                    int mutateTo = _threadData.GetRandom.Next(0, _bitCount);
-                    currentChromosome[chromosomeIndex] = mutateTo;
+                int canMutate = _threadData.GetRandom.Next(0, _mutationRate + 1);
+                if (canMutate == _mutationRate) {
+                    int mutateCount = _threadData.GetRandom.Next(1, 3);
+                    while (mutateCount > 0) {
+                        int mutateTo = _threadData.GetRandom.Next(0, _bitCount);
+                        currentChromosome[chromosomeIndex] = mutateTo;
+                        mutateCount--;
+                    }
                 }
             }
+        }
+
+        private List<int> Order(HashSet<int> data) {
+            List<int> list = data.ToList();
+            list.Sort();
+            return list;
         }
 
         private int GetRandomFromRoulette() {
@@ -645,6 +653,22 @@ namespace SoundScheduler_Logic.Engine {
                 get { return _random[Thread.CurrentThread.ManagedThreadId]; }
             }
 
+            private Dictionary<int, float> _scoreSum = new Dictionary<int, float>();
+            public float ScoreSum {
+                get { return _scoreSum[Thread.CurrentThread.ManagedThreadId]; }
+                set { _scoreSum[Thread.CurrentThread.ManagedThreadId] = value; }
+            }
+
+            public float ScoreSumAllThreads {
+                get {
+                    float sum = 0;
+                    foreach (Thread thread in this.Threads) {
+                        sum += _scoreSum[thread.ManagedThreadId];
+                    }
+                    return sum;
+                }
+            }
+
             public void AddThreadRange(int threadId, ThreadRange threadRange) {
                 _threadRanges.Add(threadId, threadRange);
             }
@@ -732,7 +756,7 @@ namespace SoundScheduler_Logic.Engine {
                     } else {
                         _random.Add(thread.ManagedThreadId, new Random());
                     }
-                    
+                    _scoreSum.Add(thread.ManagedThreadId, 0);
                 }
             }
 
