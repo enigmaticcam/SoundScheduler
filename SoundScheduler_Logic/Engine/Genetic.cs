@@ -25,9 +25,24 @@ namespace SoundScheduler_Logic.Engine {
             get { return _generationCount; }
         }
 
-        private int _threadCount = Environment.ProcessorCount;
         private int _chromosomeCount = 500;
+        public int ChromosomeCount {
+            get { return _chromosomeCount; }
+            set { _chromosomeCount = value; }
+        }
+
         private int _mutationRate = 500;
+        public int MutationRate {
+            get { return _mutationRate; }
+            set { _mutationRate = value; }
+        }
+
+        private int _threadCount = Environment.ProcessorCount;
+        public int ThreadCount {
+            get { return _threadCount; }
+            set { _threadCount = value; }
+        }
+
         private int _mutationRateDiff;
         private int _bitLength;
         private int _bitCount;

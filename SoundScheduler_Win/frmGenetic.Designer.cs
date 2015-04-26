@@ -26,11 +26,18 @@
             this.cmdGo = new System.Windows.Forms.Button();
             this.txtResults = new System.Windows.Forms.TextBox();
             this.cmdStop = new System.Windows.Forms.Button();
+            this.txtPopulation = new System.Windows.Forms.TextBox();
+            this.label1 = new System.Windows.Forms.Label();
+            this.label2 = new System.Windows.Forms.Label();
+            this.txtMutationRate = new System.Windows.Forms.TextBox();
+            this.label3 = new System.Windows.Forms.Label();
+            this.txtThreadCount = new System.Windows.Forms.TextBox();
+            this.lblProcessorCount = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // cmdGo
             // 
-            this.cmdGo.Location = new System.Drawing.Point(13, 13);
+            this.cmdGo.Location = new System.Drawing.Point(13, 94);
             this.cmdGo.Name = "cmdGo";
             this.cmdGo.Size = new System.Drawing.Size(75, 23);
             this.cmdGo.TabIndex = 0;
@@ -40,17 +47,17 @@
             // 
             // txtResults
             // 
-            this.txtResults.Location = new System.Drawing.Point(13, 43);
+            this.txtResults.Location = new System.Drawing.Point(13, 123);
             this.txtResults.Multiline = true;
             this.txtResults.Name = "txtResults";
             this.txtResults.ReadOnly = true;
             this.txtResults.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.txtResults.Size = new System.Drawing.Size(768, 518);
+            this.txtResults.Size = new System.Drawing.Size(768, 438);
             this.txtResults.TabIndex = 1;
             // 
             // cmdStop
             // 
-            this.cmdStop.Location = new System.Drawing.Point(95, 12);
+            this.cmdStop.Location = new System.Drawing.Point(94, 94);
             this.cmdStop.Name = "cmdStop";
             this.cmdStop.Size = new System.Drawing.Size(75, 23);
             this.cmdStop.TabIndex = 2;
@@ -58,16 +65,83 @@
             this.cmdStop.UseVisualStyleBackColor = true;
             this.cmdStop.Click += new System.EventHandler(this.cmdStop_Click);
             // 
+            // txtPopulation
+            // 
+            this.txtPopulation.Location = new System.Drawing.Point(131, 12);
+            this.txtPopulation.Name = "txtPopulation";
+            this.txtPopulation.Size = new System.Drawing.Size(100, 20);
+            this.txtPopulation.TabIndex = 3;
+            this.txtPopulation.Text = "500";
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(68, 15);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(57, 13);
+            this.label1.TabIndex = 4;
+            this.label1.Text = "Population";
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(16, 41);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(109, 13);
+            this.label2.TabIndex = 6;
+            this.label2.Text = "Mutation Rate (1 in ?)";
+            // 
+            // txtMutationRate
+            // 
+            this.txtMutationRate.Location = new System.Drawing.Point(131, 38);
+            this.txtMutationRate.Name = "txtMutationRate";
+            this.txtMutationRate.Size = new System.Drawing.Size(100, 20);
+            this.txtMutationRate.TabIndex = 5;
+            this.txtMutationRate.Text = "500";
+            // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.Location = new System.Drawing.Point(53, 67);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(72, 13);
+            this.label3.TabIndex = 8;
+            this.label3.Text = "Thread Count";
+            // 
+            // txtThreadCount
+            // 
+            this.txtThreadCount.Location = new System.Drawing.Point(131, 64);
+            this.txtThreadCount.Name = "txtThreadCount";
+            this.txtThreadCount.Size = new System.Drawing.Size(100, 20);
+            this.txtThreadCount.TabIndex = 7;
+            // 
+            // lblProcessorCount
+            // 
+            this.lblProcessorCount.AutoSize = true;
+            this.lblProcessorCount.Location = new System.Drawing.Point(238, 67);
+            this.lblProcessorCount.Name = "lblProcessorCount";
+            this.lblProcessorCount.Size = new System.Drawing.Size(98, 13);
+            this.lblProcessorCount.TabIndex = 9;
+            this.lblProcessorCount.Text = "(lblProcessorCount)";
+            // 
             // frmGenetic
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(793, 573);
+            this.Controls.Add(this.lblProcessorCount);
+            this.Controls.Add(this.label3);
+            this.Controls.Add(this.txtThreadCount);
+            this.Controls.Add(this.label2);
+            this.Controls.Add(this.txtMutationRate);
+            this.Controls.Add(this.label1);
+            this.Controls.Add(this.txtPopulation);
             this.Controls.Add(this.cmdStop);
             this.Controls.Add(this.txtResults);
             this.Controls.Add(this.cmdGo);
             this.Name = "frmGenetic";
             this.Text = "frmGenetic";
+            this.Load += new System.EventHandler(this.frmGenetic_Load);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -78,5 +152,12 @@
         private System.Windows.Forms.Button cmdGo;
         private System.Windows.Forms.TextBox txtResults;
         private System.Windows.Forms.Button cmdStop;
+        private System.Windows.Forms.TextBox txtPopulation;
+        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.TextBox txtMutationRate;
+        private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.TextBox txtThreadCount;
+        private System.Windows.Forms.Label lblProcessorCount;
     }
 }

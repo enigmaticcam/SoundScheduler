@@ -313,6 +313,9 @@ namespace SoundScheduler_Win {
                 .SetUsers(_users)
                 .SetResultsFunc(Results)
                 .SetSolutionAction(Finish)
+                .SetChromosomeCount(Convert.ToInt32(txtPopulation.Text))
+                .SetMutationRate(Convert.ToInt32(txtMutationRate.Text))
+                .SetThreadCount(Convert.ToInt32(txtThreadCount.Text))
                 .Build();
             action.PerformAction();
 
@@ -339,6 +342,11 @@ namespace SoundScheduler_Win {
                 _timeSinceStart = timeSinceStart;
                 _score = score;
             }
+        }
+
+        private void frmGenetic_Load(object sender, EventArgs e) {
+            txtThreadCount.Text = Environment.ProcessorCount.ToString();
+            lblProcessorCount.Text = Environment.ProcessorCount + " processors detected";
         }
     }
 }

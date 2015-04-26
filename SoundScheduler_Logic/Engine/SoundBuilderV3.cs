@@ -63,6 +63,9 @@ namespace SoundScheduler_Logic.Engine {
             private Action<int[]> _solutionAction;
             private float _solve = 10000;
             private Dictionary<int, List<JobConsideration>> _jobConsiderationsInThreads = new Dictionary<int, List<JobConsideration>>();
+            private int _chromosomeCount;
+            private int _mutationRate;
+            private int _threadCount;
             static readonly object _object = new object();
 
             public void PerformAction() {
@@ -103,6 +106,9 @@ namespace SoundScheduler_Logic.Engine {
 
             private void PerformAlgorithm() {
                 _genetic.ScoreSolveValue = _solve;
+                _genetic.ChromosomeCount = _chromosomeCount;
+                _genetic.MutationRate = _mutationRate;
+                _genetic.ThreadCount = _threadCount;
                 _genetic.BeginAsync(GetBitLength(), GetBitCount(), Fitness, _resultsFunc, _solutionAction);
             }
 
@@ -154,6 +160,9 @@ namespace SoundScheduler_Logic.Engine {
                 _meetings = builder.Meetings;
                 _resultsFunc = builder.ResultsFunc;
                 _solutionAction = builder.SolutionAction;
+                _mutationRate = builder.MutationRate;
+                _chromosomeCount = builder.ChromosomeCount;
+                _threadCount = builder.ThreadCount;
             }
 
             public class Builder {
@@ -162,6 +171,9 @@ namespace SoundScheduler_Logic.Engine {
                 public IEnumerable<Meeting> Meetings;
                 public Func<Genetic.GeneticResults, bool> ResultsFunc;
                 public Action<int[]> SolutionAction;
+                public int MutationRate;
+                public int ChromosomeCount;
+                public int ThreadCount;
 
                 public Builder SetUsers(IEnumerable<User> users) {
                     this.Users = users;
@@ -185,6 +197,21 @@ namespace SoundScheduler_Logic.Engine {
 
                 public Builder SetSolutionAction(Action<int[]> solutionAction) {
                     this.SolutionAction = solutionAction;
+                    return this;
+                }
+
+                public Builder SetMutationRate(int mutationRate) {
+                    this.MutationRate = mutationRate;
+                    return this;
+                }
+
+                public Builder SetChromosomeCount(int chromosomeCount) {
+                    this.ChromosomeCount = chromosomeCount;
+                    return this;
+                }
+
+                public Builder SetThreadCount(int threadCount) {
+                    this.ThreadCount = threadCount;
                     return this;
                 }
 
