@@ -138,6 +138,8 @@ namespace SoundScheduler_Logic.Engine {
                 }
                 if (score == _solve) {
                     return genetic.IsSolved;
+                } else if (score == genetic.IsSolved) {
+                    return score - 1;
                 } else {
                     return score;
                 }
