@@ -332,12 +332,8 @@ namespace SoundScheduler_Logic.Engine {
             foreach (Template template in this.Templates) {
                 foreach (Job job in template.Jobs) {
                     _partitions.Add(counter, new HashSet<int>());
-                    if (template.PartitionsForJob(job).Count == 0) {
-                        InstantiateWithPartition(1, uniquePartitions, counter);
-                    } else {
-                        foreach (int partition in template.PartitionsForJob(job)) {
-                            InstantiateWithPartition(partition, uniquePartitions, counter);
-                        }
+                    foreach (int partition in template.PartitionsForJob(job)) {
+                        InstantiateWithPartition(partition, uniquePartitions, counter);
                     }
                     counter++;
                 }
@@ -623,6 +619,7 @@ namespace SoundScheduler_Logic.Engine {
 
     public class JobConsiderationUsersWhoDidSameJobLastMeeting : JobConsideration {
         private Dictionary<int, Job> _usersLastJob = new Dictionary<int, Job>();
+        private Dictionary<int, bool> _hasOnlyOneJob = new Dictionary<int, bool>();
         private int _counter;
 
         public override bool IsConsiderationSoft {
@@ -641,7 +638,9 @@ namespace SoundScheduler_Logic.Engine {
                 foreach (Job job in template.Jobs) {
                     if (_usersLastJob.ContainsKey(usersInJobs[_counter])) {
                         if (_usersLastJob[usersInJobs[_counter]] == job || _usersLastJob[usersInJobs[_counter]].IsSameJob(job)) {
-                            ++sameJobCount;
+                            if (!_hasOnlyOneJob[usersInJobs[_counter]]) {
+                                ++sameJobCount;
+                            }
                         }
                         _usersLastJob[usersInJobs[_counter]] = job;
                     } else {
@@ -654,7 +653,22 @@ namespace SoundScheduler_Logic.Engine {
         }
 
         public JobConsiderationUsersWhoDidSameJobLastMeeting(Builder builder) : base(builder) {
+            BuildUniqueJobsPerUser();
+        }
 
+        private void BuildUniqueJobsPerUser() {
+            for (int userIndex = 0; userIndex < this.Users.Count(); userIndex++) {
+                User user = this.Users.ElementAt(userIndex);
+                bool hasOnlyOneJob = true;
+                for (int job = 0; job < user.Jobs.Count; job++) {
+                    for (int compare = job + 1; compare < user.Jobs.Count; compare++) {
+                        if (!user.Jobs.ElementAt(job).IsSameJob(user.Jobs.ElementAt(compare))) {
+                            hasOnlyOneJob = false;
+                        }
+                    }
+                }
+                _hasOnlyOneJob.Add(userIndex, hasOnlyOneJob);
+            }
         }
 
         public class Builder : JobConsideration.BuilderBase {

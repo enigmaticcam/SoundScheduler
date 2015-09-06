@@ -517,6 +517,12 @@ namespace SoundScheduler_UnitTests {
             jobs[1].Name = "Job 1";
             jobs[2].Name = "Job 2";
 
+            users[0].Jobs = new List<Job> { jobs[0], jobs[1], jobs[2] };
+            users[1].Jobs = new List<Job> { jobs[0], jobs[1], jobs[2] };
+            users[2].Jobs = new List<Job> { jobs[0], jobs[1], jobs[2] };
+            users[3].Jobs = new List<Job> { jobs[0], jobs[1], jobs[2] };
+            users[4].Jobs = new List<Job> { jobs[0], jobs[1], jobs[2] };
+
             Template template1 = new Template();
             template1.Jobs.Add(jobs[0]);
             template1.Jobs.Add(jobs[1]);

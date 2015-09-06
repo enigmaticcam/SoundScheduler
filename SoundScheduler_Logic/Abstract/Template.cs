@@ -37,13 +37,11 @@ namespace SoundScheduler_Logic.Abstract {
 
         public Meeting ToMeeting(DateTime date) {
             Meeting meeting = new Meeting(this);
+            meeting.PartitionCount = _partitionCount;
             meeting.Date = date;
             meeting.Name = this.Name + " - " + date.ToShortDateString();
             foreach (Job job in this.Jobs) {
                 meeting.Jobs.Add(job);
-                if (HasPartitionForJob(job)) {
-                    AddJobToPartition(job, 0);
-                }
                 foreach (int partition in PartitionsForJob(job)) {
                     meeting.AddJobToPartition(job, partition);
                 }

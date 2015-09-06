@@ -27,6 +27,11 @@ namespace SoundScheduler_Logic.Abstract {
             get { return _data.TemplateParent; }
         }
 
+        public int PartitionCount {
+            get { return _data.PartitionCount; }
+            set { _data.PartitionCount = value; }
+        }
+
         public User UserForJob(Job job) {
             if (_data.JobUserSlots.ContainsKey(job)) {
                 return _data.JobUserSlots[job];
@@ -64,9 +69,12 @@ namespace SoundScheduler_Logic.Abstract {
         }
 
         public Template ToTemplate() {
-            Template template = new Template();
+            Template template = new Template(this.PartitionCount);
             foreach (Job job in this.Jobs) {
                 template.Jobs.Add(job);
+                foreach (int partition in this.PartitionsForJob(job)) {
+                    template.AddJobToPartition(job, partition);
+                }
             }
             return template;
         }
@@ -88,6 +96,7 @@ namespace SoundScheduler_Logic.Abstract {
             public Dictionary<Job, User> JobUserSlots { get; set; }
             public Dictionary<User, Job> UserJobSlots { get; set; }
             public Dictionary<Job, HashSet<int>> JobPartitions { get; set; }
+            public int PartitionCount { get; set; }
 
             public Data() {
                 this.Jobs = new List<Job>();
