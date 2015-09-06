@@ -176,11 +176,12 @@ namespace SoundScheduler_Logic.Engine {
         private Dictionary<Job, Dictionary<Job, float>> _jobComboToPoints = new Dictionary<Job, Dictionary<Job, float>>();
         private Dictionary<ulong, float> _jobComboAsBitToPoints = new Dictionary<ulong, float>();
         private Dictionary<Job, ulong> _jobToBit = new Dictionary<Job, ulong>();
-        private Dictionary<int, ulong> _userCombos = new Dictionary<int, ulong>();
-        private Dictionary<int, Dictionary<int, float>> _exceptions = new Dictionary<int, Dictionary<int, float>>();
+        private Dictionary<int, Dictionary<int, ulong>> _userCombos = new Dictionary<int, Dictionary<int, ulong>>();
+        private Dictionary<int, Dictionary<int, Dictionary<int, float>>> _exceptions = new Dictionary<int, Dictionary<int, Dictionary<int, float>>>();
         private Dictionary<Job, float> _jobToException = new Dictionary<Job, float>();
         private HashSet<int> _usersForDay = new HashSet<int>();
         private List<Job> _jobsForCombo = new List<Job>();
+        private Dictionary<int, HashSet<int>> _partitions = new Dictionary<int, HashSet<int>>();
         private int _counter;
         private ulong _bit;
         private float _score;
@@ -195,8 +196,17 @@ namespace SoundScheduler_Logic.Engine {
             get { return false; }
         }
 
+        public void AddException(int templateIndex, int userIndex, float reductionCoefficient, int partition) {
+            if (!_exceptions.ContainsKey(partition)) {
+                _exceptions.Add(partition, new Dictionary<int, Dictionary<int, float>>());
+            }
+            _exceptions[partition][templateIndex][userIndex] = reductionCoefficient;
+        }
+
         public void AddException(int templateIndex, int userIndex, float reductionCoefficient) {
-            _exceptions[templateIndex][userIndex] = reductionCoefficient;
+            for (int partition = 1; partition <= this.Templates.ElementAt(templateIndex).ParitionCount; partition++) {
+                _exceptions[partition][templateIndex][userIndex] = reductionCoefficient;
+            }
         }
 
         public void AddJobToException(Job job, float reduction) {
@@ -231,28 +241,36 @@ namespace SoundScheduler_Logic.Engine {
             foreach (Template template in this.Templates) {
                 _usersForDay.Clear();
                 foreach (Job job in template.Jobs) {
-                    _score += AddJobToDayJobCombo(job, usersInJobs[_counter]);
-                    if (_exceptions[_day][usersInJobs[_counter]] > 0) {
-                        _score += Math.Max(_exceptions[_day][usersInJobs[_counter]], _jobToException[job]);
+                    foreach (int partition in _partitions[_counter]) {
+                        _score += AddJobToDayJobCombo(job, usersInJobs[_counter], partition);
+                        if (_exceptions[partition][_day][usersInJobs[_counter]] > 0) {
+                            _score += Math.Max(_exceptions[partition][_day][usersInJobs[_counter]], _jobToException[job]);
+                        }
+                        _usersForDay.Add(usersInJobs[_counter]);
                     }
-                    _usersForDay.Add(usersInJobs[_counter]);
+                    
                     ++_counter;
                 }
-                foreach (int user in _usersForDay) {
-                    _score += ScoreForDay(template, _userCombos[user]);
-                    _userCombos[user] = 0;
+                foreach (int partition in template.ValidPartitions()) {
+                    foreach (int user in _usersForDay) {
+                        _score += ScoreForDay(template, _userCombos[partition][user]);
+                        _userCombos[partition][user] = 0;
+                    }
                 }
                 ++_day;
             }
             return _score;
         }
         
-        private float AddJobToDayJobCombo(Job job, int userComboIndex) {
+        private float AddJobToDayJobCombo(Job job, int userComboIndex, int partition) {
             _bit = _jobToBit[job];
-            if ((_userCombos[userComboIndex] & _bit) == _bit) {
+            if (!_userCombos.ContainsKey(partition)) {
+                _userCombos.Add(partition, new Dictionary<int, ulong>());
+            }
+            if ((_userCombos[partition][userComboIndex] & _bit) == _bit) {
                 return 1;
             } else {
-                _userCombos[userComboIndex] += _bit;
+                _userCombos[partition][userComboIndex] += _bit;
                 return 0;
             }
         }
@@ -287,9 +305,8 @@ namespace SoundScheduler_Logic.Engine {
         }
 
         public JobConsiderationUsersWhoAlreadyHaveJob(Builder builder) : base(builder) {
+            BuildPartitionsAndUserCombos();
             BuildJobIndex();
-            BuildUserCombos();
-            BuildExceptions();
         }
 
         private void BuildJobIndex() {
@@ -299,21 +316,50 @@ namespace SoundScheduler_Logic.Engine {
             }
         }
 
-        private void BuildUserCombos() {
-            for (int userIndex = 0; userIndex < this.Users.Count(); userIndex++) {
-                _userCombos.Add(userIndex, 0);
+        private void BuildExceptions(int partition) {
+            _exceptions.Add(partition, new Dictionary<int, Dictionary<int, float>>());
+            for (int templateIndex = 0; templateIndex < this.Templates.Count(); templateIndex++) {
+                _exceptions[partition].Add(templateIndex, new Dictionary<int, float>());
+                for (int userIndex = 0; userIndex < this.Users.Count(); userIndex++) {
+                    _exceptions[partition][templateIndex].Add(userIndex, 0);
+                }
             }
         }
 
-        private void BuildExceptions() {
-            for (int templateIndex = 0; templateIndex < this.Templates.Count(); templateIndex++) {
-                _exceptions.Add(templateIndex, new Dictionary<int, float>());
-                for (int userIndex = 0; userIndex < this.Users.Count(); userIndex++) {
-                    _exceptions[templateIndex].Add(userIndex, 0);
+        private void BuildPartitionsAndUserCombos() {
+            HashSet<int> uniquePartitions = new HashSet<int>();
+            int counter = 0;
+            foreach (Template template in this.Templates) {
+                foreach (Job job in template.Jobs) {
+                    _partitions.Add(counter, new HashSet<int>());
+                    if (template.PartitionsForJob(job).Count == 0) {
+                        InstantiateWithPartition(1, uniquePartitions, counter);
+                    } else {
+                        foreach (int partition in template.PartitionsForJob(job)) {
+                            InstantiateWithPartition(partition, uniquePartitions, counter);
+                        }
+                    }
+                    counter++;
                 }
             }
             foreach (Job job in this.Jobs) {
                 _jobToException.Add(job, 1);
+            }
+        }
+
+        private void InstantiateWithPartition(int partition, HashSet<int> uniquePartitions, int counter) {
+            _partitions[counter].Add(partition);
+            if (!uniquePartitions.Contains(partition)) {
+                uniquePartitions.Add(partition);
+                BuildUserCombos(partition);
+                BuildExceptions(partition);
+            }
+        }
+
+        private void BuildUserCombos(int partition) {
+            _userCombos.Add(partition, new Dictionary<int, ulong>());
+            for (int userIndex = 0; userIndex < this.Users.Count(); userIndex++) {
+                _userCombos[partition].Add(userIndex, 0);
             }
         }
 
@@ -330,11 +376,14 @@ namespace SoundScheduler_Logic.Engine {
                 .SetUsers(this.Users)
                 .SetJobRank(this.JobRank)
                 .Build();
-            foreach (int templateIndex in _exceptions.Keys) {
-                foreach (int userIndex in _exceptions[templateIndex].Keys) {
-                    consideration.AddException(templateIndex, userIndex, _exceptions[templateIndex][userIndex]);
+            foreach (int partition in _exceptions.Keys) {
+                foreach (int templateIndex in _exceptions[partition].Keys) {
+                    foreach (int userIndex in _exceptions[partition][templateIndex].Keys) {
+                        consideration.AddException(templateIndex, userIndex, _exceptions[partition][templateIndex][userIndex], partition);
+                    }
                 }
             }
+            
             foreach (Job job in _jobToException.Keys) {
                 consideration.AddJobToException(job, _jobToException[job]);
             }

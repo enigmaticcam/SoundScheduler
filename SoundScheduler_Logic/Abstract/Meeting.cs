@@ -43,9 +43,24 @@ namespace SoundScheduler_Logic.Abstract {
             }
         }
 
+        public HashSet<int> PartitionsForJob(Job job) {
+            if (_data.JobPartitions.ContainsKey(job)) {
+                return _data.JobPartitions[job];
+            } else {
+                return new HashSet<int>();
+            }
+        }
+
         public void AddUserForJob(User user, Job job) {
             _data.JobUserSlots.Add(job, user);
             _data.UserJobSlots.Add(user, job);
+        }
+
+        public void AddJobToPartition(Job job, int partition) {
+            if (!_data.JobPartitions.ContainsKey(job)) {
+                _data.JobPartitions.Add(job, new HashSet<int>());
+            }
+            _data.JobPartitions[job].Add(partition);
         }
 
         public Template ToTemplate() {
@@ -72,11 +87,13 @@ namespace SoundScheduler_Logic.Abstract {
             public Template TemplateParent { get; set; }
             public Dictionary<Job, User> JobUserSlots { get; set; }
             public Dictionary<User, Job> UserJobSlots { get; set; }
+            public Dictionary<Job, HashSet<int>> JobPartitions { get; set; }
 
             public Data() {
                 this.Jobs = new List<Job>();
                 this.JobUserSlots = new Dictionary<Job, User>();
                 this.UserJobSlots = new Dictionary<User, Job>();
+                this.JobPartitions = new Dictionary<Job, HashSet<int>>();
             }
         }
     }
