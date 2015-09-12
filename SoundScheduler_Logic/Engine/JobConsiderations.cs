@@ -176,7 +176,7 @@ namespace SoundScheduler_Logic.Engine {
         private Dictionary<Job, Dictionary<Job, float>> _jobComboToPoints = new Dictionary<Job, Dictionary<Job, float>>();
         private Dictionary<ulong, float> _jobComboAsBitToPoints = new Dictionary<ulong, float>();
         private Dictionary<Job, ulong> _jobToBit = new Dictionary<Job, ulong>();
-        private Dictionary<int, Dictionary<int, ulong>> _userCombos = new Dictionary<int, Dictionary<int, ulong>>();
+        private Dictionary<int, ulong> _userCombos = new Dictionary<int, ulong>();
         private Dictionary<int, Dictionary<int, Dictionary<int, float>>> _exceptions = new Dictionary<int, Dictionary<int, Dictionary<int, float>>>();
         private Dictionary<Job, float> _jobToException = new Dictionary<Job, float>();
         private HashSet<int> _usersForDay = new HashSet<int>();
@@ -189,7 +189,7 @@ namespace SoundScheduler_Logic.Engine {
         private int _day;
 
         public override string JobName {
-            get { return "Users Who Already Have Job"; }
+            get { return "Users Who Already Have Job/Exception"; }
         }
 
         public override bool IsConsiderationSoft {
@@ -241,8 +241,8 @@ namespace SoundScheduler_Logic.Engine {
             foreach (Template template in this.Templates) {
                 _usersForDay.Clear();
                 foreach (Job job in template.Jobs) {
+                    _score += AddJobToDayJobCombo(job, usersInJobs[_counter]);
                     foreach (int partition in _partitions[_counter]) {
-                        _score += AddJobToDayJobCombo(job, usersInJobs[_counter], partition);
                         if (_exceptions[partition][_day][usersInJobs[_counter]] > 0) {
                             _score += Math.Max(_exceptions[partition][_day][usersInJobs[_counter]], _jobToException[job]);
                         }
@@ -251,26 +251,21 @@ namespace SoundScheduler_Logic.Engine {
                     
                     ++_counter;
                 }
-                foreach (int partition in template.ValidPartitions()) {
-                    foreach (int user in _usersForDay) {
-                        _score += ScoreForDay(template, _userCombos[partition][user]);
-                        _userCombos[partition][user] = 0;
-                    }
+                foreach (int user in _usersForDay) {
+                    _score += ScoreForDay(template, _userCombos[user]);
+                    _userCombos[user] = 0;
                 }
                 ++_day;
             }
             return _score;
         }
         
-        private float AddJobToDayJobCombo(Job job, int userComboIndex, int partition) {
+        private float AddJobToDayJobCombo(Job job, int userComboIndex) {
             _bit = _jobToBit[job];
-            if (!_userCombos.ContainsKey(partition)) {
-                _userCombos.Add(partition, new Dictionary<int, ulong>());
-            }
-            if ((_userCombos[partition][userComboIndex] & _bit) == _bit) {
+            if ((_userCombos[userComboIndex] & _bit) == _bit) {
                 return 1;
             } else {
-                _userCombos[partition][userComboIndex] += _bit;
+                _userCombos[userComboIndex] += _bit;
                 return 0;
             }
         }
@@ -327,6 +322,7 @@ namespace SoundScheduler_Logic.Engine {
         }
 
         private void BuildPartitionsAndUserCombos() {
+            BuildUserCombos();
             HashSet<int> uniquePartitions = new HashSet<int>();
             int counter = 0;
             foreach (Template template in this.Templates) {
@@ -347,15 +343,14 @@ namespace SoundScheduler_Logic.Engine {
             _partitions[counter].Add(partition);
             if (!uniquePartitions.Contains(partition)) {
                 uniquePartitions.Add(partition);
-                BuildUserCombos(partition);
                 BuildExceptions(partition);
             }
         }
 
-        private void BuildUserCombos(int partition) {
-            _userCombos.Add(partition, new Dictionary<int, ulong>());
+        private void BuildUserCombos() {
+            _userCombos = new Dictionary<int, ulong>();
             for (int userIndex = 0; userIndex < this.Users.Count(); userIndex++) {
-                _userCombos[partition].Add(userIndex, 0);
+                _userCombos.Add(userIndex, 0);
             }
         }
 

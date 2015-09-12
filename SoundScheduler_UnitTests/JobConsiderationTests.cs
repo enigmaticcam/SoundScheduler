@@ -258,7 +258,7 @@ namespace SoundScheduler_UnitTests {
 
             // Assert
             Assert.AreEqual(2, invalidCount1);
-            Assert.AreEqual(0, invalidCount2);
+            Assert.AreEqual(1, invalidCount2);
         }
 
         [TestMethod]

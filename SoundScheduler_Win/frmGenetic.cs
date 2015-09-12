@@ -228,39 +228,48 @@ namespace SoundScheduler_Win {
             templateTuesday.AddJobToPartition(jobMic1, 1);
             templateTuesday.AddJobToPartition(jobMic2, 1);
             templateTuesday.AddJobToPartition(jobMic3, 2);
-            templateTuesday.AddJobToPartition(jobMic4, 2);
+            templateTuesday.AddJobToPartition(jobMic4, 2);            
             
-            _meetings.Add(templateTuesday.ToMeeting(DateTime.Parse("8/25/2015")));
-            _meetings.Add(templateSunday.ToMeeting(DateTime.Parse("8/30/2015")));
-            _meetings.Add(templateTuesday.ToMeeting(DateTime.Parse("9/1/2015")));
             _meetings.Add(templateSunday.ToMeeting(DateTime.Parse("9/6/2015")));
             _meetings.Add(templateTuesday.ToMeeting(DateTime.Parse("9/8/2015")));
             _meetings.Add(templateSunday.ToMeeting(DateTime.Parse("9/13/2015")));
+            _meetings.Add(templateTuesday.ToMeeting(DateTime.Parse("9/15/2015")));
+            _meetings.Add(templateSunday.ToMeeting(DateTime.Parse("9/20/2015")));
+            _meetings.Add(templateTuesday.ToMeeting(DateTime.Parse("9/22/2015")));
+            _meetings.Add(templateSunday.ToMeeting(DateTime.Parse("9/27/2015")));
+            _meetings.Add(templateTuesday.ToMeeting(DateTime.Parse("9/29/2015")));
+            _meetings.Add(templateSunday.ToMeeting(DateTime.Parse("10/4/2015")));
+            _meetings.Add(templateTuesday.ToMeeting(DateTime.Parse("10/6/2015")));
+            _meetings.Add(templateSunday.ToMeeting(DateTime.Parse("10/11/2015")));
+            _meetings.Add(templateTuesday.ToMeeting(DateTime.Parse("10/20/2015")));
+            _meetings.Add(templateSunday.ToMeeting(DateTime.Parse("10/25/2015")));
+            _meetings.Add(templateTuesday.ToMeeting(DateTime.Parse("10/27/2015")));
+            _meetings.Add(templateSunday.ToMeeting(DateTime.Parse("11/1/2015")));
 
             foreach (Meeting meeting in _meetings) {
                 _templates.Add(meeting.ToTemplate());
             }
 
-            _meetings[0].AddUserForJob(userCTangen, jobSound);
-            _meetings[0].AddUserForJob(userDLopez, jobStage);
-            _meetings[0].AddUserForJob(userBDeaver, jobMic1);
-            _meetings[0].AddUserForJob(userEWilder, jobMic2);
-            _meetings[0].AddUserForJob(userRStubbs, jobMic3);
-            _meetings[0].AddUserForJob(userDKeil, jobMic4);
+            _meetings[0].AddUserForJob(userDLopez, jobSound);
+            _meetings[0].AddUserForJob(userESavelberg, jobStage);
+            _meetings[0].AddUserForJob(userDKeil, jobMic1);
+            _meetings[0].AddUserForJob(userCTangen, jobMic2);
+            _meetings[0].AddUserForJob(userBTyler, jobMic3);
+            _meetings[0].AddUserForJob(userDBecker, jobMic4);
 
-            _meetings[1].AddUserForJob(userEWilder, jobSound);
-            _meetings[1].AddUserForJob(userBDeaver, jobStage);
-            _meetings[1].AddUserForJob(userBBabbe, jobMic1);
-            _meetings[1].AddUserForJob(userDKeil, jobMic2);
-            _meetings[1].AddUserForJob(userDCook, jobMic3);
-            _meetings[1].AddUserForJob(userRStubbs, jobMic4);
+            _meetings[1].AddUserForJob(userESavelberg, jobSound);
+            _meetings[1].AddUserForJob(userCTangen, jobStage);
+            _meetings[1].AddUserForJob(userRStubbs, jobMic1);
+            _meetings[1].AddUserForJob(userDCook, jobMic2);
+            _meetings[1].AddUserForJob(userDKeil, jobMic3);
+            _meetings[1].AddUserForJob(userEWilder, jobMic4);
 
-            _meetings[2].AddUserForJob(userDCook, jobSound);
-            _meetings[2].AddUserForJob(userEWilder, jobStage);
-            _meetings[2].AddUserForJob(userBTyler, jobMic1);
-            _meetings[2].AddUserForJob(userBBabbe, jobMic2);
-            _meetings[2].AddUserForJob(userDBecker, jobMic3);
-            _meetings[2].AddUserForJob(userDLopez, jobMic4);
+            _meetings[2].AddUserForJob(userEWilder, jobSound);
+            _meetings[2].AddUserForJob(userDCook, jobStage);
+            _meetings[2].AddUserForJob(userDLopez, jobMic1);
+            _meetings[2].AddUserForJob(userBDeaver, jobMic2);
+            _meetings[2].AddUserForJob(userESavelberg, jobMic3);
+            _meetings[2].AddUserForJob(userBTyler, jobMic4);
 
             JobConsideration consideration = null;
 
@@ -292,14 +301,46 @@ namespace SoundScheduler_Win {
                 .SetUsers(_users)
                 .Build();
             ((JobConsiderationUsersWhoAlreadyHaveJob)consideration).AddJobToException(jobStage, (float)0.5);
-            ((JobConsiderationUsersWhoAlreadyHaveJob)consideration).AddException(3, _users.IndexOf(userBBabbe), (float)0.5);
-            ((JobConsiderationUsersWhoAlreadyHaveJob)consideration).AddException(3, _users.IndexOf(userRStubbs), (float)0.5, 1);
+            ((JobConsiderationUsersWhoAlreadyHaveJob)consideration).AddException(3, _users.IndexOf(userESavelberg), (float)0.5, 1);
             ((JobConsiderationUsersWhoAlreadyHaveJob)consideration).AddException(3, _users.IndexOf(userDCook), (float)0.5, 2);
-            ((JobConsiderationUsersWhoAlreadyHaveJob)consideration).AddException(5, _users.IndexOf(userRStubbs), (float)0.5);
-            ((JobConsiderationUsersWhoAlreadyHaveJob)consideration).AddException(4, _users.IndexOf(userDLopez), (float)0.5, 1);
-            ((JobConsiderationUsersWhoAlreadyHaveJob)consideration).AddException(4, _users.IndexOf(userBBabbe), (float)0.5, 2);
+            ((JobConsiderationUsersWhoAlreadyHaveJob)consideration).AddException(3, _users.IndexOf(userCTangen), (float)0.5, 2);
+            ((JobConsiderationUsersWhoAlreadyHaveJob)consideration).AddException(3, _users.IndexOf(userDLopez), (float)1);
+            ((JobConsiderationUsersWhoAlreadyHaveJob)consideration).AddException(4, _users.IndexOf(userESavelberg), (float)0.5);
+            ((JobConsiderationUsersWhoAlreadyHaveJob)consideration).AddException(4, _users.IndexOf(userDBecker), (float)1);
+            ((JobConsiderationUsersWhoAlreadyHaveJob)consideration).AddException(4, _users.IndexOf(userDLopez), (float)1);
+            ((JobConsiderationUsersWhoAlreadyHaveJob)consideration).AddException(5, _users.IndexOf(userRStubbs), (float)0.5, 1);
             ((JobConsiderationUsersWhoAlreadyHaveJob)consideration).AddException(5, _users.IndexOf(userCTangen), (float)0.5, 2);
-            ((JobConsiderationUsersWhoAlreadyHaveJob)consideration).AddException(5, _users.IndexOf(userESavelberg), (float)0.5, 1);
+            ((JobConsiderationUsersWhoAlreadyHaveJob)consideration).AddException(5, _users.IndexOf(userDLopez), (float)1);
+            ((JobConsiderationUsersWhoAlreadyHaveJob)consideration).AddException(5, _users.IndexOf(userBBabbe), (float)0.5);
+            ((JobConsiderationUsersWhoAlreadyHaveJob)consideration).AddException(5, _users.IndexOf(userRStubbs), (float)0.5, 2);
+            ((JobConsiderationUsersWhoAlreadyHaveJob)consideration).AddException(6, _users.IndexOf(userCTangen), (float)0.5, 1);
+            ((JobConsiderationUsersWhoAlreadyHaveJob)consideration).AddException(6, _users.IndexOf(userDBecker), (float)0.5, 2);
+            ((JobConsiderationUsersWhoAlreadyHaveJob)consideration).AddException(6, _users.IndexOf(userESavelberg), (float)0.5, 1);
+            ((JobConsiderationUsersWhoAlreadyHaveJob)consideration).AddException(6, _users.IndexOf(userBBabbe), (float)0.5, 2);
+            ((JobConsiderationUsersWhoAlreadyHaveJob)consideration).AddException(7, _users.IndexOf(userDBecker), (float)0.5, 1);
+            ((JobConsiderationUsersWhoAlreadyHaveJob)consideration).AddException(7, _users.IndexOf(userESavelberg), (float)0.5, 2);
+            ((JobConsiderationUsersWhoAlreadyHaveJob)consideration).AddException(8, _users.IndexOf(userDBecker), (float)0.5);
+            ((JobConsiderationUsersWhoAlreadyHaveJob)consideration).AddException(8, _users.IndexOf(userBBabbe), (float)0.5, 2);
+            ((JobConsiderationUsersWhoAlreadyHaveJob)consideration).AddException(8, _users.IndexOf(userRStubbs), (float)0.5, 1);
+            ((JobConsiderationUsersWhoAlreadyHaveJob)consideration).AddException(9, _users.IndexOf(userDCook), (float)0.5, 2);
+            ((JobConsiderationUsersWhoAlreadyHaveJob)consideration).AddException(10, _users.IndexOf(userDCook), (float)0.5);
+            ((JobConsiderationUsersWhoAlreadyHaveJob)consideration).AddException(10, _users.IndexOf(userDLopez), (float)0.5, 2);
+            ((JobConsiderationUsersWhoAlreadyHaveJob)consideration).AddException(11, _users.IndexOf(userDCook), (float)0.5, 1);
+            ((JobConsiderationUsersWhoAlreadyHaveJob)consideration).AddException(11, _users.IndexOf(userRStubbs), (float)0.5, 2);
+            ((JobConsiderationUsersWhoAlreadyHaveJob)consideration).AddException(11, _users.IndexOf(userBBabbe), (float)0.5, 1);
+            ((JobConsiderationUsersWhoAlreadyHaveJob)consideration).AddException(11, _users.IndexOf(userESavelberg), (float)0.5, 2);
+            ((JobConsiderationUsersWhoAlreadyHaveJob)consideration).AddException(11, _users.IndexOf(userCTangen), (float)1);
+            ((JobConsiderationUsersWhoAlreadyHaveJob)consideration).AddException(12, _users.IndexOf(userRStubbs), (float)0.5);
+            ((JobConsiderationUsersWhoAlreadyHaveJob)consideration).AddException(12, _users.IndexOf(userESavelberg), (float)0.5, 2);
+            ((JobConsiderationUsersWhoAlreadyHaveJob)consideration).AddException(12, _users.IndexOf(userCTangen), (float)1);
+            ((JobConsiderationUsersWhoAlreadyHaveJob)consideration).AddException(13, _users.IndexOf(userDBecker), (float)0.5, 2);
+            ((JobConsiderationUsersWhoAlreadyHaveJob)consideration).AddException(13, _users.IndexOf(userBBabbe), (float)0.5, 1);
+            ((JobConsiderationUsersWhoAlreadyHaveJob)consideration).AddException(13, _users.IndexOf(userCTangen), (float)0.5, 2);
+            ((JobConsiderationUsersWhoAlreadyHaveJob)consideration).AddException(13, _users.IndexOf(userDLopez), (float)0.5, 1);
+            ((JobConsiderationUsersWhoAlreadyHaveJob)consideration).AddException(13, _users.IndexOf(userDCook), (float)0.5);
+            ((JobConsiderationUsersWhoAlreadyHaveJob)consideration).AddException(13, _users.IndexOf(userBBabbe), (float)0.5, 2);
+            ((JobConsiderationUsersWhoAlreadyHaveJob)consideration).AddException(13, _users.IndexOf(userDKeil), (float)0.5, 1);
+            ((JobConsiderationUsersWhoAlreadyHaveJob)consideration).AddException(14, _users.IndexOf(userESavelberg), (float)0.5, 2);
 
             _jobConsiderations.Add(consideration);
 
