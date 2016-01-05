@@ -382,6 +382,11 @@ namespace SoundScheduler_UnitTests {
         }
 
         [TestMethod]
+        public void JobConsideration_UsersWhoAlreadyHaveJob_SubJob() {
+
+        }
+
+        [TestMethod]
         public void JobConsideration_EvenUserDistributionPerJob_WithoutSameJobs() {
 
             // Arrange

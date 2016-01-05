@@ -182,6 +182,8 @@ namespace SoundScheduler_Logic.Engine {
         private HashSet<int> _usersForDay = new HashSet<int>();
         private List<Job> _jobsForCombo = new List<Job>();
         private Dictionary<int, HashSet<int>> _partitions = new Dictionary<int, HashSet<int>>();
+        private Dictionary<Job, Job> _jobToSubjob = new Dictionary<Job, Job>();
+        private Dictionary<int, int> _subjobNeedInPartition = new Dictionary<int, int>();
         private int _counter;
         private ulong _bit;
         private float _score;
@@ -194,6 +196,14 @@ namespace SoundScheduler_Logic.Engine {
 
         public override bool IsConsiderationSoft {
             get { return false; }
+        }
+
+        public void AddSubjobToJob(Job mainJob, Job subJob) {
+            _jobToSubjob.Add(mainJob, subJob);
+        }
+
+        public void AddNeedForSubjob(int userIndex, int partition) {
+            _subjobNeedInPartition.Add(userIndex, partition);
         }
 
         public void AddException(int templateIndex, int userIndex, float reductionCoefficient, int partition) {
@@ -243,6 +253,7 @@ namespace SoundScheduler_Logic.Engine {
                 foreach (Job job in template.Jobs) {
                     _score += AddJobToDayJobCombo(job, usersInJobs[_counter]);
                     foreach (int partition in _partitions[_counter]) {
+                        _score += IsSubJobNeededAndFulfilled(job, template, usersInJobs[_counter], partition);
                         if (_exceptions[partition][_day][usersInJobs[_counter]] > 0) {
                             _score += Math.Max(_exceptions[partition][_day][usersInJobs[_counter]], _jobToException[job]);
                         }
@@ -258,6 +269,38 @@ namespace SoundScheduler_Logic.Engine {
                 ++_day;
             }
             return _score;
+        }
+
+        private float IsSubJobNeededAndFulfilled(Job job, Template template, int userIndex, int partition) {
+            if (DoesJobHaveSubJob(job) && DoesUserHaveNeedForSubJobInPartition(userIndex, partition)) {
+                return IsUserInSubjobAvailableForPartition(userIndex, partition);
+            } else {
+                return 0;
+            }
+        }
+
+        private bool DoesJobHaveSubJob(Job job) {
+            return _jobToSubjob.ContainsKey(job);
+        }
+        // fix this. It's not the current user, but rather the user who's in the subjob.
+        private bool DoesUserHaveNeedForSubJobInPartition(int userIndex, int partition) {
+            if (_subjobNeedInPartition.ContainsKey(userIndex) && _subjobNeedInPartition[userIndex] == partition) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+
+        private float IsUserInSubjobAvailableForPartition(int userIndex, int partition) {
+            if (!_exceptions.ContainsKey(partition)) {
+                return 0;
+            } else if (!_exceptions[partition].ContainsKey(_day)) {
+                return 0;
+            } else if (!_exceptions[partition][_day].ContainsKey(userIndex)) {
+                return 0;
+            } else {
+                return _exceptions[partition][_day][userIndex];
+            }
         }
         
         private float AddJobToDayJobCombo(Job job, int userComboIndex) {

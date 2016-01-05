@@ -118,6 +118,11 @@ namespace SoundScheduler_Win {
             _jobConsiderations = new List<JobConsideration>();
             _templates = new List<Template>();
 
+            Job jobVideo = new Job();
+            jobVideo.Name = "Video";
+            _jobs.Add(jobVideo);
+            jobVideo.IsVoidedOnSoftException = true;
+
             Job jobSound = new Job();
             jobSound.Name = "Sound Box";
             _jobs.Add(jobSound);
@@ -148,6 +153,16 @@ namespace SoundScheduler_Win {
             _jobs.Add(jobMic4);
             jobMic4.IsVoidedOnSoftException = true;
 
+            Job jobMicSub1 = new Job();
+            jobMicSub1.Name = "Mic Sub 1";
+            _jobs.Add(jobMicSub1);
+            jobMicSub1.IsVoidedOnSoftException = true;
+
+            Job jobMicSub2 = new Job();
+            jobMicSub2.Name = "Mic Sub 2";
+            _jobs.Add(jobMicSub2);
+            jobMicSub2.IsVoidedOnSoftException = true;
+
             jobMic1.AddSameJob(jobMic2);
             jobMic1.AddSameJob(jobMic3);
             jobMic1.AddSameJob(jobMic4);
@@ -155,39 +170,41 @@ namespace SoundScheduler_Win {
             jobMic2.AddSameJob(jobMic4);
             jobMic3.AddSameJob(jobMic4);
 
+            jobMicSub1.AddSameJob(jobMicSub2);
+
             User userCTangen = new User();
             userCTangen.Name = "Cameron Tangen";
-            userCTangen.Jobs = new List<Job> { jobSound, jobStage, jobMic1, jobMic2, jobMic3, jobMic4 };
+            userCTangen.Jobs = new List<Job> { jobVideo, jobSound, jobStage, jobMic1, jobMic2, jobMic3, jobMic4, jobMicSub1, jobMicSub2 };
             _users.Add(userCTangen);
 
             User userESavelberg = new User();
             userESavelberg.Name = "Eric Savelberg";
-            userESavelberg.Jobs = new List<Job> { jobSound, jobStage, jobMic1, jobMic2, jobMic3, jobMic4 };
+            userESavelberg.Jobs = new List<Job> { jobSound, jobStage, jobMic1, jobMic2, jobMic3, jobMic4, jobMicSub1, jobMicSub2 };
             _users.Add(userESavelberg);
 
             User userDCook = new User();
             userDCook.Name = "Dennis Cook";
-            userDCook.Jobs = new List<Job> { jobSound, jobStage, jobMic1, jobMic2, jobMic3, jobMic4 };
+            userDCook.Jobs = new List<Job> { jobSound, jobStage, jobMic1, jobMic2, jobMic3, jobMic4, jobMicSub1, jobMicSub2 };
             _users.Add(userDCook);
 
             User userDLopez = new User();
             userDLopez.Name = "David Lopez";
-            userDLopez.Jobs = new List<Job> { jobSound, jobStage, jobMic1, jobMic2, jobMic3, jobMic4 };
+            userDLopez.Jobs = new List<Job> { jobSound, jobStage, jobMic1, jobMic2, jobMic3, jobMic4, jobMicSub1, jobMicSub2 };
             _users.Add(userDLopez);
 
             User userEWilder = new User();
             userEWilder.Name = "Ethan Wilder";
-            userEWilder.Jobs = new List<Job> { jobSound, jobStage, jobMic1, jobMic2, jobMic3, jobMic4 };
+            userEWilder.Jobs = new List<Job> { jobSound, jobStage, jobMic1, jobMic2, jobMic3, jobMic4, jobMicSub1, jobMicSub2 };
             _users.Add(userEWilder);
 
             User userRStubbs = new User();
             userRStubbs.Name = "Reed Stubbs";
-            userRStubbs.Jobs = new List<Job> { jobMic1, jobMic2, jobMic3, jobMic4 };
+            userRStubbs.Jobs = new List<Job> { jobMic1, jobMic2, jobMic3, jobMic4, jobMicSub1, jobMicSub2 };
             _users.Add(userRStubbs);
 
             User userDKeil = new User();
             userDKeil.Name = "David Keil";
-            userDKeil.Jobs = new List<Job> { jobMic1, jobMic2, jobMic3, jobMic4 };
+            userDKeil.Jobs = new List<Job> { jobMic1, jobMic2, jobMic3, jobMic4, jobMicSub1, jobMicSub2 };
             _users.Add(userDKeil);
 
             User userBDeaver = new User();
@@ -197,18 +214,23 @@ namespace SoundScheduler_Win {
 
             User userBTyler = new User();
             userBTyler.Name = "Bobby Tyler";
-            userBTyler.Jobs = new List<Job> { jobMic1, jobMic2, jobMic3, jobMic4 };
+            userBTyler.Jobs = new List<Job> { jobMic1, jobMic2, jobMic3, jobMic4, jobMicSub1, jobMicSub2 };
             _users.Add(userBTyler);
 
             User userBBabbe = new User();
             userBBabbe.Name = "Bob Babbe";
-            userBBabbe.Jobs = new List<Job> { jobMic1, jobMic2, jobMic3, jobMic4 };
+            userBBabbe.Jobs = new List<Job> { jobMic1, jobMic2, jobMic3, jobMic4, jobMicSub1, jobMicSub2 };
             _users.Add(userBBabbe);
 
             User userDBecker = new User();
             userDBecker.Name = "Dave Becker";
-            userDBecker.Jobs = new List<Job> { jobMic1, jobMic2, jobMic3, jobMic4 };
+            userDBecker.Jobs = new List<Job> { jobMic1, jobMic2, jobMic3, jobMic4, jobMicSub1, jobMicSub2 };
             _users.Add(userDBecker);
+
+            User userMPowers = new User();
+            userMPowers.Name = "Mike Powers";
+            userMPowers.Jobs = new List<Job> { jobMic1, jobMic2, jobMic3, jobMic4, jobMicSub1, jobMicSub2 };
+            _users.Add(userMPowers);
 
             Template templateSunday = new Template(2);
             templateSunday.Name = "Sunday";
@@ -229,35 +251,44 @@ namespace SoundScheduler_Win {
             templateTuesday.AddJobToPartition(jobMic2, 1);
             templateTuesday.AddJobToPartition(jobMic3, 2);
             templateTuesday.AddJobToPartition(jobMic4, 2);
+
+            Template templateTuesdayWithVideo = new Template();
+            templateTuesdayWithVideo.Name = "Tuesday";
+            templateTuesdayWithVideo.Jobs = new List<Job> { jobVideo, jobSound, jobStage, jobMic1, jobMic2 };
+            templateTuesdayWithVideo.AddJobToAllPartitions(jobVideo);
+            templateTuesdayWithVideo.AddJobToAllPartitions(jobSound);
+            templateTuesdayWithVideo.AddJobToAllPartitions(jobStage);
+            templateTuesdayWithVideo.AddJobToAllPartitions(jobMic1);
+            templateTuesdayWithVideo.AddJobToAllPartitions(jobMic2);
             
-            _meetings.Add(templateSunday.ToMeeting(DateTime.Parse("11/1/2015")));
-            _meetings.Add(templateTuesday.ToMeeting(DateTime.Parse("11/3/2015")));
-            _meetings.Add(templateSunday.ToMeeting(DateTime.Parse("11/8/2015")));
-            _meetings.Add(templateTuesday.ToMeeting(DateTime.Parse("11/10/2015")));
-            _meetings.Add(templateSunday.ToMeeting(DateTime.Parse("11/15/2015")));
-            _meetings.Add(templateTuesday.ToMeeting(DateTime.Parse("11/17/2015")));
-            _meetings.Add(templateSunday.ToMeeting(DateTime.Parse("11/22/2015")));
-            _meetings.Add(templateTuesday.ToMeeting(DateTime.Parse("11/24/2015")));
-            _meetings.Add(templateSunday.ToMeeting(DateTime.Parse("11/29/2015")));
-            _meetings.Add(templateTuesday.ToMeeting(DateTime.Parse("12/1/2015")));
-            _meetings.Add(templateSunday.ToMeeting(DateTime.Parse("12/6/2015")));
+            _meetings.Add(templateSunday.ToMeeting(DateTime.Parse("12/27/2015")));
+            _meetings.Add(templateTuesday.ToMeeting(DateTime.Parse("12/29/2015")));
+            _meetings.Add(templateSunday.ToMeeting(DateTime.Parse("1/3/2016")));
+            _meetings.Add(templateTuesdayWithVideo.ToMeeting(DateTime.Parse("1/5/2016")));
+            _meetings.Add(templateSunday.ToMeeting(DateTime.Parse("1/10/2016")));
+            _meetings.Add(templateTuesdayWithVideo.ToMeeting(DateTime.Parse("1/12/2016")));
+            _meetings.Add(templateSunday.ToMeeting(DateTime.Parse("1/17/2016")));
+            _meetings.Add(templateTuesdayWithVideo.ToMeeting(DateTime.Parse("1/19/2016")));
+            _meetings.Add(templateSunday.ToMeeting(DateTime.Parse("1/24/2016")));
+            _meetings.Add(templateTuesdayWithVideo.ToMeeting(DateTime.Parse("1/26/2016")));
+            _meetings.Add(templateSunday.ToMeeting(DateTime.Parse("1/31/2016")));
 
             foreach (Meeting meeting in _meetings) {
                 _templates.Add(meeting.ToTemplate());
             }
 
-            _meetings[0].AddUserForJob(userDCook, jobSound);
-            _meetings[0].AddUserForJob(userCTangen, jobStage);
-            _meetings[0].AddUserForJob(userDKeil, jobMic1);
-            _meetings[0].AddUserForJob(userBTyler, jobMic2);
-            _meetings[0].AddUserForJob(userRStubbs, jobMic3);
-            _meetings[0].AddUserForJob(userDBecker, jobMic4);
+            _meetings[0].AddUserForJob(userEWilder, jobSound);
+            _meetings[0].AddUserForJob(userDLopez, jobStage);
+            _meetings[0].AddUserForJob(userBBabbe, jobMic1);
+            _meetings[0].AddUserForJob(userMPowers, jobMic2);
+            _meetings[0].AddUserForJob(userESavelberg, jobMic3);
+            _meetings[0].AddUserForJob(userDCook, jobMic4);
 
-            _meetings[1].AddUserForJob(userEWilder, jobSound);
-            _meetings[1].AddUserForJob(userESavelberg, jobStage);
-            _meetings[1].AddUserForJob(userBTyler, jobMic1);
+            _meetings[1].AddUserForJob(userDCook, jobSound);
+            _meetings[1].AddUserForJob(userEWilder, jobStage);
+            _meetings[1].AddUserForJob(userRStubbs, jobMic1);
             _meetings[1].AddUserForJob(userBBabbe, jobMic2);
-            _meetings[1].AddUserForJob(userDBecker, jobMic3);
+            _meetings[1].AddUserForJob(userBTyler, jobMic3);
             _meetings[1].AddUserForJob(userDKeil, jobMic4);
 
             _meetings[2].AddUserForJob(userESavelberg, jobSound);
@@ -265,7 +296,7 @@ namespace SoundScheduler_Win {
             _meetings[2].AddUserForJob(userRStubbs, jobMic1);
             _meetings[2].AddUserForJob(userDKeil, jobMic2);
             _meetings[2].AddUserForJob(userEWilder, jobMic3);
-            _meetings[2].AddUserForJob(userBBabbe, jobMic4);
+            _meetings[2].AddUserForJob(userMPowers, jobMic4);
 
             JobConsideration consideration = null;
 
@@ -296,34 +327,48 @@ namespace SoundScheduler_Win {
                 .SetTemplates(_templates)
                 .SetUsers(_users)
                 .Build();
+
+            // Stage and video can still be run if you have a discussion part already
             ((JobConsiderationUsersWhoAlreadyHaveJob)consideration).AddJobToException(jobStage, (float)0.5);
-            ((JobConsiderationUsersWhoAlreadyHaveJob)consideration).AddException(3, _users.IndexOf(userDBecker), (float)0.5, 1);
-            ((JobConsiderationUsersWhoAlreadyHaveJob)consideration).AddException(3, _users.IndexOf(userDCook), (float)1, 1);
-            ((JobConsiderationUsersWhoAlreadyHaveJob)consideration).AddException(3, _users.IndexOf(userRStubbs), (float)1, 2);
-            ((JobConsiderationUsersWhoAlreadyHaveJob)consideration).AddException(3, _users.IndexOf(userDKeil), (float)0.5, 1);
-            ((JobConsiderationUsersWhoAlreadyHaveJob)consideration).AddException(3, _users.IndexOf(userESavelberg), (float)0.5, 2);
-            ((JobConsiderationUsersWhoAlreadyHaveJob)consideration).AddException(4, _users.IndexOf(userCTangen), (float)0.5, 2);
-            ((JobConsiderationUsersWhoAlreadyHaveJob)consideration).AddException(4, _users.IndexOf(userESavelberg), (float)0.5, 1);
-            ((JobConsiderationUsersWhoAlreadyHaveJob)consideration).AddException(4, _users.IndexOf(userDBecker), (float)1, 2);
-            ((JobConsiderationUsersWhoAlreadyHaveJob)consideration).AddException(5, _users.IndexOf(userDBecker), (float)0.5, 1);
-            ((JobConsiderationUsersWhoAlreadyHaveJob)consideration).AddException(5, _users.IndexOf(userBBabbe), (float)0.5, 2);
-            ((JobConsiderationUsersWhoAlreadyHaveJob)consideration).AddException(5, _users.IndexOf(userRStubbs), (float)0.5, 1);
-            ((JobConsiderationUsersWhoAlreadyHaveJob)consideration).AddException(6, _users.IndexOf(userCTangen), (float)0.5, 1);
-            ((JobConsiderationUsersWhoAlreadyHaveJob)consideration).AddException(6, _users.IndexOf(userDBecker), (float)0.5, 2);
-            ((JobConsiderationUsersWhoAlreadyHaveJob)consideration).AddException(6, _users.IndexOf(userESavelberg), (float)1, 1);
-            ((JobConsiderationUsersWhoAlreadyHaveJob)consideration).AddException(6, _users.IndexOf(userDCook), (float)1, 2);
-            ((JobConsiderationUsersWhoAlreadyHaveJob)consideration).AddException(7, _users.IndexOf(userRStubbs), (float)1, 1);
-            ((JobConsiderationUsersWhoAlreadyHaveJob)consideration).AddException(7, _users.IndexOf(userDBecker), (float)1, 2);
-            ((JobConsiderationUsersWhoAlreadyHaveJob)consideration).AddException(7, _users.IndexOf(userCTangen), (float)0.5, 1);
-            ((JobConsiderationUsersWhoAlreadyHaveJob)consideration).AddException(7, _users.IndexOf(userBBabbe), (float)0.5, 1);
+            ((JobConsiderationUsersWhoAlreadyHaveJob)consideration).AddJobToException(jobVideo, (float)0.5);
+
+            // Any job can be done at the same time as video
+            ((JobConsiderationUsersWhoAlreadyHaveJob)consideration).AddAllJobCombos(jobVideo, (float)0.5);
+
+            // Sound cannot be done the same time as stage and mic. Stage can be done the same time as mic. Mic cannot be done the same time as other mic.
+            ((JobConsiderationUsersWhoAlreadyHaveJob)consideration).AddSingleJobCombo(jobSound, jobStage, 1);
+            ((JobConsiderationUsersWhoAlreadyHaveJob)consideration).AddSingleJobCombo(jobSound, jobMic1, 1);
+            ((JobConsiderationUsersWhoAlreadyHaveJob)consideration).AddSingleJobCombo(jobSound, jobMic2, 1);
+            ((JobConsiderationUsersWhoAlreadyHaveJob)consideration).AddSingleJobCombo(jobSound, jobMic3, 1);
+            ((JobConsiderationUsersWhoAlreadyHaveJob)consideration).AddSingleJobCombo(jobSound, jobMic4, 1);
+            ((JobConsiderationUsersWhoAlreadyHaveJob)consideration).AddSingleJobCombo(jobStage, jobMic1, (float)0.5);
+            ((JobConsiderationUsersWhoAlreadyHaveJob)consideration).AddSingleJobCombo(jobStage, jobMic2, (float)0.5);
+            ((JobConsiderationUsersWhoAlreadyHaveJob)consideration).AddSingleJobCombo(jobStage, jobMic3, (float)0.5);
+            ((JobConsiderationUsersWhoAlreadyHaveJob)consideration).AddSingleJobCombo(jobStage, jobMic4, (float)0.5);
+            ((JobConsiderationUsersWhoAlreadyHaveJob)consideration).AddSingleJobCombo(jobMic1, jobMic2, 1);
+            ((JobConsiderationUsersWhoAlreadyHaveJob)consideration).AddSingleJobCombo(jobMic1, jobMic3, 1);
+            ((JobConsiderationUsersWhoAlreadyHaveJob)consideration).AddSingleJobCombo(jobMic1, jobMic4, 1);
+            ((JobConsiderationUsersWhoAlreadyHaveJob)consideration).AddSingleJobCombo(jobMic2, jobMic3, 1);
+            ((JobConsiderationUsersWhoAlreadyHaveJob)consideration).AddSingleJobCombo(jobMic2, jobMic4, 1);
+            ((JobConsiderationUsersWhoAlreadyHaveJob)consideration).AddSingleJobCombo(jobMic3, jobMic4, 1);
+
+            // Who's partially or completely unavailable.
+            ((JobConsiderationUsersWhoAlreadyHaveJob)consideration).AddException(3, _users.IndexOf(userRStubbs), (float)0.5);
+            ((JobConsiderationUsersWhoAlreadyHaveJob)consideration).AddException(3, _users.IndexOf(userMPowers), (float)0.5);
+            ((JobConsiderationUsersWhoAlreadyHaveJob)consideration).AddException(5, _users.IndexOf(userCTangen), (float)0.5);
+            ((JobConsiderationUsersWhoAlreadyHaveJob)consideration).AddException(5, _users.IndexOf(userMPowers), (float)0.5);
+            ((JobConsiderationUsersWhoAlreadyHaveJob)consideration).AddException(7, _users.IndexOf(userRStubbs), (float)0.5);
+            ((JobConsiderationUsersWhoAlreadyHaveJob)consideration).AddException(9, _users.IndexOf(userBBabbe), (float)0.5);
+            ((JobConsiderationUsersWhoAlreadyHaveJob)consideration).AddException(4, _users.IndexOf(userDBecker), (float)0.5, 2);
+            ((JobConsiderationUsersWhoAlreadyHaveJob)consideration).AddException(4, _users.IndexOf(userDCook), (float)0.5, 2);
+            ((JobConsiderationUsersWhoAlreadyHaveJob)consideration).AddException(6, _users.IndexOf(userBBabbe), (float)0.5, 2);
+            ((JobConsiderationUsersWhoAlreadyHaveJob)consideration).AddException(6, _users.IndexOf(userRStubbs), (float)0.5, 1);
+            ((JobConsiderationUsersWhoAlreadyHaveJob)consideration).AddException(6, _users.IndexOf(userMPowers), (float)0.5, 2);
+            ((JobConsiderationUsersWhoAlreadyHaveJob)consideration).AddException(8, _users.IndexOf(userMPowers), (float)0.5, 2);
             ((JobConsiderationUsersWhoAlreadyHaveJob)consideration).AddException(8, _users.IndexOf(userDBecker), (float)0.5, 1);
-            ((JobConsiderationUsersWhoAlreadyHaveJob)consideration).AddException(8, _users.IndexOf(userBBabbe), (float)1, 2);
-            ((JobConsiderationUsersWhoAlreadyHaveJob)consideration).AddException(8, _users.IndexOf(userRStubbs), (float)1, 1);
-            ((JobConsiderationUsersWhoAlreadyHaveJob)consideration).AddException(9, _users.IndexOf(userDLopez), (float)0.5, 1);
-            ((JobConsiderationUsersWhoAlreadyHaveJob)consideration).AddException(9, _users.IndexOf(userRStubbs), (float)0.5, 2);
-            ((JobConsiderationUsersWhoAlreadyHaveJob)consideration).AddException(9, _users.IndexOf(userDCook), (float)0.5, 2);
-            ((JobConsiderationUsersWhoAlreadyHaveJob)consideration).AddException(10, _users.IndexOf(userDCook), (float)0.5, 1);
+            ((JobConsiderationUsersWhoAlreadyHaveJob)consideration).AddException(8, _users.IndexOf(userESavelberg), (float)0.5, 2);
             ((JobConsiderationUsersWhoAlreadyHaveJob)consideration).AddException(10, _users.IndexOf(userDLopez), (float)0.5, 2);
+            ((JobConsiderationUsersWhoAlreadyHaveJob)consideration).AddException(10, _users.IndexOf(userCTangen), (float)0.5, 2);
 
             _jobConsiderations.Add(consideration);
 
