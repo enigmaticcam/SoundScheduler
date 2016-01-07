@@ -322,53 +322,53 @@ namespace SoundScheduler_Win {
                 .Build();
             _jobConsiderations.Add(consideration);
 
-            consideration = new JobConsiderationUsersWhoAlreadyHaveJob.Builder()
+            consideration = new JobConsiderationUsersWhoAlreadyHaveJobOld.Builder()
                 .SetJobs(_jobs)
                 .SetTemplates(_templates)
                 .SetUsers(_users)
                 .Build();
 
             // Stage and video can still be run if you have a discussion part already
-            ((JobConsiderationUsersWhoAlreadyHaveJob)consideration).AddJobToException(jobStage, (float)0.5);
-            ((JobConsiderationUsersWhoAlreadyHaveJob)consideration).AddJobToException(jobVideo, (float)0.5);
+            ((JobConsiderationUsersWhoAlreadyHaveJobOld)consideration).AddJobToException(jobStage, (float)0.5);
+            ((JobConsiderationUsersWhoAlreadyHaveJobOld)consideration).AddJobToException(jobVideo, (float)0.5);
 
             // Any job can be done at the same time as video
-            ((JobConsiderationUsersWhoAlreadyHaveJob)consideration).AddAllJobCombos(jobVideo, (float)0.5);
+            ((JobConsiderationUsersWhoAlreadyHaveJobOld)consideration).AddAllJobCombos(jobVideo, (float)0.5);
 
             // Sound cannot be done the same time as stage and mic. Stage can be done the same time as mic. Mic cannot be done the same time as other mic.
-            ((JobConsiderationUsersWhoAlreadyHaveJob)consideration).AddSingleJobCombo(jobSound, jobStage, 1);
-            ((JobConsiderationUsersWhoAlreadyHaveJob)consideration).AddSingleJobCombo(jobSound, jobMic1, 1);
-            ((JobConsiderationUsersWhoAlreadyHaveJob)consideration).AddSingleJobCombo(jobSound, jobMic2, 1);
-            ((JobConsiderationUsersWhoAlreadyHaveJob)consideration).AddSingleJobCombo(jobSound, jobMic3, 1);
-            ((JobConsiderationUsersWhoAlreadyHaveJob)consideration).AddSingleJobCombo(jobSound, jobMic4, 1);
-            ((JobConsiderationUsersWhoAlreadyHaveJob)consideration).AddSingleJobCombo(jobStage, jobMic1, (float)0.5);
-            ((JobConsiderationUsersWhoAlreadyHaveJob)consideration).AddSingleJobCombo(jobStage, jobMic2, (float)0.5);
-            ((JobConsiderationUsersWhoAlreadyHaveJob)consideration).AddSingleJobCombo(jobStage, jobMic3, (float)0.5);
-            ((JobConsiderationUsersWhoAlreadyHaveJob)consideration).AddSingleJobCombo(jobStage, jobMic4, (float)0.5);
-            ((JobConsiderationUsersWhoAlreadyHaveJob)consideration).AddSingleJobCombo(jobMic1, jobMic2, 1);
-            ((JobConsiderationUsersWhoAlreadyHaveJob)consideration).AddSingleJobCombo(jobMic1, jobMic3, 1);
-            ((JobConsiderationUsersWhoAlreadyHaveJob)consideration).AddSingleJobCombo(jobMic1, jobMic4, 1);
-            ((JobConsiderationUsersWhoAlreadyHaveJob)consideration).AddSingleJobCombo(jobMic2, jobMic3, 1);
-            ((JobConsiderationUsersWhoAlreadyHaveJob)consideration).AddSingleJobCombo(jobMic2, jobMic4, 1);
-            ((JobConsiderationUsersWhoAlreadyHaveJob)consideration).AddSingleJobCombo(jobMic3, jobMic4, 1);
+            ((JobConsiderationUsersWhoAlreadyHaveJobOld)consideration).AddSingleJobCombo(jobSound, jobStage, 1);
+            ((JobConsiderationUsersWhoAlreadyHaveJobOld)consideration).AddSingleJobCombo(jobSound, jobMic1, 1);
+            ((JobConsiderationUsersWhoAlreadyHaveJobOld)consideration).AddSingleJobCombo(jobSound, jobMic2, 1);
+            ((JobConsiderationUsersWhoAlreadyHaveJobOld)consideration).AddSingleJobCombo(jobSound, jobMic3, 1);
+            ((JobConsiderationUsersWhoAlreadyHaveJobOld)consideration).AddSingleJobCombo(jobSound, jobMic4, 1);
+            ((JobConsiderationUsersWhoAlreadyHaveJobOld)consideration).AddSingleJobCombo(jobStage, jobMic1, (float)0.5);
+            ((JobConsiderationUsersWhoAlreadyHaveJobOld)consideration).AddSingleJobCombo(jobStage, jobMic2, (float)0.5);
+            ((JobConsiderationUsersWhoAlreadyHaveJobOld)consideration).AddSingleJobCombo(jobStage, jobMic3, (float)0.5);
+            ((JobConsiderationUsersWhoAlreadyHaveJobOld)consideration).AddSingleJobCombo(jobStage, jobMic4, (float)0.5);
+            ((JobConsiderationUsersWhoAlreadyHaveJobOld)consideration).AddSingleJobCombo(jobMic1, jobMic2, 1);
+            ((JobConsiderationUsersWhoAlreadyHaveJobOld)consideration).AddSingleJobCombo(jobMic1, jobMic3, 1);
+            ((JobConsiderationUsersWhoAlreadyHaveJobOld)consideration).AddSingleJobCombo(jobMic1, jobMic4, 1);
+            ((JobConsiderationUsersWhoAlreadyHaveJobOld)consideration).AddSingleJobCombo(jobMic2, jobMic3, 1);
+            ((JobConsiderationUsersWhoAlreadyHaveJobOld)consideration).AddSingleJobCombo(jobMic2, jobMic4, 1);
+            ((JobConsiderationUsersWhoAlreadyHaveJobOld)consideration).AddSingleJobCombo(jobMic3, jobMic4, 1);
 
             // Who's partially or completely unavailable.
-            ((JobConsiderationUsersWhoAlreadyHaveJob)consideration).AddException(3, _users.IndexOf(userRStubbs), (float)0.5);
-            ((JobConsiderationUsersWhoAlreadyHaveJob)consideration).AddException(3, _users.IndexOf(userMPowers), (float)0.5);
-            ((JobConsiderationUsersWhoAlreadyHaveJob)consideration).AddException(5, _users.IndexOf(userCTangen), (float)0.5);
-            ((JobConsiderationUsersWhoAlreadyHaveJob)consideration).AddException(5, _users.IndexOf(userMPowers), (float)0.5);
-            ((JobConsiderationUsersWhoAlreadyHaveJob)consideration).AddException(7, _users.IndexOf(userRStubbs), (float)0.5);
-            ((JobConsiderationUsersWhoAlreadyHaveJob)consideration).AddException(9, _users.IndexOf(userBBabbe), (float)0.5);
-            ((JobConsiderationUsersWhoAlreadyHaveJob)consideration).AddException(4, _users.IndexOf(userDBecker), (float)0.5, 2);
-            ((JobConsiderationUsersWhoAlreadyHaveJob)consideration).AddException(4, _users.IndexOf(userDCook), (float)0.5, 2);
-            ((JobConsiderationUsersWhoAlreadyHaveJob)consideration).AddException(6, _users.IndexOf(userBBabbe), (float)0.5, 2);
-            ((JobConsiderationUsersWhoAlreadyHaveJob)consideration).AddException(6, _users.IndexOf(userRStubbs), (float)0.5, 1);
-            ((JobConsiderationUsersWhoAlreadyHaveJob)consideration).AddException(6, _users.IndexOf(userMPowers), (float)0.5, 2);
-            ((JobConsiderationUsersWhoAlreadyHaveJob)consideration).AddException(8, _users.IndexOf(userMPowers), (float)0.5, 2);
-            ((JobConsiderationUsersWhoAlreadyHaveJob)consideration).AddException(8, _users.IndexOf(userDBecker), (float)0.5, 1);
-            ((JobConsiderationUsersWhoAlreadyHaveJob)consideration).AddException(8, _users.IndexOf(userESavelberg), (float)0.5, 2);
-            ((JobConsiderationUsersWhoAlreadyHaveJob)consideration).AddException(10, _users.IndexOf(userDLopez), (float)0.5, 2);
-            ((JobConsiderationUsersWhoAlreadyHaveJob)consideration).AddException(10, _users.IndexOf(userCTangen), (float)0.5, 2);
+            ((JobConsiderationUsersWhoAlreadyHaveJobOld)consideration).AddException(3, _users.IndexOf(userRStubbs), (float)0.5);
+            ((JobConsiderationUsersWhoAlreadyHaveJobOld)consideration).AddException(3, _users.IndexOf(userMPowers), (float)0.5);
+            ((JobConsiderationUsersWhoAlreadyHaveJobOld)consideration).AddException(5, _users.IndexOf(userCTangen), (float)0.5);
+            ((JobConsiderationUsersWhoAlreadyHaveJobOld)consideration).AddException(5, _users.IndexOf(userMPowers), (float)0.5);
+            ((JobConsiderationUsersWhoAlreadyHaveJobOld)consideration).AddException(7, _users.IndexOf(userRStubbs), (float)0.5);
+            ((JobConsiderationUsersWhoAlreadyHaveJobOld)consideration).AddException(9, _users.IndexOf(userBBabbe), (float)0.5);
+            ((JobConsiderationUsersWhoAlreadyHaveJobOld)consideration).AddException(4, _users.IndexOf(userDBecker), (float)0.5, 2);
+            ((JobConsiderationUsersWhoAlreadyHaveJobOld)consideration).AddException(4, _users.IndexOf(userDCook), (float)0.5, 2);
+            ((JobConsiderationUsersWhoAlreadyHaveJobOld)consideration).AddException(6, _users.IndexOf(userBBabbe), (float)0.5, 2);
+            ((JobConsiderationUsersWhoAlreadyHaveJobOld)consideration).AddException(6, _users.IndexOf(userRStubbs), (float)0.5, 1);
+            ((JobConsiderationUsersWhoAlreadyHaveJobOld)consideration).AddException(6, _users.IndexOf(userMPowers), (float)0.5, 2);
+            ((JobConsiderationUsersWhoAlreadyHaveJobOld)consideration).AddException(8, _users.IndexOf(userMPowers), (float)0.5, 2);
+            ((JobConsiderationUsersWhoAlreadyHaveJobOld)consideration).AddException(8, _users.IndexOf(userDBecker), (float)0.5, 1);
+            ((JobConsiderationUsersWhoAlreadyHaveJobOld)consideration).AddException(8, _users.IndexOf(userESavelberg), (float)0.5, 2);
+            ((JobConsiderationUsersWhoAlreadyHaveJobOld)consideration).AddException(10, _users.IndexOf(userDLopez), (float)0.5, 2);
+            ((JobConsiderationUsersWhoAlreadyHaveJobOld)consideration).AddException(10, _users.IndexOf(userCTangen), (float)0.5, 2);
 
             _jobConsiderations.Add(consideration);
 

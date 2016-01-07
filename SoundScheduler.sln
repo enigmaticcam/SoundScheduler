@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
-VisualStudioVersion = 12.0.31101.0
+VisualStudioVersion = 12.0.40629.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SoundScheduler_Logic", "SoundScheduler_Logic\SoundScheduler_Logic.csproj", "{DF4C1016-AFF8-4356-A2FC-8BAAAF362E45}"
 EndProject
@@ -16,7 +16,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{EA2A35
 		.nuget\NuGet.targets = .nuget\NuGet.targets
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharedSolutions_Logic", "..\..\..\Documents\Visual Studio 2013\Projects\SharedSolutions\SharedSolutions_Logic\SharedSolutions_Logic.csproj", "{0FC9856F-50A3-4946-8BA2-805945BA8801}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharedSolutions_Logic", "..\..\..\..\Source\Repos\SharedSolutions\SharedSolutions_Logic\SharedSolutions_Logic.csproj", "{0FC9856F-50A3-4946-8BA2-805945BA8801}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

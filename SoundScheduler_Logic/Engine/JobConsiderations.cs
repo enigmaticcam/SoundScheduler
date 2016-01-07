@@ -30,6 +30,11 @@ namespace SoundScheduler_Logic.Engine {
             get { return _jobs; }
         }
 
+        private UserExceptionDictionary _userExceptions;
+        public UserExceptionDictionary UserExceptions {
+            get { return _userExceptions; }
+        }
+
         private int _solutionCount;
         public int SolutionCount {
             get { return _solutionCount; }
@@ -71,6 +76,7 @@ namespace SoundScheduler_Logic.Engine {
             _templates = builder.Templates;
             _users = builder.Users;
             _jobs = builder.Jobs;
+            _userExceptions = builder.UserExceptions;
             this.JobRank = builder.JobRank;
             _solutionCount = GetSolutionCount();
         }
@@ -80,6 +86,7 @@ namespace SoundScheduler_Logic.Engine {
             public IEnumerable<Template> Templates;
             public IEnumerable<User> Users;
             public IEnumerable<Job> Jobs;
+            public UserExceptionDictionary UserExceptions;
             public int JobRank = 1;
 
             public BuilderBase SetTemplates(IEnumerable<Template> templates) {
@@ -99,6 +106,11 @@ namespace SoundScheduler_Logic.Engine {
 
             public BuilderBase SetJobRank(int jobRank) {
                 this.JobRank = jobRank;
+                return this;
+            }
+
+            public BuilderBase SetUserExceptions(UserExceptionDictionary userExceptions) {
+                this.UserExceptions = userExceptions;
                 return this;
             }
         }
@@ -167,12 +179,235 @@ namespace SoundScheduler_Logic.Engine {
                 .SetTemplates(this.Templates)
                 .SetUsers(this.Users)
                 .SetJobRank(this.JobRank)
+                .SetUserExceptions(this.UserExceptions)
                 .Build();
             return consideration;
         }
     }
 
+    public class JobConsiderationSubstituteJobAvailability : JobConsideration {
+        private Job _substituteJob;
+
+        public override string JobName {
+            get { return "Substitute Job Availability"; }
+        }
+
+        public override bool IsConsiderationSoft {
+            get { return false; }
+        }
+
+        public override float IsValid(int[] usersInJobs) {
+            throw new NotImplementedException();
+        }
+
+        public override JobConsideration ToCopy() {
+            throw new NotImplementedException();
+        }
+
+
+        public JobConsiderationSubstituteJobAvailability(Builder builder) : base(builder) {
+            _substituteJob = builder.SubstituteJob;
+        }
+
+        public class Builder : JobConsideration.BuilderBase {
+            public Job SubstituteJob;
+
+            public Builder SetSubstituteJob(Job substituteJob) {
+                this.SubstituteJob = substituteJob;
+                return this;
+            }
+
+            public override JobConsideration Build() {
+                return new JobConsiderationSubstituteJobAvailability(this);
+            }
+        }
+    }
+
     public class JobConsiderationUsersWhoAlreadyHaveJob : JobConsideration {
+        private Dictionary<Job, Dictionary<Job, float>> _jobComboToPoints = new Dictionary<Job, Dictionary<Job, float>>();
+        private Dictionary<Job, ulong> _jobToBit = new Dictionary<Job, ulong>();
+        private Dictionary<int, ulong> _userCombos = new Dictionary<int, ulong>();
+        private Dictionary<ulong, float> _jobComboAsBitToPoints = new Dictionary<ulong, float>();
+        private HashSet<int> _usersForDay = new HashSet<int>();
+        private List<Job> _jobsForCombo = new List<Job>();
+        private ulong _bit;
+        private float _tempScore;
+        private float _score;
+        private int _counter;
+
+        public override string JobName {
+            get { return "Users Who Already Have Job"; }
+        }
+
+        public override bool IsConsiderationSoft {
+            get { return false; }
+        }
+
+        public void AddAllJobCombos(Job job1, float reduction) {
+            foreach (Job job2 in this.Jobs) {
+                if (job1 != job2) {
+                    AddJobComboPoints(job1, job2, reduction);
+                    AddJobComboPoints(job2, job1, reduction);
+                }
+            }
+        }
+
+        private void AddJobComboPoints(Job job1, Job job2, float reduction) {
+            if (!_jobComboToPoints.ContainsKey(job1)) {
+                _jobComboToPoints.Add(job1, new Dictionary<Job, float>());
+            }
+            _jobComboToPoints[job1].Add(job2, reduction);
+        }
+
+        public override float IsValid(int[] usersInJobs) {
+            _score = 0;
+            _counter = 0;
+            foreach (Template template in this.Templates) {
+                foreach (Job job in template.Jobs) {
+                    _score += AddJobToDayJobCombo(job, usersInJobs[_counter]);
+                    _usersForDay.Add(usersInJobs[_counter]);
+                    _counter++;
+                }
+                foreach (int user in _usersForDay) {
+                    _score += ScoreForDay(template, _userCombos[user]);
+                    _userCombos[user] = 0;
+                }
+            }
+            return _score;
+        }
+
+        private float AddJobToDayJobCombo(Job job, int userComboIndex) {
+            _bit = _jobToBit[job];
+            if ((_userCombos[userComboIndex] & _bit) == _bit) {
+                return 1;
+            } else {
+                _userCombos[userComboIndex] += _bit;
+                return 0;
+            }
+        }
+
+        private float ScoreForDay(Template template, ulong combo) {
+            if (!_jobComboAsBitToPoints.ContainsKey(combo)) {
+                _jobsForCombo.Clear();
+                foreach (Job job in template.Jobs) {
+                    if ((_jobToBit[job] & combo) == _jobToBit[job]) {
+                        _jobsForCombo.Add(job);
+                    }
+                }
+                _jobComboAsBitToPoints.Add(combo, ScoreForJobCombo(_jobsForCombo));
+            }
+            return _jobComboAsBitToPoints[combo];
+        }
+
+        private float ScoreForJobCombo(List<Job> jobs) {
+            _tempScore = 0;
+            int jobIndex = 0;
+            foreach (Job job in jobs) {
+                for (int jobAgainstIndex = jobIndex + 1; jobAgainstIndex < jobs.Count; jobAgainstIndex++) {
+                    if (_jobComboToPoints.ContainsKey(job) && _jobComboToPoints[job].ContainsKey(jobs[jobAgainstIndex])) {
+                        _tempScore += _jobComboToPoints[job][jobs[jobAgainstIndex]];
+                    } else {
+                        _tempScore += 1;
+                    }
+                }
+                ++jobIndex;
+            }
+            return _tempScore;
+        }
+
+        public override JobConsideration ToCopy() {
+            JobConsiderationUsersWhoAlreadyHaveJob consideration = (JobConsiderationUsersWhoAlreadyHaveJob)new JobConsiderationUsersWhoAlreadyHaveJob.Builder()
+                .SetJobs(this.Jobs)
+                .SetTemplates(this.Templates)
+                .SetUsers(this.Users)
+                .SetJobRank(this.JobRank)
+                .SetUserExceptions(this.UserExceptions)
+                .Build();
+            foreach (Job job1 in _jobComboToPoints.Keys) {
+                foreach (Job job2 in _jobComboToPoints[job1].Keys) {
+                    consideration.AddJobComboPoints(job1, job2, _jobComboToPoints[job1][job2]);
+                }
+            }
+            return consideration; 
+        }
+
+        public JobConsiderationUsersWhoAlreadyHaveJob(Builder builder): base(builder) {
+            BuildJobIndex();
+            BuildUserCombos();
+        }
+
+        private void BuildJobIndex() {
+            for (int jobIndex = 0; jobIndex < this.Jobs.Count(); jobIndex++) {
+                ulong bit = (ulong)Math.Pow(2, jobIndex);
+                _jobToBit.Add(this.Jobs.ElementAt(jobIndex), bit);
+            }
+        }
+
+        private void BuildUserCombos() {
+            _userCombos = new Dictionary<int, ulong>();
+            for (int userIndex = 0; userIndex < this.Users.Count(); userIndex++) {
+                _userCombos.Add(userIndex, 0);
+            }
+        }
+
+        public class Builder : JobConsideration.BuilderBase {
+            public override JobConsideration Build() {
+                return new JobConsiderationUsersWhoAlreadyHaveJob(this);
+            }
+        }
+    }
+
+    public class JobConsiderationUsersWhoHaveExceptions : JobConsideration {
+        private int _counter;
+        private float _score;
+
+        public override string JobName {
+            get { return "Users Who Have Exceptions"; }
+        }
+
+        public override bool IsConsiderationSoft {
+            get { return false; }
+        }
+
+        public override float IsValid(int[] usersInJobs) {
+            _score = 0;
+            _counter = 0;
+            foreach (Template template in this.Templates) {
+                foreach (Job job in template.Jobs) {
+                    foreach (int partition in template.PartitionsForJob(job)) {
+                        if (this.UserExceptions.HasUserException(partition, usersInJobs[_counter])) {
+                            _score += this.UserExceptions.GetUserException(partition, usersInJobs[_counter]).GetJobExceptionValue(job);
+                        }
+                    }
+                    _counter++;
+                }
+            }
+            return _score;
+        }
+
+        public JobConsiderationUsersWhoHaveExceptions(Builder builder) : base(builder) {
+
+        }
+
+        public class Builder : JobConsideration.BuilderBase {
+            public override JobConsideration Build() {
+                return new JobConsiderationUsersWhoHaveExceptions(this);
+            }
+        }
+
+        public override JobConsideration ToCopy() {
+            JobConsiderationUsersWhoAlreadyHaveJobOld consideration = (JobConsiderationUsersWhoAlreadyHaveJobOld)new JobConsiderationUsersWhoAlreadyHaveJobOld.Builder()
+                .SetJobs(this.Jobs)
+                .SetTemplates(this.Templates)
+                .SetUsers(this.Users)
+                .SetJobRank(this.JobRank)
+                .SetUserExceptions(this.UserExceptions.ToCopy())
+                .Build();
+            return consideration;
+        }
+    }
+
+    public class JobConsiderationUsersWhoAlreadyHaveJobOld : JobConsideration {
         private Dictionary<Job, Dictionary<Job, float>> _jobComboToPoints = new Dictionary<Job, Dictionary<Job, float>>();
         private Dictionary<ulong, float> _jobComboAsBitToPoints = new Dictionary<ulong, float>();
         private Dictionary<Job, ulong> _jobToBit = new Dictionary<Job, ulong>();
@@ -184,11 +419,13 @@ namespace SoundScheduler_Logic.Engine {
         private Dictionary<int, HashSet<int>> _partitions = new Dictionary<int, HashSet<int>>();
         private Dictionary<Job, Job> _jobToSubjob = new Dictionary<Job, Job>();
         private Dictionary<int, int> _subjobNeedInPartition = new Dictionary<int, int>();
+        private Dictionary<Template, Dictionary<Job, int>> _subJobIndexOfJob = new Dictionary<Template, Dictionary<Job, int>>();
         private int _counter;
         private ulong _bit;
         private float _score;
         private float _tempScore;
         private int _day;
+        private int _startOfDay;
 
         public override string JobName {
             get { return "Users Who Already Have Job/Exception"; }
@@ -249,11 +486,12 @@ namespace SoundScheduler_Logic.Engine {
             _counter = 0;
             _day = 0;
             foreach (Template template in this.Templates) {
+                _startOfDay = _counter;
                 _usersForDay.Clear();
                 foreach (Job job in template.Jobs) {
                     _score += AddJobToDayJobCombo(job, usersInJobs[_counter]);
                     foreach (int partition in _partitions[_counter]) {
-                        _score += IsSubJobNeededAndFulfilled(job, template, usersInJobs[_counter], partition);
+                        _score += IsSubJobNeededAndFulfilled(job, template, usersInJobs[_counter], partition, usersInJobs);
                         if (_exceptions[partition][_day][usersInJobs[_counter]] > 0) {
                             _score += Math.Max(_exceptions[partition][_day][usersInJobs[_counter]], _jobToException[job]);
                         }
@@ -271,18 +509,22 @@ namespace SoundScheduler_Logic.Engine {
             return _score;
         }
 
-        private float IsSubJobNeededAndFulfilled(Job job, Template template, int userIndex, int partition) {
-            if (DoesJobHaveSubJob(job) && DoesUserHaveNeedForSubJobInPartition(userIndex, partition)) {
-                return IsUserInSubjobAvailableForPartition(userIndex, partition);
+        private float IsSubJobNeededAndFulfilled(Job job, Template template, int userIndex, int partition, int[] usersInJobs) {
+            if (IsJobInPartition(job, template, partition) && DoesJobHaveSubJob(job) && DoesUserHaveNeedForSubJobInPartition(userIndex, partition)) {
+                return IsUserInSubjobAvailableForPartition(template, job, partition, usersInJobs);
             } else {
                 return 0;
             }
         }
 
+        private bool IsJobInPartition(Job job, Template template, int partition) {
+            return template.PartitionsForJob(job).Contains(partition);
+        }
+
         private bool DoesJobHaveSubJob(Job job) {
             return _jobToSubjob.ContainsKey(job);
         }
-        // fix this. It's not the current user, but rather the user who's in the subjob.
+        
         private bool DoesUserHaveNeedForSubJobInPartition(int userIndex, int partition) {
             if (_subjobNeedInPartition.ContainsKey(userIndex) && _subjobNeedInPartition[userIndex] == partition) {
                 return true;
@@ -291,15 +533,16 @@ namespace SoundScheduler_Logic.Engine {
             }
         }
 
-        private float IsUserInSubjobAvailableForPartition(int userIndex, int partition) {
+        private float IsUserInSubjobAvailableForPartition(Template template, Job job, int partition, int[] usersInJobs) {
+            int userInSubjob = usersInJobs[_subJobIndexOfJob[template][job]];
             if (!_exceptions.ContainsKey(partition)) {
                 return 0;
             } else if (!_exceptions[partition].ContainsKey(_day)) {
                 return 0;
-            } else if (!_exceptions[partition][_day].ContainsKey(userIndex)) {
+            } else if (!_exceptions[partition][_day].ContainsKey(userInSubjob)) {
                 return 0;
             } else {
-                return _exceptions[partition][_day][userIndex];
+                return _exceptions[partition][_day][userInSubjob];
             }
         }
         
@@ -342,9 +585,23 @@ namespace SoundScheduler_Logic.Engine {
             return _tempScore;
         }
 
-        public JobConsiderationUsersWhoAlreadyHaveJob(Builder builder) : base(builder) {
+        public JobConsiderationUsersWhoAlreadyHaveJobOld(Builder builder) : base(builder) {
+            BuildSubJobIndexOfJob();
             BuildPartitionsAndUserCombos();
             BuildJobIndex();
+        }
+
+        private void BuildSubJobIndexOfJob() {
+            int startOfDay = 0;
+            foreach (Template template in this.Templates) {
+                _subJobIndexOfJob.Add(template, new Dictionary<Job, int>());
+                foreach (Job job in template.Jobs) {
+                    if (_jobToSubjob.ContainsKey(job)) {
+                        _subJobIndexOfJob[template].Add(job, template.Jobs.IndexOf(_jobToSubjob[job]) + startOfDay);
+                    }
+                }
+                startOfDay += template.Jobs.Count;
+            }
         }
 
         private void BuildJobIndex() {
@@ -399,16 +656,17 @@ namespace SoundScheduler_Logic.Engine {
 
         public class Builder : JobConsideration.BuilderBase {
             public override JobConsideration Build() {
-                return new JobConsiderationUsersWhoAlreadyHaveJob(this);
+                return new JobConsiderationUsersWhoAlreadyHaveJobOld(this);
             }
         }
 
         public override JobConsideration ToCopy() {
-            JobConsiderationUsersWhoAlreadyHaveJob consideration = (JobConsiderationUsersWhoAlreadyHaveJob)new JobConsiderationUsersWhoAlreadyHaveJob.Builder()
+            JobConsiderationUsersWhoAlreadyHaveJobOld consideration = (JobConsiderationUsersWhoAlreadyHaveJobOld)new JobConsiderationUsersWhoAlreadyHaveJobOld.Builder()
                 .SetJobs(this.Jobs)
                 .SetTemplates(this.Templates)
                 .SetUsers(this.Users)
                 .SetJobRank(this.JobRank)
+                .SetUserExceptions(this.UserExceptions)
                 .Build();
             foreach (int partition in _exceptions.Keys) {
                 foreach (int templateIndex in _exceptions[partition].Keys) {
@@ -516,6 +774,7 @@ namespace SoundScheduler_Logic.Engine {
                 .SetTemplates(this.Templates)
                 .SetUsers(this.Users)
                 .SetJobRank(this.JobRank)
+                .SetUserExceptions(this.UserExceptions)
                 .Build();
             return consideration;
         }
@@ -650,6 +909,7 @@ namespace SoundScheduler_Logic.Engine {
                 .SetTemplates(this.Templates)
                 .SetUsers(this.Users)
                 .SetJobRank(this.JobRank)
+                .SetUserExceptions(this.UserExceptions)
                 .Build();
             return consideration;
         }
@@ -721,8 +981,82 @@ namespace SoundScheduler_Logic.Engine {
                 .SetTemplates(this.Templates)
                 .SetUsers(this.Users)
                 .SetJobRank(this.JobRank)
+                .SetUserExceptions(this.UserExceptions)
                 .Build();
             return consideration;
+        }
+    }
+
+    public class UserExceptionType {
+        private Dictionary<Job, float> _jobExceptionValue = new Dictionary<Job, float>();
+        private Dictionary<Job, bool> _subRequiresAvailability = new Dictionary<Job, bool>();
+
+        public void AddJobExceptionValue(Job job, float value) {
+            _jobExceptionValue.Add(job, value);
+        }
+
+        public float GetJobExceptionValue(Job job) {
+            if (_jobExceptionValue.ContainsKey(job)) {
+                return _jobExceptionValue[job];
+            } else {
+                return 0;
+            }
+        }
+
+        public void AddSubRequiresAvailability(Job job, bool requires) {
+            _subRequiresAvailability.Add(job, requires);
+        }
+
+        public bool GetSubRequiresAvailability(Job job) {
+            if (_subRequiresAvailability.ContainsKey(job)) {
+                return _subRequiresAvailability[job];
+            } else {
+                return false;
+            }
+        }
+
+        public UserExceptionType ToCopy() {
+            UserExceptionType copy = new UserExceptionType();
+            foreach (Job job in _jobExceptionValue.Keys) {
+                copy.AddJobExceptionValue(job, _jobExceptionValue[job]);
+            }
+            foreach (Job job in _subRequiresAvailability.Keys) {
+                copy.AddSubRequiresAvailability(job, _subRequiresAvailability[job]);
+            }
+            return copy;
+        }
+    }
+
+    public class UserExceptionDictionary {
+        private Dictionary<int, Dictionary<int, UserExceptionType>> _userExceptions = new Dictionary<int,Dictionary<int,UserExceptionType>>();
+
+        public void AddUserException(UserExceptionType exception, int partition, int userIndex) {
+            if (!_userExceptions.ContainsKey(partition)) {
+                _userExceptions.Add(partition, new Dictionary<int,UserExceptionType>());
+            }
+            _userExceptions[partition].Add(userIndex, exception);
+        }
+
+        public bool HasUserException(int partition, int userIndex) {
+            if (_userExceptions.ContainsKey(partition)) {
+                return _userExceptions[partition].ContainsKey(userIndex);
+            } else {
+                return false;
+            }
+        }
+
+        public UserExceptionType GetUserException(int partition, int userIndex) {
+            return _userExceptions[partition][userIndex];
+        }
+
+        public UserExceptionDictionary ToCopy() {
+            UserExceptionDictionary copy = new UserExceptionDictionary();
+            foreach (int partition in _userExceptions.Keys) {
+                foreach (int userIndex in _userExceptions[partition].Keys) {
+                    copy.AddUserException(_userExceptions[partition][userIndex], partition, userIndex);
+                }
+            }
+            return copy;
         }
     }
 }
