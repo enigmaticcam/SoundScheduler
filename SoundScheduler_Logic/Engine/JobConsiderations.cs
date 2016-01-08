@@ -168,6 +168,13 @@ namespace SoundScheduler_Logic.Engine {
         }
 
         public class Builder : JobConsideration.BuilderBase {
+            public Job SubstituteJob;
+
+            public Builder SetSubstituteJob(Job substituteJob) {
+                this.SubstituteJob = substituteJob;
+                return this;
+            }
+
             public override JobConsideration Build() {
                 return new JobConsiderationUsersWhoCantDoJob(this);
             }
@@ -187,6 +194,18 @@ namespace SoundScheduler_Logic.Engine {
 
     public class JobConsiderationSubstituteJobAvailability : JobConsideration {
         private Job _substituteJob;
+        private Dictionary<int, Dictionary<int, UserExceptionType>> _exceptionAvailability = new Dictionary<int, Dictionary<int, UserExceptionType>>();
+        private Dictionary<int, int> _dayToSubstituteJob = new Dictionary<int, int>();
+        private int _day = 0;
+        private int _counter = 0;
+        private float _score;
+
+        public void AddNeedForAvailability(int userIndex, int partition, UserExceptionType exception) {
+            if (!_exceptionAvailability.ContainsKey(userIndex)) {
+                _exceptionAvailability.Add(userIndex, new Dictionary<int, UserExceptionType>());
+            }
+            _exceptionAvailability[userIndex].Add(partition, exception);
+        }
 
         public override string JobName {
             get { return "Substitute Job Availability"; }
@@ -197,7 +216,43 @@ namespace SoundScheduler_Logic.Engine {
         }
 
         public override float IsValid(int[] usersInJobs) {
-            throw new NotImplementedException();
+            _day = 0;
+            _counter = 0;
+            _score = 0;
+            foreach (Template template in this.Templates) {
+                if (_dayToSubstituteJob.ContainsKey(_counter)) {
+                    foreach (Job job in template.Jobs) {
+                        foreach (int partition in template.PartitionsForJob(job)) {
+                            if (DoesUserHaveRequirementForSubstitute(usersInJobs[_counter], partition) && IsRequirementApplicableForJob(usersInJobs[_counter], partition, job)) {
+                                _score += IsUserInSubstituteJobAvailable(usersInJobs[_dayToSubstituteJob[_day]], partition, job);
+                            }
+                        }
+                        _counter++;
+                    }
+                }
+                _day++;
+            }
+            return _score;
+        }
+
+        private bool DoesUserHaveRequirementForSubstitute(int userIndex, int partition) {
+            if (_exceptionAvailability.ContainsKey(userIndex) && _exceptionAvailability[userIndex].ContainsKey(partition)) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+
+        private bool IsRequirementApplicableForJob(int userIndex, int partition, Job job) {
+            return _exceptionAvailability[userIndex][partition].GetSubRequiresAvailability(job);
+        }
+
+        private float IsUserInSubstituteJobAvailable(int userIndex, int partition, Job job) {
+            if (this.UserExceptions.HasUserException(partition, userIndex)) {
+                return this.UserExceptions.GetUserException(partition, userIndex).GetJobExceptionValue(job);
+            } else {
+                return 0;
+            }
         }
 
         public override JobConsideration ToCopy() {
@@ -207,6 +262,21 @@ namespace SoundScheduler_Logic.Engine {
 
         public JobConsiderationSubstituteJobAvailability(Builder builder) : base(builder) {
             _substituteJob = builder.SubstituteJob;
+            BuildDayToSubstituteJobReference();
+        }
+
+        private void BuildDayToSubstituteJobReference() {
+            int day = 0;
+            int counter = 0;
+            foreach (Template template in this.Templates) {
+                foreach (Job job in template.Jobs) {
+                    if (_substituteJob == job) {
+                        _dayToSubstituteJob.Add(day, counter);
+                    }
+                    counter++;
+                }
+                day++;
+            }
         }
 
         public class Builder : JobConsideration.BuilderBase {
@@ -252,7 +322,7 @@ namespace SoundScheduler_Logic.Engine {
             }
         }
 
-        private void AddJobComboPoints(Job job1, Job job2, float reduction) {
+        public void AddJobComboPoints(Job job1, Job job2, float reduction) {
             if (!_jobComboToPoints.ContainsKey(job1)) {
                 _jobComboToPoints.Add(job1, new Dictionary<Job, float>());
             }

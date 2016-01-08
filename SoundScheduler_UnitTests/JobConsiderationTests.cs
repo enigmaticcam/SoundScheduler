@@ -208,6 +208,237 @@ namespace SoundScheduler_UnitTests {
         }
 
         [TestMethod]
+        public void JobConsideration_SubstituteJobAvailability_DoesFail() {
+
+            // Arrange
+            List<Job> jobs = new List<Job> { new Job(), new Job(), new Job(), new Job() };
+            List<User> users = new List<User> { new User(), new User(), new User(), new User(), new User() };
+
+            jobs[0].Name = "Job0";
+            jobs[1].Name = "Job1";
+
+            Template template1 = new Template(2);
+            template1.Jobs.Add(jobs[0]);
+            template1.Jobs.Add(jobs[1]);
+            List<Template> templates = new List<Template> { template1 };
+
+            template1.AddJobToAllPartitions(jobs[0]);
+            template1.AddJobToPartition(jobs[1], 1);
+
+            int[] solution1 = new int[jobs.Count];
+
+            solution1[jobs.IndexOf(jobs[0])] = users.IndexOf(users[0]);
+            solution1[jobs.IndexOf(jobs[1])] = users.IndexOf(users[1]);
+
+            UserExceptionType substituteRequired = new UserExceptionType();
+            substituteRequired.AddSubRequiresAvailability(jobs[1], true);
+
+            UserExceptionType substituteException = new UserExceptionType();
+            substituteException.AddJobExceptionValue(jobs[1], (float)0.5);
+
+            UserExceptionDictionary exceptions = new UserExceptionDictionary();
+            exceptions.AddUserException(substituteException, 1, users.IndexOf(users[0]));
+
+            // Act
+            JobConsideration consideration = new JobConsiderationSubstituteJobAvailability.Builder()
+                .SetSubstituteJob(jobs[0])
+                .SetJobs(jobs)
+                .SetTemplates(templates)
+                .SetUsers(users)
+                .SetUserExceptions(exceptions)
+                .Build();
+            ((JobConsiderationSubstituteJobAvailability)consideration).AddNeedForAvailability(users.IndexOf(users[1]), 1, substituteRequired);
+            float invalidCount1 = consideration.IsValid(solution1);
+
+            // Assert
+            Assert.AreEqual((float)0.5, invalidCount1);
+        }
+
+        [TestMethod]
+        public void JobConsideration_SubstituteJobAvailability_DoesPassNoSubJob() {
+
+            // Arrange
+            List<Job> jobs = new List<Job> { new Job(), new Job(), new Job(), new Job() };
+            List<User> users = new List<User> { new User(), new User(), new User(), new User(), new User() };
+
+            jobs[0].Name = "Job0";
+            jobs[1].Name = "Job1";
+
+            Template template1 = new Template(2);
+            template1.Jobs.Add(jobs[0]);
+            template1.Jobs.Add(jobs[1]);
+            List<Template> templates = new List<Template> { template1 };
+
+            template1.AddJobToAllPartitions(jobs[0]);
+            template1.AddJobToPartition(jobs[1], 1);
+
+            int[] solution1 = new int[jobs.Count];
+
+            solution1[jobs.IndexOf(jobs[0])] = users.IndexOf(users[0]);
+            solution1[jobs.IndexOf(jobs[1])] = users.IndexOf(users[1]);
+
+            UserExceptionType substituteRequired = new UserExceptionType();
+            substituteRequired.AddSubRequiresAvailability(jobs[1], true);
+
+            UserExceptionType substituteException = new UserExceptionType();
+            substituteException.AddJobExceptionValue(jobs[1], (float)0.5);
+
+            UserExceptionDictionary exceptions = new UserExceptionDictionary();
+            exceptions.AddUserException(substituteException, 1, users.IndexOf(users[0]));
+
+            // Act
+            JobConsideration consideration = new JobConsiderationSubstituteJobAvailability.Builder()
+                .SetSubstituteJob(jobs[2])
+                .SetJobs(jobs)
+                .SetTemplates(templates)
+                .SetUsers(users)
+                .SetUserExceptions(exceptions)
+                .Build();
+            ((JobConsiderationSubstituteJobAvailability)consideration).AddNeedForAvailability(users.IndexOf(users[1]), 1, substituteRequired);
+            float invalidCount1 = consideration.IsValid(solution1);
+
+            // Assert
+            Assert.AreEqual(0, invalidCount1);
+        }
+
+        [TestMethod]
+        public void JobConsideration_SubstituteJobAvailability_DoesPassNoRequirement() {
+
+            // Arrange
+            List<Job> jobs = new List<Job> { new Job(), new Job(), new Job(), new Job() };
+            List<User> users = new List<User> { new User(), new User(), new User(), new User(), new User() };
+
+            jobs[0].Name = "Job0";
+            jobs[1].Name = "Job1";
+
+            Template template1 = new Template(2);
+            template1.Jobs.Add(jobs[0]);
+            template1.Jobs.Add(jobs[1]);
+            List<Template> templates = new List<Template> { template1 };
+
+            template1.AddJobToAllPartitions(jobs[0]);
+            template1.AddJobToPartition(jobs[1], 1);
+
+            int[] solution1 = new int[jobs.Count];
+
+            solution1[jobs.IndexOf(jobs[0])] = users.IndexOf(users[0]);
+            solution1[jobs.IndexOf(jobs[1])] = users.IndexOf(users[1]);
+
+            UserExceptionType substituteException = new UserExceptionType();
+            substituteException.AddJobExceptionValue(jobs[1], (float)0.5);
+
+            UserExceptionDictionary exceptions = new UserExceptionDictionary();
+            exceptions.AddUserException(substituteException, 1, users.IndexOf(users[0]));
+
+            // Act
+            JobConsideration consideration = new JobConsiderationSubstituteJobAvailability.Builder()
+                .SetSubstituteJob(jobs[0])
+                .SetJobs(jobs)
+                .SetTemplates(templates)
+                .SetUsers(users)
+                .SetUserExceptions(exceptions)
+                .Build();
+            float invalidCount1 = consideration.IsValid(solution1);
+
+            // Assert
+            Assert.AreEqual(0, invalidCount1);
+        }
+
+        [TestMethod]
+        public void JobConsideration_SubstituteJobAvailability_DoesPassRequiresDifferentJob() {
+
+            // Arrange
+            List<Job> jobs = new List<Job> { new Job(), new Job(), new Job(), new Job() };
+            List<User> users = new List<User> { new User(), new User(), new User(), new User(), new User() };
+
+            jobs[0].Name = "Job0";
+            jobs[1].Name = "Job1";
+
+            Template template1 = new Template(2);
+            template1.Jobs.Add(jobs[0]);
+            template1.Jobs.Add(jobs[1]);
+            List<Template> templates = new List<Template> { template1 };
+
+            template1.AddJobToAllPartitions(jobs[0]);
+            template1.AddJobToPartition(jobs[1], 1);
+
+            int[] solution1 = new int[jobs.Count];
+
+            solution1[jobs.IndexOf(jobs[0])] = users.IndexOf(users[0]);
+            solution1[jobs.IndexOf(jobs[1])] = users.IndexOf(users[1]);
+
+            UserExceptionType substituteRequired = new UserExceptionType();
+            substituteRequired.AddSubRequiresAvailability(jobs[1], true);
+
+            UserExceptionType substituteException = new UserExceptionType();
+            substituteException.AddJobExceptionValue(jobs[3], (float)0.5);
+
+            UserExceptionDictionary exceptions = new UserExceptionDictionary();
+            exceptions.AddUserException(substituteException, 1, users.IndexOf(users[0]));
+
+            // Act
+            JobConsideration consideration = new JobConsiderationSubstituteJobAvailability.Builder()
+                .SetSubstituteJob(jobs[0])
+                .SetJobs(jobs)
+                .SetTemplates(templates)
+                .SetUsers(users)
+                .SetUserExceptions(exceptions)
+                .Build();
+            ((JobConsiderationSubstituteJobAvailability)consideration).AddNeedForAvailability(users.IndexOf(users[1]), 1, substituteRequired);
+            float invalidCount1 = consideration.IsValid(solution1);
+
+            // Assert
+            Assert.AreEqual(0, invalidCount1);
+        }
+
+        [TestMethod]
+        public void JobConsideration_SubstituteJobAvailability_DoesPassSubUserAvailable() {
+
+            // Arrange
+            List<Job> jobs = new List<Job> { new Job(), new Job(), new Job(), new Job() };
+            List<User> users = new List<User> { new User(), new User(), new User(), new User(), new User() };
+
+            jobs[0].Name = "Job0";
+            jobs[1].Name = "Job1";
+
+            Template template1 = new Template(2);
+            template1.Jobs.Add(jobs[0]);
+            template1.Jobs.Add(jobs[1]);
+            List<Template> templates = new List<Template> { template1 };
+
+            template1.AddJobToAllPartitions(jobs[0]);
+            template1.AddJobToPartition(jobs[1], 1);
+
+            int[] solution1 = new int[jobs.Count];
+
+            solution1[jobs.IndexOf(jobs[0])] = users.IndexOf(users[0]);
+            solution1[jobs.IndexOf(jobs[1])] = users.IndexOf(users[1]);
+
+            UserExceptionType substituteRequired = new UserExceptionType();
+            substituteRequired.AddSubRequiresAvailability(jobs[1], true);
+
+            UserExceptionType substituteException = new UserExceptionType();
+            substituteException.AddJobExceptionValue(jobs[3], (float)0.5);
+
+            UserExceptionDictionary exceptions = new UserExceptionDictionary();
+            exceptions.AddUserException(substituteException, 2, users.IndexOf(users[0]));
+
+            // Act
+            JobConsideration consideration = new JobConsiderationSubstituteJobAvailability.Builder()
+                .SetSubstituteJob(jobs[0])
+                .SetJobs(jobs)
+                .SetTemplates(templates)
+                .SetUsers(users)
+                .SetUserExceptions(exceptions)
+                .Build();
+            ((JobConsiderationSubstituteJobAvailability)consideration).AddNeedForAvailability(users.IndexOf(users[1]), 1, substituteRequired);
+            float invalidCount1 = consideration.IsValid(solution1);
+
+            // Assert
+            Assert.AreEqual(0, invalidCount1);
+        }
+
+        [TestMethod]
         public void JobConsideration_UsersWhoAlreadyHaveJob_Paritions() {
 
             // Arrange
