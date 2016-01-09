@@ -237,7 +237,7 @@ namespace SoundScheduler_UnitTests {
             substituteException.AddJobExceptionValue(jobs[1], (float)0.5);
 
             UserExceptionDictionary exceptions = new UserExceptionDictionary();
-            exceptions.AddUserException(substituteException, 1, users.IndexOf(users[0]));
+            exceptions.AddUserException(substituteException, users.IndexOf(users[0]), 0, 1);
 
             // Act
             JobConsideration consideration = new JobConsiderationSubstituteJobAvailability.Builder()
@@ -247,7 +247,7 @@ namespace SoundScheduler_UnitTests {
                 .SetUsers(users)
                 .SetUserExceptions(exceptions)
                 .Build();
-            ((JobConsiderationSubstituteJobAvailability)consideration).AddNeedForAvailability(users.IndexOf(users[1]), 1, substituteRequired);
+            ((JobConsiderationSubstituteJobAvailability)consideration).AddNeedForAvailability(0, users.IndexOf(users[1]), 1, substituteRequired);
             float invalidCount1 = consideration.IsValid(solution1);
 
             // Assert
@@ -284,7 +284,7 @@ namespace SoundScheduler_UnitTests {
             substituteException.AddJobExceptionValue(jobs[1], (float)0.5);
 
             UserExceptionDictionary exceptions = new UserExceptionDictionary();
-            exceptions.AddUserException(substituteException, 1, users.IndexOf(users[0]));
+            exceptions.AddUserException(substituteException, users.IndexOf(users[0]), 0, 1);
 
             // Act
             JobConsideration consideration = new JobConsiderationSubstituteJobAvailability.Builder()
@@ -294,7 +294,7 @@ namespace SoundScheduler_UnitTests {
                 .SetUsers(users)
                 .SetUserExceptions(exceptions)
                 .Build();
-            ((JobConsiderationSubstituteJobAvailability)consideration).AddNeedForAvailability(users.IndexOf(users[1]), 1, substituteRequired);
+            ((JobConsiderationSubstituteJobAvailability)consideration).AddNeedForAvailability(0, users.IndexOf(users[1]), 1, substituteRequired);
             float invalidCount1 = consideration.IsValid(solution1);
 
             // Assert
@@ -328,7 +328,7 @@ namespace SoundScheduler_UnitTests {
             substituteException.AddJobExceptionValue(jobs[1], (float)0.5);
 
             UserExceptionDictionary exceptions = new UserExceptionDictionary();
-            exceptions.AddUserException(substituteException, 1, users.IndexOf(users[0]));
+            exceptions.AddUserException(substituteException, users.IndexOf(users[0]), 0, 1);
 
             // Act
             JobConsideration consideration = new JobConsiderationSubstituteJobAvailability.Builder()
@@ -374,7 +374,7 @@ namespace SoundScheduler_UnitTests {
             substituteException.AddJobExceptionValue(jobs[3], (float)0.5);
 
             UserExceptionDictionary exceptions = new UserExceptionDictionary();
-            exceptions.AddUserException(substituteException, 1, users.IndexOf(users[0]));
+            exceptions.AddUserException(substituteException, users.IndexOf(users[0]), 0, 1);
 
             // Act
             JobConsideration consideration = new JobConsiderationSubstituteJobAvailability.Builder()
@@ -384,7 +384,7 @@ namespace SoundScheduler_UnitTests {
                 .SetUsers(users)
                 .SetUserExceptions(exceptions)
                 .Build();
-            ((JobConsiderationSubstituteJobAvailability)consideration).AddNeedForAvailability(users.IndexOf(users[1]), 1, substituteRequired);
+            ((JobConsiderationSubstituteJobAvailability)consideration).AddNeedForAvailability(0, users.IndexOf(users[1]), 1, substituteRequired);
             float invalidCount1 = consideration.IsValid(solution1);
 
             // Assert
@@ -421,7 +421,7 @@ namespace SoundScheduler_UnitTests {
             substituteException.AddJobExceptionValue(jobs[3], (float)0.5);
 
             UserExceptionDictionary exceptions = new UserExceptionDictionary();
-            exceptions.AddUserException(substituteException, 2, users.IndexOf(users[0]));
+            exceptions.AddUserException(substituteException, users.IndexOf(users[0]), 0, 2);
 
             // Act
             JobConsideration consideration = new JobConsiderationSubstituteJobAvailability.Builder()
@@ -431,65 +431,65 @@ namespace SoundScheduler_UnitTests {
                 .SetUsers(users)
                 .SetUserExceptions(exceptions)
                 .Build();
-            ((JobConsiderationSubstituteJobAvailability)consideration).AddNeedForAvailability(users.IndexOf(users[1]), 1, substituteRequired);
+            ((JobConsiderationSubstituteJobAvailability)consideration).AddNeedForAvailability(0, users.IndexOf(users[1]), 1, substituteRequired);
             float invalidCount1 = consideration.IsValid(solution1);
 
             // Assert
             Assert.AreEqual(0, invalidCount1);
         }
 
-        [TestMethod]
-        public void JobConsideration_UsersWhoAlreadyHaveJob_Paritions() {
+        //[TestMethod]
+        //public void JobConsideration_UsersWhoAlreadyHaveJob_Paritions() {
 
-            // Arrange
-            List<Job> jobs = new List<Job> { new Job(), new Job(), new Job(), new Job(), new Job() };
-            List<User> users = new List<User> { new User(), new User(), new User(), new User(), new User() };
+        //    // Arrange
+        //    List<Job> jobs = new List<Job> { new Job(), new Job(), new Job(), new Job(), new Job() };
+        //    List<User> users = new List<User> { new User(), new User(), new User(), new User(), new User() };
 
-            jobs[0].Name = "Job0";
-            jobs[1].Name = "Job1";
-            jobs[2].Name = "Job2";
-            jobs[3].Name = "Job3";
+        //    jobs[0].Name = "Job0";
+        //    jobs[1].Name = "Job1";
+        //    jobs[2].Name = "Job2";
+        //    jobs[3].Name = "Job3";
 
-            Template template1 = new Template(2);
-            template1.Jobs.Add(jobs[0]);
-            template1.Jobs.Add(jobs[1]);
-            template1.Jobs.Add(jobs[2]);
-            template1.Jobs.Add(jobs[3]);
-            List<Template> templates = new List<Template> { template1 };
+        //    Template template1 = new Template(2);
+        //    template1.Jobs.Add(jobs[0]);
+        //    template1.Jobs.Add(jobs[1]);
+        //    template1.Jobs.Add(jobs[2]);
+        //    template1.Jobs.Add(jobs[3]);
+        //    List<Template> templates = new List<Template> { template1 };
 
-            template1.AddJobToAllPartitions(jobs[0]);
-            template1.AddJobToPartition(jobs[1], 1);
-            template1.AddJobToPartition(jobs[2], 2);
-            template1.AddJobToPartition(jobs[3], 1);
+        //    template1.AddJobToAllPartitions(jobs[0]);
+        //    template1.AddJobToPartition(jobs[1], 1);
+        //    template1.AddJobToPartition(jobs[2], 2);
+        //    template1.AddJobToPartition(jobs[3], 1);
 
-            int[] solution1 = new int[jobs.Count];
-            int[] solution2 = new int[jobs.Count];
+        //    int[] solution1 = new int[jobs.Count];
+        //    int[] solution2 = new int[jobs.Count];
 
-            solution1[jobs.IndexOf(jobs[0])] = users.IndexOf(users[0]);
-            solution1[jobs.IndexOf(jobs[1])] = users.IndexOf(users[1]);
-            solution1[jobs.IndexOf(jobs[2])] = users.IndexOf(users[0]);
-            solution1[jobs.IndexOf(jobs[3])] = users.IndexOf(users[2]);
+        //    solution1[jobs.IndexOf(jobs[0])] = users.IndexOf(users[0]);
+        //    solution1[jobs.IndexOf(jobs[1])] = users.IndexOf(users[1]);
+        //    solution1[jobs.IndexOf(jobs[2])] = users.IndexOf(users[0]);
+        //    solution1[jobs.IndexOf(jobs[3])] = users.IndexOf(users[2]);
 
-            solution2[jobs.IndexOf(jobs[0])] = users.IndexOf(users[0]);
-            solution2[jobs.IndexOf(jobs[1])] = users.IndexOf(users[1]);
-            solution2[jobs.IndexOf(jobs[2])] = users.IndexOf(users[1]);
-            solution2[jobs.IndexOf(jobs[3])] = users.IndexOf(users[3]);
+        //    solution2[jobs.IndexOf(jobs[0])] = users.IndexOf(users[0]);
+        //    solution2[jobs.IndexOf(jobs[1])] = users.IndexOf(users[1]);
+        //    solution2[jobs.IndexOf(jobs[2])] = users.IndexOf(users[1]);
+        //    solution2[jobs.IndexOf(jobs[3])] = users.IndexOf(users[3]);
 
-            // Act
-            JobConsideration consideration = new JobConsiderationUsersWhoAlreadyHaveJobOld.Builder()
-                .SetJobs(jobs)
-                .SetTemplates(templates)
-                .SetUsers(users)
-                .Build();
-            ((JobConsiderationUsersWhoAlreadyHaveJobOld)consideration).AddException(0, users.IndexOf(users[2]), 1, 1);
-            ((JobConsiderationUsersWhoAlreadyHaveJobOld)consideration).AddException(0, users.IndexOf(users[3]), 1, 2);
-            float invalidCount1 = consideration.IsValid(solution1);
-            float invalidCount2 = consideration.IsValid(solution2);
+        //    // Act
+        //    JobConsideration consideration = new JobConsiderationUsersWhoAlreadyHaveJobOld.Builder()
+        //        .SetJobs(jobs)
+        //        .SetTemplates(templates)
+        //        .SetUsers(users)
+        //        .Build();
+        //    ((JobConsiderationUsersWhoAlreadyHaveJobOld)consideration).AddException(0, users.IndexOf(users[2]), 1, 1);
+        //    ((JobConsiderationUsersWhoAlreadyHaveJobOld)consideration).AddException(0, users.IndexOf(users[3]), 1, 2);
+        //    float invalidCount1 = consideration.IsValid(solution1);
+        //    float invalidCount2 = consideration.IsValid(solution2);
 
-            // Assert
-            Assert.AreEqual(2, invalidCount1);
-            Assert.AreEqual(1, invalidCount2);
-        }
+        //    // Assert
+        //    Assert.AreEqual(2, invalidCount1);
+        //    Assert.AreEqual(1, invalidCount2);
+        //}
 
         [TestMethod]
         public void JobConsideration_UsersWhoAlreadyHaveJob() {
@@ -546,70 +546,70 @@ namespace SoundScheduler_UnitTests {
             Assert.AreEqual(0, invalidCount2);
         }
 
-        [TestMethod]
-        public void JobConsideration_UsersWhoAlreadyHaveJob_WithExceptions() {
+        //[TestMethod]
+        //public void JobConsideration_UsersWhoAlreadyHaveJob_WithExceptions() {
 
-            // Arrange
-            List<Job> jobs = new List<Job> { new Job(), new Job(), new Job(), new Job(), new Job(), new Job() };
-            List<User> users = new List<User> { new User(), new User(), new User(), new User(), new User(), new User(), new User(), new User(), new User(), new User() };
+        //    // Arrange
+        //    List<Job> jobs = new List<Job> { new Job(), new Job(), new Job(), new Job(), new Job(), new Job() };
+        //    List<User> users = new List<User> { new User(), new User(), new User(), new User(), new User(), new User(), new User(), new User(), new User(), new User() };
 
-            jobs[0].Name = "Job0";
-            jobs[1].Name = "Job1";
-            jobs[2].Name = "Job2";
-            jobs[3].Name = "Job3";
-            jobs[4].Name = "Job4";
-            jobs[5].Name = "Job5";
+        //    jobs[0].Name = "Job0";
+        //    jobs[1].Name = "Job1";
+        //    jobs[2].Name = "Job2";
+        //    jobs[3].Name = "Job3";
+        //    jobs[4].Name = "Job4";
+        //    jobs[5].Name = "Job5";
 
-            Template template1 = new Template();
-            template1.Jobs.Add(jobs[0]);
-            template1.Jobs.Add(jobs[1]);
-            template1.Jobs.Add(jobs[2]);
-            template1.Jobs.Add(jobs[3]);
-            template1.Jobs.Add(jobs[4]);
-            template1.Jobs.Add(jobs[5]);
-            List<Template> templates = new List<Template> { template1 };
+        //    Template template1 = new Template();
+        //    template1.Jobs.Add(jobs[0]);
+        //    template1.Jobs.Add(jobs[1]);
+        //    template1.Jobs.Add(jobs[2]);
+        //    template1.Jobs.Add(jobs[3]);
+        //    template1.Jobs.Add(jobs[4]);
+        //    template1.Jobs.Add(jobs[5]);
+        //    List<Template> templates = new List<Template> { template1 };
 
-            foreach (Job job in jobs) {
-                template1.AddJobToPartition(job, 1);
-            }
+        //    foreach (Job job in jobs) {
+        //        template1.AddJobToPartition(job, 1);
+        //    }
 
-            int[] solution1 = new int[jobs.Count];
-            int[] solution2 = new int[jobs.Count];
+        //    int[] solution1 = new int[jobs.Count];
+        //    int[] solution2 = new int[jobs.Count];
 
-            solution1[jobs.IndexOf(jobs[0])] = users.IndexOf(users[0]);
-            solution1[jobs.IndexOf(jobs[1])] = users.IndexOf(users[1]);
-            solution1[jobs.IndexOf(jobs[2])] = users.IndexOf(users[2]);
-            solution1[jobs.IndexOf(jobs[3])] = users.IndexOf(users[3]);
-            solution1[jobs.IndexOf(jobs[4])] = users.IndexOf(users[4]);
-            solution1[jobs.IndexOf(jobs[5])] = users.IndexOf(users[5]);
+        //    solution1[jobs.IndexOf(jobs[0])] = users.IndexOf(users[0]);
+        //    solution1[jobs.IndexOf(jobs[1])] = users.IndexOf(users[1]);
+        //    solution1[jobs.IndexOf(jobs[2])] = users.IndexOf(users[2]);
+        //    solution1[jobs.IndexOf(jobs[3])] = users.IndexOf(users[3]);
+        //    solution1[jobs.IndexOf(jobs[4])] = users.IndexOf(users[4]);
+        //    solution1[jobs.IndexOf(jobs[5])] = users.IndexOf(users[5]);
 
-            solution2[jobs.IndexOf(jobs[0])] = users.IndexOf(users[4]);
-            solution2[jobs.IndexOf(jobs[1])] = users.IndexOf(users[5]);
-            solution2[jobs.IndexOf(jobs[2])] = users.IndexOf(users[6]);
-            solution2[jobs.IndexOf(jobs[3])] = users.IndexOf(users[7]);
-            solution2[jobs.IndexOf(jobs[4])] = users.IndexOf(users[8]);
-            solution2[jobs.IndexOf(jobs[5])] = users.IndexOf(users[9]);
+        //    solution2[jobs.IndexOf(jobs[0])] = users.IndexOf(users[4]);
+        //    solution2[jobs.IndexOf(jobs[1])] = users.IndexOf(users[5]);
+        //    solution2[jobs.IndexOf(jobs[2])] = users.IndexOf(users[6]);
+        //    solution2[jobs.IndexOf(jobs[3])] = users.IndexOf(users[7]);
+        //    solution2[jobs.IndexOf(jobs[4])] = users.IndexOf(users[8]);
+        //    solution2[jobs.IndexOf(jobs[5])] = users.IndexOf(users[9]);
 
-            // Act
-            JobConsideration consideration = new JobConsiderationUsersWhoAlreadyHaveJobOld.Builder()
-                .SetJobs(jobs)
-                .SetTemplates(templates)
-                .SetUsers(users)
-                .Build();
-            ((JobConsiderationUsersWhoAlreadyHaveJobOld)consideration).AddException(0, users.IndexOf(users[0]), 1);
-            ((JobConsiderationUsersWhoAlreadyHaveJobOld)consideration).AddException(0, users.IndexOf(users[1]), 1);
-            ((JobConsiderationUsersWhoAlreadyHaveJobOld)consideration).AddException(0, users.IndexOf(users[2]), (float)0.5);
-            ((JobConsiderationUsersWhoAlreadyHaveJobOld)consideration).AddException(0, users.IndexOf(users[3]), (float)0.5);
-            ((JobConsiderationUsersWhoAlreadyHaveJobOld)consideration).AddJobToException(jobs[1], 0);
-            ((JobConsiderationUsersWhoAlreadyHaveJobOld)consideration).AddJobToException(jobs[3], 0);
-            ((JobConsiderationUsersWhoAlreadyHaveJobOld)consideration).AddJobToException(jobs[5], 0);
-            float invalidCount1 = consideration.IsValid(solution1);
-            float invalidCount2 = consideration.IsValid(solution2);
+        //    // Act
+        //    JobConsideration consideration = new JobConsiderationUsersWhoAlreadyHaveJobOld.Builder()
+        //        .SetJobs(jobs)
+        //        .SetTemplates(templates)
+        //        .SetUsers(users)
+        //        .Build();
+        //    ((JobConsiderationUsersWhoAlreadyHaveJobOld)consideration).AddException(0, users.IndexOf(users[0]), 1);
+        //    ((JobConsiderationUsersWhoAlreadyHaveJobOld)consideration).AddException(0, users.IndexOf(users[1]), 1);
+        //    ((JobConsiderationUsersWhoAlreadyHaveJobOld)consideration).AddException(0, users.IndexOf(users[2]), (float)0.5);
+        //    ((JobConsiderationUsersWhoAlreadyHaveJobOld)consideration).AddException(0, users.IndexOf(users[3]), (float)0.5);
+        //    ((JobConsiderationUsersWhoAlreadyHaveJobOld)consideration).AddJobToException(jobs[1], 0);
+        //    ((JobConsiderationUsersWhoAlreadyHaveJobOld)consideration).AddJobToException(jobs[3], 0);
+        //    ((JobConsiderationUsersWhoAlreadyHaveJobOld)consideration).AddJobToException(jobs[5], 0);
+        //    float invalidCount1 = consideration.IsValid(solution1);
+        //    float invalidCount2 = consideration.IsValid(solution2);
 
-            // Assert
-            Assert.AreEqual(3.5, invalidCount1);
-            Assert.AreEqual(0, invalidCount2);
-        }
+        //    // Assert
+        //    Assert.AreEqual(3.5, invalidCount1);
+        //    Assert.AreEqual(0, invalidCount2);
+        //}
 
         [TestMethod]
         public void JobConsideration_UsersWhoHaveExceptions() {
@@ -650,9 +650,9 @@ namespace SoundScheduler_UnitTests {
             exception2.AddJobExceptionValue(jobs[1], (float)0.5);
 
             UserExceptionDictionary exceptions = new UserExceptionDictionary();
-            exceptions.AddUserException(exception1, 1, users.IndexOf(users[0]));
-            exceptions.AddUserException(exception2, 2, users.IndexOf(users[1]));
-            exceptions.AddUserException(exception1, 1, users.IndexOf(users[2]));
+            exceptions.AddUserException(exception1, users.IndexOf(users[0]), 0, 1);
+            exceptions.AddUserException(exception2, users.IndexOf(users[1]), 0, 2);
+            exceptions.AddUserException(exception1, users.IndexOf(users[2]), 0, 1);
 
             // Act
             JobConsideration consideration = new JobConsiderationUsersWhoHaveExceptions.Builder()
@@ -666,60 +666,6 @@ namespace SoundScheduler_UnitTests {
 
             // Assert
             Assert.AreEqual(1.5, invalidCount1);
-            Assert.AreEqual(0, invalidCount2);
-        }
-
-        [TestMethod]
-        public void JobConsideration_UsersWhoAlreadyHaveJob_SubJob() {
-
-            // Arrange
-            List<Job> jobs = new List<Job> { new Job(), new Job(), new Job() };
-            List<User> users = new List<User> { new User(), new User(), new User(), new User(), new User(), new User(), new User(), new User(), new User(), new User() };
-
-            jobs[0].Name = "Job0";
-            jobs[1].Name = "Job1";
-            jobs[2].Name = "Job2";
-
-            Template template1 = new Template(2);
-            template1.Jobs.Add(jobs[0]);
-            template1.Jobs.Add(jobs[1]);
-            template1.Jobs.Add(jobs[2]);
-            template1.Jobs.Add(jobs[3]);
-            template1.Jobs.Add(jobs[4]);
-            template1.Jobs.Add(jobs[5]);
-            List<Template> templates = new List<Template> { template1 };
-
-            template1.AddJobToAllPartitions(jobs[0]);
-            template1.AddJobToAllPartitions(jobs[1]);
-
-            foreach (Job job in jobs) {
-                template1.AddJobToPartition(job, 1);
-            }
-
-            int[] solution1 = new int[jobs.Count];
-            int[] solution2 = new int[jobs.Count];
-
-            solution1[jobs.IndexOf(jobs[0])] = users.IndexOf(users[0]);
-            solution1[jobs.IndexOf(jobs[1])] = users.IndexOf(users[1]);
-
-            solution2[jobs.IndexOf(jobs[0])] = users.IndexOf(users[0]);
-            solution2[jobs.IndexOf(jobs[1])] = users.IndexOf(users[2]);
-
-            // Act
-            JobConsideration consideration = new JobConsiderationUsersWhoAlreadyHaveJobOld.Builder()
-                .SetJobs(jobs)
-                .SetTemplates(templates)
-                .SetUsers(users)
-                .Build();
-            ((JobConsiderationUsersWhoAlreadyHaveJobOld)consideration).AddException(0, users.IndexOf(users[2]), (float)0.6, 2);
-            ((JobConsiderationUsersWhoAlreadyHaveJobOld)consideration).AddNeedForSubjob(users.IndexOf(users[0]), 1);
-            ((JobConsiderationUsersWhoAlreadyHaveJobOld)consideration).AddException(0, users.IndexOf(users[2]), (float)0.5);
-            ((JobConsiderationUsersWhoAlreadyHaveJobOld)consideration).AddException(0, users.IndexOf(users[3]), (float)0.5);
-            float invalidCount1 = consideration.IsValid(solution1);
-            float invalidCount2 = consideration.IsValid(solution2);
-
-            // Assert
-            Assert.AreEqual(3.5, invalidCount1);
             Assert.AreEqual(0, invalidCount2);
         }
 

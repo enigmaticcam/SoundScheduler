@@ -125,6 +125,10 @@ namespace SoundScheduler_Logic.Engine {
             }
 
             private float Fitness(int[] chromosome, Genetic genetic) {
+                // Debug
+                //List<int> solutionAsList = new List<int> { 4, 3, 9, 11, 1, 2, 2, 4, 5, 9, 8, 6, 1, 2, 5, 6, 4, 11, 0, 3, 1, 11, 5, 2, 0, 4, 8, 10, 11, 9, 0, 2, 3, 6, 10, 1, 4, 2, 10, 9, 3, 5, 0, 1, 4, 9, 6, 2, 4, 0, 8, 11, 6, 10, 0, 2, 1, 11, 8, 3, 1, 3, 6, 5, 10, 8 };
+                //chromosome = solutionAsList.ToArray();
+
                 float score = _solve;
                 CopyJobConsiderationsToThread();
                 foreach (JobConsideration consideration in _jobConsiderationsInThreads[Thread.CurrentThread.ManagedThreadId]) {
