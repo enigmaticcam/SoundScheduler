@@ -22,6 +22,10 @@ namespace SoundScheduler_Win {
         private List<JobConsideration> _jobConsiderations;
         private List<Template> _templates;
         private List<BestScoreEntry> _bestScores;
+        private List<BestScoreEntry> _analysisBestScores;
+        private bool _isAnalyzing;
+        private int _analsysisTimeInSeconds = 180;
+        private int _analsysisTriesBeforeFinish = 10;
 
         public frmGenetic() {
             InitializeComponent();
@@ -38,18 +42,41 @@ namespace SoundScheduler_Win {
         }
 
         private void UpdateResults(Genetic.GeneticResults results) {
-            if (results.BestSolutionSoFarSolution != null) {
-                string elapsedTime = _timer.Elapsed.Hours.ToString().PadLeft(2, '0') + ":" + _timer.Elapsed.Minutes.ToString().PadLeft(2, '0') + ":" + _timer.Elapsed.Seconds.ToString().PadLeft(2, '0');
+            string elapsedTime = _timer.Elapsed.Hours.ToString().PadLeft(2, '0') + ":" + _timer.Elapsed.Minutes.ToString().PadLeft(2, '0') + ":" + _timer.Elapsed.Seconds.ToString().PadLeft(2, '0');
+            if (!_isAnalyzing) {
+                if (results.BestSolutionSoFarSolution != null) {
+                    StringBuilder text = new StringBuilder();
+                    text.AppendLine("Best Solution So Far: " + IntArrayToString(results.BestSolutionSoFarSolution));
+                    text.AppendLine("Best Solution Score So Far: " + results.BestSolutionSoFarScore + "%");
+                    text.AppendLine("Generation Count: " + results.GenerationCount);
+                    text.AppendLine("Generations Per Second: " + results.GenerationsPerSecond);
+                    text.AppendLine("Elapsed Time: " + elapsedTime);
+                    text.AppendLine("Utilizing " + results.CPUCoreCount + " CPU Cores");
+                    text.Append(BestScoresSoFarText(results.BestSolutionSoFarScore, elapsedTime));
+                    txtResults.Text = text.ToString();
+                }
+            } else {
                 StringBuilder text = new StringBuilder();
-                text.AppendLine("Best Solution So Far: " + IntArrayToString(results.BestSolutionSoFarSolution));
-                text.AppendLine("Best Solution Score So Far: " + results.BestSolutionSoFarScore + "%");
-                text.AppendLine("Generation Count: " + results.GenerationCount);
-                text.AppendLine("Generations Per Second: " + results.GenerationsPerSecond);
+                if (_analysisBestScores.Count > 0) {
+                    text.AppendLine(BestOfAnalysisScores());
+                }
                 text.AppendLine("Elapsed Time: " + elapsedTime);
-                text.AppendLine("Utilizing " + results.CPUCoreCount + " CPU Cores");
-                text.Append(BestScoresSoFarText(results.BestSolutionSoFarScore, elapsedTime));
+                text.AppendLine("Best Solution Score So Far: " + results.BestSolutionSoFarScore + "%");
+                text.AppendLine(BestScoresSoFarText(results.BestSolutionSoFarScore, elapsedTime));
                 txtResults.Text = text.ToString();
+                if (_timer.Elapsed.TotalSeconds >= _analsysisTimeInSeconds && !_stop) {
+                    _stop = true;
+                    _analysisBestScores.Add(_bestScores[0]);
+                }
             }
+        }
+
+        private string BestOfAnalysisScores() {
+            StringBuilder text = new StringBuilder();
+            for (int index = 0; index < _analysisBestScores.Count; index++) {
+                text.AppendLine("Round " + (index + 1).ToString() + ": " + _analysisBestScores[index].Score + "% at " + _analysisBestScores[index].TimeSinceStart);
+            }
+            return text.ToString();
         }
 
         private string BestScoresSoFarText(float scoreToBeat, string secondsSinceStart) {
@@ -84,35 +111,97 @@ namespace SoundScheduler_Win {
         }
 
         private void UpdateResultsFinished(int[] solution) {
-            int counter = 0;
-            int day = 1;
-            StringBuilder text = new StringBuilder();
-            foreach (JobConsideration consideration in _jobConsiderations) {
-                float score = consideration.IsValid(solution);
-                if (score != 0) {
+            if (!_isAnalyzing) {
+                int counter = 0;
+                int day = 1;
+                StringBuilder text = new StringBuilder();
+                foreach (JobConsideration consideration in _jobConsiderations) {
+                    float score = consideration.IsValid(solution);
+                    if (score != 0) {
+                        text.AppendLine("");
+                        text.AppendLine(consideration.JobName + ": -" + score + " points");
+                    }
+                }
+                foreach (Meeting meeting in _meetings) {
                     text.AppendLine("");
-                    text.AppendLine(consideration.JobName + ": -" + score + " points");
+                    text.AppendLine("Day " + day);
+                    text.AppendLine("Date: " + meeting.Date.ToShortDateString());
+                    foreach (Job job in meeting.Jobs) {
+                        text.AppendLine("Job: " + job.Name + " User: " + _users[solution[counter]].Name);
+                        counter++;
+                    }
+                    day++;
+                }
+                txtResults.Text += text.ToString();
+            } else {
+                if (_analysisBestScores.Count < _analsysisTriesBeforeFinish) {
+                    PerformAnalysis(true);
                 }
             }
-            foreach (Meeting meeting in _meetings) {
-                text.AppendLine("");
-                text.AppendLine("Day " + day);
-                text.AppendLine("Date: " + meeting.Date.ToShortDateString());
-                foreach (Job job in meeting.Jobs) {
-                    text.AppendLine("Job: " + job.Name + " User: " + _users[solution[counter]].Name);
-                    counter++;
-                }
-                day++;
-            }
-            txtResults.Text += text.ToString();
         }
 
         private void cmdGo_Click(object sender, EventArgs e) {
+            _isAnalyzing = false;
             _stop = false;
             _bestScores = new List<BestScoreEntry>();
 
             Build();
             
+            SoundBuilderV3.ActionFillMeetingsAll action = new SoundBuilderV3.ActionFillMeetingsAll.Builder()
+                .SetJobConsiderations(_jobConsiderations)
+                .SetMeetings(_meetings)
+                .SetUsers(_users)
+                .SetResultsFunc(Results)
+                .SetSolutionAction(Finish)
+                .SetChromosomeCount(Convert.ToInt32(txtPopulation.Text))
+                .SetMutationRate(Convert.ToInt32(txtMutationRate.Text))
+                .SetThreadCount(Convert.ToInt32(txtThreadCount.Text))
+                .Build();
+            action.PerformAction();
+
+            _timer = new System.Diagnostics.Stopwatch();
+            _timer.Start();
+        }
+
+        private void cmdStop_Click(object sender, EventArgs e) {
+            _stop = true;
+        }
+
+        private class BestScoreEntry {
+            private string _timeSinceStart;
+            public string TimeSinceStart {
+                get { return _timeSinceStart; }
+            }
+
+            private float _score;
+            public float Score {
+                get { return _score; }
+            }
+
+            public BestScoreEntry(string timeSinceStart, float score) {
+                _timeSinceStart = timeSinceStart;
+                _score = score;
+            }
+        }
+
+        private void frmGenetic_Load(object sender, EventArgs e) {
+            txtThreadCount.Text = Environment.ProcessorCount.ToString();
+            lblProcessorCount.Text = Environment.ProcessorCount + " processors detected";
+        }
+
+        private void cmdAnalyze_Click(object sender, EventArgs e) {
+            PerformAnalysis(false);
+        }
+
+        private void PerformAnalysis(bool continued) {
+            _isAnalyzing = true;
+            _stop = false;
+            _bestScores = new List<BestScoreEntry>();
+            if (!continued) {
+                _analysisBestScores = new List<BestScoreEntry>();
+            }
+            Build();
+
             SoundBuilderV3.ActionFillMeetingsAll action = new SoundBuilderV3.ActionFillMeetingsAll.Builder()
                 .SetJobConsiderations(_jobConsiderations)
                 .SetMeetings(_meetings)
@@ -532,6 +621,7 @@ namespace SoundScheduler_Win {
             exceptions.AddUserException(chairman, _users.IndexOf(userMPowers), 10, 1);
             exceptions.AddUserException(discussionWithoutVideo, _users.IndexOf(userDLopez), 10, 2);
             exceptions.AddUserException(attendant, _users.IndexOf(userCTangen), 10, 2);
+            exceptions.AddUserExceptionToAllPartitions(absent, _users.IndexOf(userMPowers), 4, _templates[4]);
 
             consideration = new JobConsiderationSubstituteJobAvailability.Builder()
                 .SetJobs(_jobs)
@@ -574,38 +664,12 @@ namespace SoundScheduler_Win {
             _jobConsiderations.Add(consideration);
 
             // Debug
-            List<int> solutionAsList = new List<int> { 4, 3, 9, 11, 1, 2, 2, 4, 5, 9, 8, 6, 1, 2, 5, 6, 4, 11, 0, 3, 1, 11, 5, 2, 0, 4, 8, 10, 11, 9, 0, 2, 3, 6, 10, 1, 4, 2, 10, 9, 3, 5, 0, 1, 4, 9, 6, 2, 4, 0, 8, 11, 6, 10, 0, 2, 1, 11, 8, 3, 1, 3, 6, 5, 10, 8 };
-            int[] solutionAsArray = solutionAsList.ToArray();
+            //List<int> solutionAsList = new List<int> { 4, 3, 9, 11, 1, 2, 2, 4, 5, 9, 8, 6, 1, 2, 5, 6, 4, 11, 0, 3, 1, 11, 5, 2, 0, 4, 8, 10, 11, 9, 0, 2, 3, 6, 10, 1, 4, 2, 10, 9, 3, 5, 0, 1, 4, 9, 6, 2, 4, 0, 8, 11, 6, 10, 0, 2, 1, 11, 8, 3, 1, 3, 6, 5, 10, 8 };
+            //int[] solutionAsArray = solutionAsList.ToArray();
 
-            foreach (JobConsideration jobConsideration in _jobConsiderations) {
-                float score = jobConsideration.IsValid(solutionAsArray);
-            }
-        }
-
-        private void cmdStop_Click(object sender, EventArgs e) {
-            _stop = true;
-        }
-
-        private class BestScoreEntry {
-            private string _timeSinceStart;
-            public string TimeSinceStart {
-                get { return _timeSinceStart; }
-            }
-
-            private float _score;
-            public float Score {
-                get { return _score; }
-            }
-
-            public BestScoreEntry(string timeSinceStart, float score) {
-                _timeSinceStart = timeSinceStart;
-                _score = score;
-            }
-        }
-
-        private void frmGenetic_Load(object sender, EventArgs e) {
-            txtThreadCount.Text = Environment.ProcessorCount.ToString();
-            lblProcessorCount.Text = Environment.ProcessorCount + " processors detected";
+            //foreach (JobConsideration jobConsideration in _jobConsiderations) {
+            //    float score = jobConsideration.IsValid(solutionAsArray);
+            //}
         }
     }
 }

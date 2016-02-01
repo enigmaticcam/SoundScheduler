@@ -33,6 +33,7 @@
             this.label3 = new System.Windows.Forms.Label();
             this.txtThreadCount = new System.Windows.Forms.TextBox();
             this.lblProcessorCount = new System.Windows.Forms.Label();
+            this.cmdAnalyze = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // cmdGo
@@ -124,11 +125,22 @@
             this.lblProcessorCount.TabIndex = 9;
             this.lblProcessorCount.Text = "(lblProcessorCount)";
             // 
+            // cmdAnalyze
+            // 
+            this.cmdAnalyze.Location = new System.Drawing.Point(706, 94);
+            this.cmdAnalyze.Name = "cmdAnalyze";
+            this.cmdAnalyze.Size = new System.Drawing.Size(75, 23);
+            this.cmdAnalyze.TabIndex = 10;
+            this.cmdAnalyze.Text = "Analyze";
+            this.cmdAnalyze.UseVisualStyleBackColor = true;
+            this.cmdAnalyze.Click += new System.EventHandler(this.cmdAnalyze_Click);
+            // 
             // frmGenetic
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(793, 573);
+            this.Controls.Add(this.cmdAnalyze);
             this.Controls.Add(this.lblProcessorCount);
             this.Controls.Add(this.label3);
             this.Controls.Add(this.txtThreadCount);
@@ -159,5 +171,6 @@
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.TextBox txtThreadCount;
         private System.Windows.Forms.Label lblProcessorCount;
+        private System.Windows.Forms.Button cmdAnalyze;
     }
 }
