@@ -67,12 +67,6 @@
     <Compile Include="Views\Concrete\ViewTemplates.cs" />
     <Compile Include="Views\Concrete\ViewUsers.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\..\..\..\..\Source\Repos\SharedSolutions\SharedSolutions_Logic\SharedSolutions_Logic.csproj">
-      <Project>{0fc9856f-50a3-4946-8ba2-805945ba8801}</Project>
-      <Name>SharedSolutions_Logic</Name>
-    </ProjectReference>
-  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

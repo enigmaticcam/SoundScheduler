@@ -146,7 +146,7 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\..\..\Source\Repos\SharedSolutions\SharedSolutions_Logic\SharedSolutions_Logic.csproj">
+    <ProjectReference Include="..\..\SharedSolutions\SharedSolutions_Logic\SharedSolutions_Logic.csproj">
       <Project>{0fc9856f-50a3-4946-8ba2-805945ba8801}</Project>
       <Name>SharedSolutions_Logic</Name>
     </ProjectReference>
