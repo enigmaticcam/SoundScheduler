@@ -196,6 +196,7 @@ namespace SoundScheduler_Logic.Engine {
         private Job _substituteJob;
         private Dictionary<int, Dictionary<int, Dictionary<int, UserExceptionType>>> _exceptionAvailability = new Dictionary<int, Dictionary<int, Dictionary<int, UserExceptionType>>>();
         private Dictionary<int, int> _dayToSubstituteJob = new Dictionary<int, int>();
+        private HashSet<Job> _jobsCantBeSubstituted = new HashSet<Job>();
         private int _day = 0;
         private int _counter = 0;
         private float _score;
@@ -228,6 +229,9 @@ namespace SoundScheduler_Logic.Engine {
                         foreach (int partition in template.PartitionsForJob(job)) {
                             if (DoesUserHaveRequirementForSubstitute(_day, usersInJobs[_counter], partition) && IsRequirementApplicableForJob(_day, usersInJobs[_counter], partition, job)) {
                                 _score += IsUserInSubstituteJobAvailable(_day, usersInJobs[_dayToSubstituteJob[_day]], partition, job);
+                                if (!CanJobBeSubstituted(job)) {
+                                    _score += 1;
+                                }
                             }
                         }
                         _counter++;
@@ -258,6 +262,14 @@ namespace SoundScheduler_Logic.Engine {
             }
         }
 
+        private bool CanJobBeSubstituted(Job job) {
+            if (_jobsCantBeSubstituted.Contains(job)) {
+                return false;
+            } else {
+                return true;
+            }
+        }
+
         public override JobConsideration ToCopy() {
             JobConsiderationSubstituteJobAvailability consideration = (JobConsiderationSubstituteJobAvailability)new JobConsiderationSubstituteJobAvailability.Builder()
                 .SetSubstituteJob(_substituteJob)
@@ -281,6 +293,7 @@ namespace SoundScheduler_Logic.Engine {
         public JobConsiderationSubstituteJobAvailability(Builder builder) : base(builder) {
             _substituteJob = builder.SubstituteJob;
             BuildDayToSubstituteJobReference();
+            BuildJobsCantBeSubstituted();
         }
 
         private void BuildDayToSubstituteJobReference() {
@@ -296,6 +309,15 @@ namespace SoundScheduler_Logic.Engine {
                 day++;
             }
         }
+
+        private void BuildJobsCantBeSubstituted() {
+            foreach (Job job in this.Jobs) {
+                if (!job.CanBeSubstituded) {
+                    _jobsCantBeSubstituted.Add(job);
+                }
+            }
+        }
+        
 
         public class Builder : JobConsideration.BuilderBase {
             public Job SubstituteJob;

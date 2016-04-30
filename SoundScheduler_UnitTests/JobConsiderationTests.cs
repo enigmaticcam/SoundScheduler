@@ -216,6 +216,10 @@ namespace SoundScheduler_UnitTests {
 
             jobs[0].Name = "Job0";
             jobs[1].Name = "Job1";
+            jobs[0].CanBeSubstituded = true;
+            jobs[1].CanBeSubstituded = true;
+            jobs[2].CanBeSubstituded = true;
+            jobs[3].CanBeSubstituded = true;
 
             Template template1 = new Template(2);
             template1.Jobs.Add(jobs[0]);
@@ -353,6 +357,10 @@ namespace SoundScheduler_UnitTests {
 
             jobs[0].Name = "Job0";
             jobs[1].Name = "Job1";
+            jobs[0].CanBeSubstituded = true;
+            jobs[1].CanBeSubstituded = true;
+            jobs[2].CanBeSubstituded = true;
+            jobs[3].CanBeSubstituded = true;
 
             Template template1 = new Template(2);
             template1.Jobs.Add(jobs[0]);
@@ -400,6 +408,10 @@ namespace SoundScheduler_UnitTests {
 
             jobs[0].Name = "Job0";
             jobs[1].Name = "Job1";
+            jobs[0].CanBeSubstituded = true;
+            jobs[1].CanBeSubstituded = true;
+            jobs[2].CanBeSubstituded = true;
+            jobs[3].CanBeSubstituded = true;
 
             Template template1 = new Template(2);
             template1.Jobs.Add(jobs[0]);

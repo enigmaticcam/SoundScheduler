@@ -228,42 +228,52 @@ namespace SoundScheduler_Win {
 
             Job jobVideo = new Job();
             jobVideo.Name = "Video";
+            jobVideo.CanBeSubstituded = true;
             _jobs.Add(jobVideo);
 
             Job jobSound = new Job();
             jobSound.Name = "Sound Box";
+            jobVideo.CanBeSubstituded = true;
             _jobs.Add(jobSound);
 
             Job jobStage = new Job();
             jobStage.Name = "Stage";
+            jobVideo.CanBeSubstituded = true;
             _jobs.Add(jobStage);
 
             Job jobMic1 = new Job();
             jobMic1.Name = "Mic 1";
+            jobVideo.CanBeSubstituded = true;
             _jobs.Add(jobMic1);
 
             Job jobMic2 = new Job();
             jobMic2.Name = "Mic 2";
+            jobVideo.CanBeSubstituded = true;
             _jobs.Add(jobMic2);
 
             Job jobMic3 = new Job();
             jobMic3.Name = "Mic 3";
+            jobVideo.CanBeSubstituded = true;
             _jobs.Add(jobMic3);
 
             Job jobMic4 = new Job();
             jobMic4.Name = "Mic 4";
+            jobVideo.CanBeSubstituded = true;
             _jobs.Add(jobMic4);
 
             Job jobSubstitute = new Job();
             jobSubstitute.Name = "Substitute";
+            jobVideo.CanBeSubstituded = false;
             _jobs.Add(jobSubstitute);
 
             Job jobAttendant1 = new Job();
             jobAttendant1.Name = "Attendant 1";
+            jobVideo.CanBeSubstituded = false;
             _jobs.Add(jobAttendant1);
 
             Job jobAttendant2 = new Job();
             jobAttendant2.Name = "Attendant 2";
+            jobVideo.CanBeSubstituded = false;
             _jobs.Add(jobAttendant2);
 
             jobMic1.AddSameJob(jobMic2);
@@ -648,6 +658,7 @@ namespace SoundScheduler_Win {
             exceptions.AddUserException(discussionWithVideo, _users.IndexOf(userKLogan), 2, 1);
             exceptions.AddUserException(discussionWithVideo, _users.IndexOf(userMBrock), 2, 2);
             exceptions.AddUserException(discussionWithoutVideo, _users.IndexOf(userGSimmons), 4, 1);
+            exceptions.AddUserExceptionToAllPartitions(absent, _users.IndexOf(userMPowers), 4, templateTuesday);
             exceptions.AddUserExceptionToAllPartitions(absent, _users.IndexOf(userMBrock), 6, templateTuesday);
             exceptions.AddUserException(absent, _users.IndexOf(userTSavelberg), 6, 1);
             exceptions.AddUserException(talkWithoutVideo, _users.IndexOf(userTSavelberg), 8, 1);

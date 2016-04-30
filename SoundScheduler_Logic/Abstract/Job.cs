@@ -24,6 +24,11 @@ namespace SoundScheduler_Logic.Abstract {
             set { _data.IsVoidedOnSoftException = value; }
         }
 
+        public bool CanBeSubstituded {
+            get { return _data.CanBeSubstituted; }
+            set { _data.CanBeSubstituted = value; }
+        }
+
         public void AddSameJob(Job job) {
             if (!_data.SameJobs.Contains(job)) {
                 _data.SameJobs.Add(job);
@@ -58,6 +63,7 @@ namespace SoundScheduler_Logic.Abstract {
             public List<Job> SameJobs { get; set; }
             public string Name { get; set; }
             public bool IsVoidedOnSoftException { get; set; }
+            public bool CanBeSubstituted { get; set; }
 
             public Data() {
                 this.SameJobs = new List<Job>();
