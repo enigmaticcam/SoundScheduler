@@ -447,7 +447,7 @@ namespace SoundScheduler_Win {
             _jobConsiderations.Add(consideration);
 
             // School parts can't do attendant
-            UserExceptionType school = new UserExceptionType();
+            UserExceptionType school = new UserExceptionType("school");
             school.AddJobExceptionValue(jobSound, 0);
             school.AddJobExceptionValue(jobStage, 0);
             school.AddJobExceptionValue(jobMic1, 0);
@@ -470,7 +470,7 @@ namespace SoundScheduler_Win {
             school.AddSubRequiresAvailability(jobAttendant2, false);
 
             // Chairman on Sunday can do still do stage, mics, substitute. Can't do attendant or sound.
-            UserExceptionType sundayChairman = new UserExceptionType();
+            UserExceptionType sundayChairman = new UserExceptionType("sundayChairman");
             sundayChairman.AddJobExceptionValue(jobSound, 1);
             sundayChairman.AddJobExceptionValue(jobStage, (float)0.5);
             sundayChairman.AddJobExceptionValue(jobMic1, (float)0.5);
@@ -492,7 +492,7 @@ namespace SoundScheduler_Win {
             sundayChairman.AddSubRequiresAvailability(jobAttendant2, true);
 
             // Tuesday Chairman can't do anything
-            UserExceptionType tuesdayChairman = new UserExceptionType();
+            UserExceptionType tuesdayChairman = new UserExceptionType("tuesdayChairman");
             tuesdayChairman.AddJobExceptionValue(jobSound, 1);
             tuesdayChairman.AddJobExceptionValue(jobStage, 1);
             tuesdayChairman.AddJobExceptionValue(jobMic1, 1);
@@ -514,7 +514,7 @@ namespace SoundScheduler_Win {
             tuesdayChairman.AddSubRequiresAvailability(jobAttendant2, true);
 
             // Discussion can still do stage and substitute. Not attendant
-            UserExceptionType discussion = new UserExceptionType();
+            UserExceptionType discussion = new UserExceptionType("discussion");
             discussion.AddJobExceptionValue(jobSound, 1);
             discussion.AddJobExceptionValue(jobStage, (float)0.5);
             discussion.AddJobExceptionValue(jobMic1, 1);
@@ -536,7 +536,7 @@ namespace SoundScheduler_Win {
             discussion.AddSubRequiresAvailability(jobAttendant2, true);
 
             // Talk can do all but sound and attendant
-            UserExceptionType talk = new UserExceptionType();
+            UserExceptionType talk = new UserExceptionType("talk");
             talk.AddJobExceptionValue(jobSound, 1);
             talk.AddJobExceptionValue(jobStage, (float)0.5);
             talk.AddJobExceptionValue(jobMic1, (float)0.5);
@@ -558,7 +558,7 @@ namespace SoundScheduler_Win {
             talk.AddSubRequiresAvailability(jobAttendant2, true);
 
             // Absentee can't do any job. They ain't there!
-            UserExceptionType absent = new UserExceptionType();
+            UserExceptionType absent = new UserExceptionType("absent");
             absent.AddJobExceptionValue(jobSound, 1);
             absent.AddJobExceptionValue(jobStage, 1);
             absent.AddJobExceptionValue(jobMic1, 1);
@@ -626,6 +626,7 @@ namespace SoundScheduler_Win {
             exceptions.AddUserException(discussion, _users.IndexOf(userMPowers), 6, 2);
             exceptions.AddUserException(sundayChairman, _users.IndexOf(userBBabbe), 10, 1);
             exceptions.AddUserException(discussion, _users.IndexOf(userESavelberg), 10, 2);
+            exceptions.AddUserException(discussion, _users.IndexOf(userDLopez), 8, 2);
 
             consideration = new JobConsiderationSubstituteJobAvailability.Builder()
                 .SetSubstituteJob(jobSubstitute)
@@ -672,12 +673,12 @@ namespace SoundScheduler_Win {
             _jobConsiderations.Add(consideration);
 
             // Debug
-            //List<int> solutionAsList = new List<int> { 3, 1, 0, 8, 2, 9, 4, 0, 3, 6, 5, 8, 2, 6, 3, 4, 9, 1, 11, 12, 1, 0, 8, 2, 4, 9, 3, 1, 9, 6, 2, 0, 10, 6, 2, 3, 7, 8, 11, 1, 3, 8, 4, 0, 12, 13, 2, 0, 6, 1, 4, 8 };
-            //int[] solutionAsArray = solutionAsList.ToArray();
+            List<int> solutionAsList = new List<int> { 2, 3, 6, 8, 4, 9, 6, 1, 4, 7, 3, 0, 8, 3, 0, 9, 1, 2, 4, 1, 2, 6, 4, 0, 9, 12, 6, 3, 5, 7, 11, 4, 6, 2, 0, 8, 3, 1, 9, 1, 0, 2, 4, 13, 8, 6, 3, 7, 8, 2, 0, 12, 3, 1, 6, 9, 13, 4, 1, 2, 7, 0, 3, 8, 10, 6, 2, 8, 4, 9, 0, 3, 0, 4, 6, 2, 8, 1 };
+            int[] solutionAsArray = solutionAsList.ToArray();
 
-            //foreach (JobConsideration jobConsideration in _jobConsiderations) {
-            //    float score = jobConsideration.IsValid(solutionAsArray);
-            //}
+            foreach (JobConsideration jobConsideration in _jobConsiderations) {
+                float score = jobConsideration.IsValid(solutionAsArray);
+            }
         }
     }
 }

@@ -224,18 +224,19 @@ namespace SoundScheduler_Logic.Engine {
             _counter = 0;
             _score = 0;
             foreach (Template template in this.Templates) {
-                if (_dayToSubstituteJob.ContainsKey(_counter)) {
-                    foreach (Job job in template.Jobs) {
+                foreach (Job job in template.Jobs) {
+                    if (_dayToSubstituteJob.ContainsKey(_day)) {
                         foreach (int partition in template.PartitionsForJob(job)) {
                             if (DoesUserHaveRequirementForSubstitute(_day, usersInJobs[_counter], partition) && IsRequirementApplicableForJob(_day, usersInJobs[_counter], partition, job)) {
+                                _score += (float)0.5;
                                 _score += IsUserInSubstituteJobAvailable(_day, usersInJobs[_dayToSubstituteJob[_day]], partition, job);
                                 if (!CanJobBeSubstituted(job)) {
                                     _score += 1;
                                 }
                             }
                         }
-                        _counter++;
                     }
+                    _counter++;
                 }
                 _day++;
             }
@@ -258,7 +259,7 @@ namespace SoundScheduler_Logic.Engine {
             if (this.UserExceptions.HasUserException(partition, userIndex, templateIndex)) {
                 return this.UserExceptions.GetUserException(partition, userIndex, templateIndex).GetJobExceptionValue(job);
             } else {
-                return (float)0.5;
+                return 0;
             }
         }
 
@@ -832,6 +833,15 @@ namespace SoundScheduler_Logic.Engine {
         private Dictionary<Job, float> _jobExceptionValue = new Dictionary<Job, float>();
         private Dictionary<Job, bool> _subRequiresAvailability = new Dictionary<Job, bool>();
 
+        private string _name;
+        public string Name {
+            get { return _name; }
+        }
+
+        public UserExceptionType(string name) {
+            _name = name;
+        }
+
         public void AddJobExceptionValue(Job job, float value) {
             _jobExceptionValue.Add(job, value);
         }
@@ -857,7 +867,7 @@ namespace SoundScheduler_Logic.Engine {
         }
 
         public UserExceptionType ToCopy() {
-            UserExceptionType copy = new UserExceptionType();
+            UserExceptionType copy = new UserExceptionType(_name);
             foreach (Job job in _jobExceptionValue.Keys) {
                 copy.AddJobExceptionValue(job, _jobExceptionValue[job]);
             }
