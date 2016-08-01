@@ -258,7 +258,7 @@ namespace SoundScheduler_Logic.Engine {
             if (this.UserExceptions.HasUserException(partition, userIndex, templateIndex)) {
                 return this.UserExceptions.GetUserException(partition, userIndex, templateIndex).GetJobExceptionValue(job);
             } else {
-                return 0;
+                return (float)0.5;
             }
         }
 
@@ -777,9 +777,9 @@ namespace SoundScheduler_Logic.Engine {
                 foreach (Job job in template.Jobs) {
                     if (_usersLastJob.ContainsKey(usersInJobs[_counter])) {
                         if (_usersLastJob[usersInJobs[_counter]] == job || _usersLastJob[usersInJobs[_counter]].IsSameJob(job)) {
-                            if (!_hasOnlyOneJob[usersInJobs[_counter]]) {
-                                ++sameJobCount;
-                            }
+                            //if (!_hasOnlyOneJob[usersInJobs[_counter]]) {
+                            ++sameJobCount;
+                            //}
                         }
                         _usersLastJob[usersInJobs[_counter]] = job;
                     } else {

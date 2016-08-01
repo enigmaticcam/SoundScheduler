@@ -447,7 +447,7 @@ namespace SoundScheduler_UnitTests {
             float invalidCount1 = consideration.IsValid(solution1);
 
             // Assert
-            Assert.AreEqual(0, invalidCount1);
+            Assert.AreEqual(0.5, invalidCount1);
         }
 
         //[TestMethod]
