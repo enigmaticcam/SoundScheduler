@@ -234,10 +234,10 @@ namespace SoundScheduler_UnitTests {
             solution1[jobs.IndexOf(jobs[0])] = users.IndexOf(users[0]);
             solution1[jobs.IndexOf(jobs[1])] = users.IndexOf(users[1]);
 
-            UserExceptionType substituteRequired = new UserExceptionType();
+            UserExceptionType substituteRequired = new UserExceptionType("");
             substituteRequired.AddSubRequiresAvailability(jobs[1], true);
 
-            UserExceptionType substituteException = new UserExceptionType();
+            UserExceptionType substituteException = new UserExceptionType("");
             substituteException.AddJobExceptionValue(jobs[1], (float)0.5);
 
             UserExceptionDictionary exceptions = new UserExceptionDictionary();
@@ -281,10 +281,10 @@ namespace SoundScheduler_UnitTests {
             solution1[jobs.IndexOf(jobs[0])] = users.IndexOf(users[0]);
             solution1[jobs.IndexOf(jobs[1])] = users.IndexOf(users[1]);
 
-            UserExceptionType substituteRequired = new UserExceptionType();
+            UserExceptionType substituteRequired = new UserExceptionType("");
             substituteRequired.AddSubRequiresAvailability(jobs[1], true);
 
-            UserExceptionType substituteException = new UserExceptionType();
+            UserExceptionType substituteException = new UserExceptionType("");
             substituteException.AddJobExceptionValue(jobs[1], (float)0.5);
 
             UserExceptionDictionary exceptions = new UserExceptionDictionary();
@@ -328,7 +328,7 @@ namespace SoundScheduler_UnitTests {
             solution1[jobs.IndexOf(jobs[0])] = users.IndexOf(users[0]);
             solution1[jobs.IndexOf(jobs[1])] = users.IndexOf(users[1]);
 
-            UserExceptionType substituteException = new UserExceptionType();
+            UserExceptionType substituteException = new UserExceptionType("");
             substituteException.AddJobExceptionValue(jobs[1], (float)0.5);
 
             UserExceptionDictionary exceptions = new UserExceptionDictionary();
@@ -375,10 +375,10 @@ namespace SoundScheduler_UnitTests {
             solution1[jobs.IndexOf(jobs[0])] = users.IndexOf(users[0]);
             solution1[jobs.IndexOf(jobs[1])] = users.IndexOf(users[1]);
 
-            UserExceptionType substituteRequired = new UserExceptionType();
+            UserExceptionType substituteRequired = new UserExceptionType("");
             substituteRequired.AddSubRequiresAvailability(jobs[1], true);
 
-            UserExceptionType substituteException = new UserExceptionType();
+            UserExceptionType substituteException = new UserExceptionType("");
             substituteException.AddJobExceptionValue(jobs[3], (float)0.5);
 
             UserExceptionDictionary exceptions = new UserExceptionDictionary();
@@ -426,10 +426,10 @@ namespace SoundScheduler_UnitTests {
             solution1[jobs.IndexOf(jobs[0])] = users.IndexOf(users[0]);
             solution1[jobs.IndexOf(jobs[1])] = users.IndexOf(users[1]);
 
-            UserExceptionType substituteRequired = new UserExceptionType();
+            UserExceptionType substituteRequired = new UserExceptionType("");
             substituteRequired.AddSubRequiresAvailability(jobs[1], true);
 
-            UserExceptionType substituteException = new UserExceptionType();
+            UserExceptionType substituteException = new UserExceptionType("");
             substituteException.AddJobExceptionValue(jobs[3], (float)0.5);
 
             UserExceptionDictionary exceptions = new UserExceptionDictionary();
@@ -655,10 +655,10 @@ namespace SoundScheduler_UnitTests {
             solution2[jobs.IndexOf(jobs[1])] = users.IndexOf(users[0]);
             solution1[jobs.IndexOf(jobs[2])] = users.IndexOf(users[2]);
 
-            UserExceptionType exception1 = new UserExceptionType();
+            UserExceptionType exception1 = new UserExceptionType("");
             exception1.AddJobExceptionValue(jobs[0], 1);
 
-            UserExceptionType exception2 = new UserExceptionType();
+            UserExceptionType exception2 = new UserExceptionType("");
             exception2.AddJobExceptionValue(jobs[1], (float)0.5);
 
             UserExceptionDictionary exceptions = new UserExceptionDictionary();
