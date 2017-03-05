@@ -34,11 +34,13 @@
             this.txtThreadCount = new System.Windows.Forms.TextBox();
             this.lblProcessorCount = new System.Windows.Forms.Label();
             this.cmdAnalyze = new System.Windows.Forms.Button();
+            this.txtPrintSolution = new System.Windows.Forms.TextBox();
+            this.cmdPrintSolution = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // cmdGo
             // 
-            this.cmdGo.Location = new System.Drawing.Point(13, 94);
+            this.cmdGo.Location = new System.Drawing.Point(13, 146);
             this.cmdGo.Name = "cmdGo";
             this.cmdGo.Size = new System.Drawing.Size(75, 23);
             this.cmdGo.TabIndex = 0;
@@ -48,17 +50,17 @@
             // 
             // txtResults
             // 
-            this.txtResults.Location = new System.Drawing.Point(13, 123);
+            this.txtResults.Location = new System.Drawing.Point(13, 175);
             this.txtResults.Multiline = true;
             this.txtResults.Name = "txtResults";
             this.txtResults.ReadOnly = true;
             this.txtResults.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.txtResults.Size = new System.Drawing.Size(768, 438);
+            this.txtResults.Size = new System.Drawing.Size(768, 386);
             this.txtResults.TabIndex = 1;
             // 
             // cmdStop
             // 
-            this.cmdStop.Location = new System.Drawing.Point(94, 94);
+            this.cmdStop.Location = new System.Drawing.Point(94, 146);
             this.cmdStop.Name = "cmdStop";
             this.cmdStop.Size = new System.Drawing.Size(75, 23);
             this.cmdStop.TabIndex = 2;
@@ -127,7 +129,7 @@
             // 
             // cmdAnalyze
             // 
-            this.cmdAnalyze.Location = new System.Drawing.Point(706, 94);
+            this.cmdAnalyze.Location = new System.Drawing.Point(706, 146);
             this.cmdAnalyze.Name = "cmdAnalyze";
             this.cmdAnalyze.Size = new System.Drawing.Size(75, 23);
             this.cmdAnalyze.TabIndex = 10;
@@ -135,11 +137,30 @@
             this.cmdAnalyze.UseVisualStyleBackColor = true;
             this.cmdAnalyze.Click += new System.EventHandler(this.cmdAnalyze_Click);
             // 
+            // txtPrintSolution
+            // 
+            this.txtPrintSolution.Location = new System.Drawing.Point(681, 12);
+            this.txtPrintSolution.Name = "txtPrintSolution";
+            this.txtPrintSolution.Size = new System.Drawing.Size(100, 20);
+            this.txtPrintSolution.TabIndex = 11;
+            // 
+            // cmdPrintSolution
+            // 
+            this.cmdPrintSolution.Location = new System.Drawing.Point(681, 36);
+            this.cmdPrintSolution.Name = "cmdPrintSolution";
+            this.cmdPrintSolution.Size = new System.Drawing.Size(100, 23);
+            this.cmdPrintSolution.TabIndex = 12;
+            this.cmdPrintSolution.Text = "Print Solution";
+            this.cmdPrintSolution.UseVisualStyleBackColor = true;
+            this.cmdPrintSolution.Click += new System.EventHandler(this.cmdPrintSolution_Click);
+            // 
             // frmGenetic
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(793, 573);
+            this.Controls.Add(this.cmdPrintSolution);
+            this.Controls.Add(this.txtPrintSolution);
             this.Controls.Add(this.cmdAnalyze);
             this.Controls.Add(this.lblProcessorCount);
             this.Controls.Add(this.label3);
@@ -172,5 +193,7 @@
         private System.Windows.Forms.TextBox txtThreadCount;
         private System.Windows.Forms.Label lblProcessorCount;
         private System.Windows.Forms.Button cmdAnalyze;
+        private System.Windows.Forms.TextBox txtPrintSolution;
+        private System.Windows.Forms.Button cmdPrintSolution;
     }
 }
