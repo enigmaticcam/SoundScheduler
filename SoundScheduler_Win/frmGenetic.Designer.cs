@@ -74,7 +74,7 @@
             this.txtPopulation.Name = "txtPopulation";
             this.txtPopulation.Size = new System.Drawing.Size(100, 20);
             this.txtPopulation.TabIndex = 3;
-            this.txtPopulation.Text = "500";
+            this.txtPopulation.Text = "1000";
             // 
             // label1
             // 
@@ -100,7 +100,7 @@
             this.txtMutationRate.Name = "txtMutationRate";
             this.txtMutationRate.Size = new System.Drawing.Size(100, 20);
             this.txtMutationRate.TabIndex = 5;
-            this.txtMutationRate.Text = "500";
+            this.txtMutationRate.Text = "250";
             // 
             // label3
             // 

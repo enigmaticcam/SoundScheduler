@@ -40,6 +40,10 @@ namespace SoundScheduler_Logic.Engine {
             get { return _solutionCount; }
         }
 
+        public virtual void Begin() {
+
+        }
+
         private int GetSolutionCount() {
             int count = 0;
             foreach (Template template in this.Templates) {
@@ -113,6 +117,96 @@ namespace SoundScheduler_Logic.Engine {
                 this.UserExceptions = userExceptions;
                 return this;
             }
+        }
+    }
+
+    public class JobConsiderationLimitsPerPeriod : JobConsideration {
+        private HashSet<int> _jobsToIgnore = new HashSet<int>();
+        private int[] _actuals;
+        private List<int> _jobsToNotIgnore = new List<int>();
+        
+        private int[] _limits;
+        public void AddLimit(int userIndex, int maxCount) {
+            _limits[userIndex] = maxCount;
+        }
+
+        private HashSet<Job> _ignoreLimitCountOnJob = new HashSet<Job>();
+        public void AddIgnoreLimitCountOnJob(Job job) {
+            _ignoreLimitCountOnJob.Add(job);
+        }
+
+        public override string JobName {
+            get { return "Avoid Using Elders"; }
+        }
+
+        public override bool IsConsiderationSoft {
+            get { return false; }
+        }
+        private Dictionary<int, Job> _someJobs = new Dictionary<int, Job>();
+
+        public override float IsValid(int[] usersInJobs) {
+            float result = 0;
+            Array.Clear(_actuals, 0, _actuals.Length);
+            foreach (int counter in _jobsToNotIgnore) {
+                _actuals[usersInJobs[counter]] += 1;
+                if (_actuals[usersInJobs[counter]] > _limits[usersInJobs[counter]]) {
+                    result += (float)0.25;
+                }
+            }
+            return result;
+        }
+
+        public override void Begin() {
+            int counter = 0;
+            foreach (Template template in this.Templates) {
+                foreach (Job job in template.Jobs) {
+                    if (!_ignoreLimitCountOnJob.Contains(job)) {
+                        _jobsToNotIgnore.Add(counter);
+                        _someJobs.Add(counter, job);
+                    }
+                    counter++;
+                }
+            }
+        }
+
+        public JobConsiderationLimitsPerPeriod(BuilderBase builder) : base(builder) {
+            _limits = new int[this.Users.Count()];
+            _actuals = new int[this.Users.Count()];
+            for (int userIndex = 0; userIndex < this.Users.Count(); userIndex++) {
+                _limits[userIndex] = 999;
+            }
+        }
+
+        public class Builder : JobConsideration.BuilderBase {
+            public Job SubstituteJob;
+
+            public Builder SetSubstituteJob(Job substituteJob) {
+                this.SubstituteJob = substituteJob;
+                return this;
+            }
+
+            public override JobConsideration Build() {
+                return new JobConsiderationLimitsPerPeriod(this);
+            }
+        }
+
+        public override JobConsideration ToCopy() {
+            JobConsiderationLimitsPerPeriod consideration = (JobConsiderationLimitsPerPeriod)new JobConsiderationLimitsPerPeriod.Builder()
+                .SetJobRank(this.JobRank)
+                .SetJobs(this.Jobs)
+                .SetTemplates(this.Templates)
+                .SetUserExceptions(this.UserExceptions)
+                .SetUsers(this.Users)
+                .Build();
+            for (int userIndex = 0; userIndex < this.Users.Count(); userIndex++) {
+                if (_limits[userIndex] != 999) {
+                    consideration.AddLimit(userIndex, _limits[userIndex]);
+                }
+            }
+            foreach (Job job in _ignoreLimitCountOnJob) {
+                consideration.AddIgnoreLimitCountOnJob(job);
+            }
+            return consideration;
         }
     }
 

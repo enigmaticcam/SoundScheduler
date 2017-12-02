@@ -25,13 +25,13 @@ namespace SoundScheduler_Logic.Engine {
             get { return _generationCount; }
         }
 
-        private int _chromosomeCount = 500;
+        private int _chromosomeCount = 1000;
         public int ChromosomeCount {
             get { return _chromosomeCount; }
             set { _chromosomeCount = value; }
         }
 
-        private int _mutationRate = 500;
+        private int _mutationRate = 250;
         public int MutationRate {
             get { return _mutationRate; }
             set { _mutationRate = value; }
