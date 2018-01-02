@@ -151,16 +151,16 @@ namespace SoundScheduler_Win {
 
             Build();
             
-            SoundBuilderV3.ActionFillMeetingsAll action = new SoundBuilderV3.ActionFillMeetingsAll.Builder()
-                .SetJobConsiderations(_jobConsiderations)
-                .SetMeetings(_meetings)
-                .SetUsers(_users)
-                .SetResultsFunc(Results)
-                .SetSolutionAction(Finish)
-                .SetChromosomeCount(Convert.ToInt32(txtPopulation.Text))
-                .SetMutationRate(Convert.ToInt32(txtMutationRate.Text))
-                .SetThreadCount(Convert.ToInt32(txtThreadCount.Text))
-                .Build();
+            SoundBuilderV3.ActionFillMeetingsAll action = new SoundBuilderV3.ActionFillMeetingsAll(
+                users: _users,
+                jobConsiderations: _jobConsiderations,
+                meetings: _meetings,
+                resultsFunc: Results,
+                solutionAction: Finish,
+                mutationRate: Convert.ToInt32(txtMutationRate.Text),
+                chromosomeCount: Convert.ToInt32(txtPopulation.Text),
+                threadCount: Convert.ToInt32(txtThreadCount.Text),
+                startingSolution: txtStartingSolution.Text);
             action.PerformAction();
 
             _timer = new System.Diagnostics.Stopwatch();
@@ -212,16 +212,16 @@ namespace SoundScheduler_Win {
             }
             Build();
 
-            SoundBuilderV3.ActionFillMeetingsAll action = new SoundBuilderV3.ActionFillMeetingsAll.Builder()
-                .SetJobConsiderations(_jobConsiderations)
-                .SetMeetings(_meetings)
-                .SetUsers(_users)
-                .SetResultsFunc(Results)
-                .SetSolutionAction(Finish)
-                .SetChromosomeCount(Convert.ToInt32(txtPopulation.Text))
-                .SetMutationRate(Convert.ToInt32(txtMutationRate.Text))
-                .SetThreadCount(Convert.ToInt32(txtThreadCount.Text))
-                .Build();
+            SoundBuilderV3.ActionFillMeetingsAll action = new SoundBuilderV3.ActionFillMeetingsAll(
+                users: _users,
+                jobConsiderations: _jobConsiderations,
+                meetings: _meetings,
+                resultsFunc: Results,
+                solutionAction: Finish,
+                mutationRate: Convert.ToInt32(txtMutationRate.Text),
+                chromosomeCount: Convert.ToInt32(txtPopulation.Text),
+                threadCount: Convert.ToInt32(txtThreadCount.Text),
+                startingSolution: txtStartingSolution.Text);
             action.PerformAction();
 
             _timer = new System.Diagnostics.Stopwatch();

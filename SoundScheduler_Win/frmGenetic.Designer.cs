@@ -36,6 +36,8 @@
             this.cmdAnalyze = new System.Windows.Forms.Button();
             this.txtPrintSolution = new System.Windows.Forms.TextBox();
             this.cmdPrintSolution = new System.Windows.Forms.Button();
+            this.txtStartingSolution = new System.Windows.Forms.TextBox();
+            this.label4 = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // cmdGo
@@ -74,7 +76,7 @@
             this.txtPopulation.Name = "txtPopulation";
             this.txtPopulation.Size = new System.Drawing.Size(100, 20);
             this.txtPopulation.TabIndex = 3;
-            this.txtPopulation.Text = "1000";
+            this.txtPopulation.Text = "250";
             // 
             // label1
             // 
@@ -154,11 +156,29 @@
             this.cmdPrintSolution.UseVisualStyleBackColor = true;
             this.cmdPrintSolution.Click += new System.EventHandler(this.cmdPrintSolution_Click);
             // 
+            // txtStartingSolution
+            // 
+            this.txtStartingSolution.Location = new System.Drawing.Point(131, 90);
+            this.txtStartingSolution.Name = "txtStartingSolution";
+            this.txtStartingSolution.Size = new System.Drawing.Size(100, 20);
+            this.txtStartingSolution.TabIndex = 13;
+            // 
+            // label4
+            // 
+            this.label4.AutoSize = true;
+            this.label4.Location = new System.Drawing.Point(41, 93);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(84, 13);
+            this.label4.TabIndex = 14;
+            this.label4.Text = "Starting Solution";
+            // 
             // frmGenetic
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(793, 573);
+            this.Controls.Add(this.label4);
+            this.Controls.Add(this.txtStartingSolution);
             this.Controls.Add(this.cmdPrintSolution);
             this.Controls.Add(this.txtPrintSolution);
             this.Controls.Add(this.cmdAnalyze);
@@ -195,5 +215,7 @@
         private System.Windows.Forms.Button cmdAnalyze;
         private System.Windows.Forms.TextBox txtPrintSolution;
         private System.Windows.Forms.Button cmdPrintSolution;
+        private System.Windows.Forms.TextBox txtStartingSolution;
+        private System.Windows.Forms.Label label4;
     }
 }

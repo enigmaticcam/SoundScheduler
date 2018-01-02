@@ -43,6 +43,12 @@ namespace SoundScheduler_Logic.Engine {
             set { _threadCount = value; }
         }
 
+        private string _startingSolution;
+        public string StartingSolution {
+            get { return _startingSolution; }
+            set { _startingSolution = value; }
+        }
+
         private int _mutationRateDiff;
         private int _bitLength;
         private int _bitCount;
@@ -119,6 +125,7 @@ namespace SoundScheduler_Logic.Engine {
             Instantiate();
             InstantiateThreads();
             GenerateRandomchromosomes();
+            SetStartingSolution();
             BeginGenetics();
         }
 
@@ -246,6 +253,13 @@ namespace SoundScheduler_Logic.Engine {
                 }
                 _immutableBits.TrasmuteImmutableBits(_chromosomes[chromosomeIndex]);
                 _chromosomesAsString[chromosomeIndex] = OutputToOneLine(_chromosomes[chromosomeIndex]);
+            }
+        }
+
+        private void SetStartingSolution() {
+            if (!string.IsNullOrEmpty(_startingSolution)) {
+                //_chromosomes[0] = _startingSolution.Split(',').Cast<int>().ToArray();
+                _chromosomes[0] = _startingSolution.Split(',').Select(x => Convert.ToInt32(x)).ToArray();
             }
         }
 

@@ -61,6 +61,7 @@ namespace SoundScheduler_Logic.Engine {
             private int _chromosomeCount;
             private int _mutationRate;
             private int _threadCount;
+            private string _startingSolution;
             static readonly object _object = new object();
 
             public void PerformAction() {
@@ -100,6 +101,7 @@ namespace SoundScheduler_Logic.Engine {
             }
 
             private void PerformAlgorithm() {
+                _genetic.StartingSolution = _startingSolution;
                 _genetic.ScoreSolveValue = _solve;
                 _genetic.ChromosomeCount = _chromosomeCount;
                 _genetic.MutationRate = _mutationRate;
@@ -153,70 +155,17 @@ namespace SoundScheduler_Logic.Engine {
                 }
             }
 
-            public ActionFillMeetingsAll(Builder builder) {
-                _users = builder.Users.ToList();
-                _jobConsiderations = builder.JobConsiderations;
-                _meetings = builder.Meetings;
-                _resultsFunc = builder.ResultsFunc;
-                _solutionAction = builder.SolutionAction;
-                _mutationRate = builder.MutationRate;
-                _chromosomeCount = builder.ChromosomeCount;
-                _threadCount = builder.ThreadCount;
-            }
-
-            public class Builder {
-                public IEnumerable<User> Users;
-                public IEnumerable<JobConsideration> JobConsiderations;
-                public IEnumerable<Meeting> Meetings;
-                public Func<Genetic.GeneticResults, bool> ResultsFunc;
-                public Action<int[]> SolutionAction;
-                public int MutationRate;
-                public int ChromosomeCount;
-                public int ThreadCount;
-
-                public Builder SetUsers(IEnumerable<User> users) {
-                    this.Users = users;
-                    return this;
-                }
-
-                public Builder SetJobConsiderations(IEnumerable<JobConsideration> jobConsiderations) {
-                    this.JobConsiderations = jobConsiderations;
-                    return this;
-                }
-
-                public Builder SetMeetings(IEnumerable<Meeting> meetings) {
-                    this.Meetings = meetings;
-                    return this;
-                }
-
-                public Builder SetResultsFunc(Func<Genetic.GeneticResults, bool> resultsFunc) {
-                    this.ResultsFunc = resultsFunc;
-                    return this;
-                }
-
-                public Builder SetSolutionAction(Action<int[]> solutionAction) {
-                    this.SolutionAction = solutionAction;
-                    return this;
-                }
-
-                public Builder SetMutationRate(int mutationRate) {
-                    this.MutationRate = mutationRate;
-                    return this;
-                }
-
-                public Builder SetChromosomeCount(int chromosomeCount) {
-                    this.ChromosomeCount = chromosomeCount;
-                    return this;
-                }
-
-                public Builder SetThreadCount(int threadCount) {
-                    this.ThreadCount = threadCount;
-                    return this;
-                }
-
-                public ActionFillMeetingsAll Build() {
-                    return new ActionFillMeetingsAll(this);
-                }
+            public ActionFillMeetingsAll(IEnumerable<User> users, IEnumerable<JobConsideration> jobConsiderations, IEnumerable<Meeting> meetings, Func<Genetic.GeneticResults, bool> resultsFunc,
+                Action<int[]> solutionAction, int mutationRate, int chromosomeCount, int threadCount, string startingSolution) {
+                _users = users.ToList();
+                _jobConsiderations = jobConsiderations;
+                _meetings = meetings;
+                _resultsFunc = resultsFunc;
+                _solutionAction = solutionAction;
+                _mutationRate = mutationRate;
+                _chromosomeCount = chromosomeCount;
+                _threadCount = threadCount;
+                _startingSolution = startingSolution;
             }
         }
 

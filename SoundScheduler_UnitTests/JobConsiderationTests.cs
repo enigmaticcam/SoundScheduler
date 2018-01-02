@@ -141,11 +141,16 @@ namespace SoundScheduler_UnitTests {
             jobConsiderations.Add(consideration);
 
             // Act
-            SoundBuilderV3.ActionFillMeetingsAll action = new SoundBuilderV3.ActionFillMeetingsAll.Builder()
-                .SetJobConsiderations(jobConsiderations)
-                .SetMeetings(meetings)
-                .SetUsers(users)
-                .Build();
+            SoundBuilderV3.ActionFillMeetingsAll action = new SoundBuilderV3.ActionFillMeetingsAll(
+                users: users,
+                jobConsiderations: jobConsiderations,
+                meetings: meetings,
+                resultsFunc: null,
+                solutionAction: null,
+                mutationRate: 0,
+                chromosomeCount: 0,
+                threadCount: 0,
+                startingSolution: null);
             action.PerformAction();
 
             // Assert
