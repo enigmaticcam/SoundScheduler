@@ -16,7 +16,6 @@ namespace SoundScheduler_Logic.Engine {
         private MeetingsByDate _meetings;
         private Dictionary<DateTime, Template> _templates;
         private ExceptionsByDate _exceptions;
-        private JobCancelUsersWhoPreferNotCertainMeetings _preferences;
 
         public void AddTemplate(DateTime date, Template template) {
             _templates.Add(date, template);
@@ -28,10 +27,6 @@ namespace SoundScheduler_Logic.Engine {
 
         public void AddException(DateTime date, User user, bool isSoftException) {
             _exceptions.AddException(date, user, isSoftException);
-        }
-
-        public void AddPreferenceNot(User user, Template template) {
-            _preferences.AddPrefernceNot(user, template);
         }
 
         public MeetingsByDate BuildSchedule() {

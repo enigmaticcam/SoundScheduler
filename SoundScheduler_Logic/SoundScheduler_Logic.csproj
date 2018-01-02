@@ -50,12 +50,7 @@
     <Compile Include="Abstract\Template.cs" />
     <Compile Include="Abstract\User.cs" />
     <Compile Include="Engine\Genetic.cs" />
-    <Compile Include="Engine\JobCancelers.cs" />
     <Compile Include="Engine\JobConsiderations.cs" />
-    <Compile Include="Engine\SoundBuilder.cs" />
-    <Compile Include="Engine\SoundBuilderV2.cs">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="Engine\SoundBuilderV3.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Views\Abstract\ViewJobs.cs" />
