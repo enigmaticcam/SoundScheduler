@@ -361,8 +361,17 @@ namespace SoundScheduler_Logic.Engine {
 
             } while (count <= threadRange.Stop);
         }
-
+        
         private void PerformCopyAndCrossover(int[] currentChromosome) {
+            int oneOrTwo = _threadData.GetRandom.Next(0, 2);
+            if (oneOrTwo == 1) {
+                PerformCopyAndCrossoverOneSwap(currentChromosome);
+            } else {
+                PerformCopyAndCrossoverTwoSwap(currentChromosome);
+            }
+        }
+
+        private void PerformCopyAndCrossoverOneSwap(int[] currentChromosome) {
             int swapIndex = int.MaxValue;
             int chromosome1 = GetRandomFromRoulette();
             int chromosome2 = GetRandomFromRoulette();
@@ -375,7 +384,23 @@ namespace SoundScheduler_Logic.Engine {
                 }
             }
         }
-        
+
+        private void PerformCopyAndCrossoverTwoSwap(int[] currentChromosome) {
+            int swapIndex1 = int.MaxValue;
+            int swapIndex2 = int.MaxValue;
+            int chromosome1 = GetRandomFromRoulette();
+            int chromosome2 = GetRandomFromRoulette();
+            swapIndex1 = _threadData.GetRandom.Next(0, _bitLength - 1);
+            swapIndex2 = _threadData.GetRandom.Next(swapIndex1 + 1, _bitLength);
+            for (int index = 0; index < _bitLength; index++) {
+                if (index >= swapIndex1 & index <= swapIndex2) {
+                    currentChromosome[index] = _chromosomes[chromosome2][index];
+                } else {
+                    currentChromosome[index] = _chromosomes[chromosome1][index];
+                }
+            }
+        }
+
         private void MutatechromosomePair(int[] currentChromosome) {
             for (int chromosomeIndex = 0; chromosomeIndex < _bitLength; chromosomeIndex++) {
                 int canMutate = _threadData.GetRandom.Next(0, _mutationRate + 1);
