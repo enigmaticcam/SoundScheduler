@@ -120,6 +120,67 @@ namespace SoundScheduler_Logic.Engine {
         }
     }
 
+    public class JobConsiderationVariety : JobConsideration {
+        private HashSet<string> _keys = new HashSet<string>();
+        private int _maxComboCount;
+
+        public JobConsiderationVariety(Builder builder) : base(builder) {
+            HashSet<int> uniqueJobs = new HashSet<int>();
+            HashSet<int> uniqueTemplates = new HashSet<int>();
+            foreach (Job job in this.Jobs) {
+                uniqueJobs.Add(job.UniqueId);
+            }
+            foreach (Template template in this.Templates) {
+                uniqueTemplates.Add(template.UniqueId);
+            }
+            _maxComboCount = this.Users.Count() * uniqueJobs.Count * uniqueTemplates.Count;
+        }
+
+        public override string JobName {
+            get { return "Variety"; }
+        }
+
+        public override bool IsConsiderationSoft {
+            get { return true; }
+        }
+
+        public override float IsValid(int[] usersInJobs) {
+            _keys.Clear();
+            int index = 0;
+            foreach (Template template in this.Templates) {
+                foreach (Job job in template.Jobs) {
+                    _keys.Add(template.UniqueId + ":" + job.UniqueId + ":" + usersInJobs[index].ToString());
+                    index++;
+                }
+            }
+            return (_maxComboCount - _keys.Count) / 10;
+        }
+
+        public class Builder : JobConsideration.BuilderBase {
+            public Job SubstituteJob;
+
+            public Builder SetSubstituteJob(Job substituteJob) {
+                this.SubstituteJob = substituteJob;
+                return this;
+            }
+
+            public override JobConsideration Build() {
+                return new JobConsiderationVariety(this);
+            }
+        }
+
+        public override JobConsideration ToCopy() {
+            JobConsiderationVariety consideration = (JobConsiderationVariety)new JobConsiderationVariety.Builder()
+                .SetJobRank(this.JobRank)
+                .SetJobs(this.Jobs)
+                .SetTemplates(this.Templates)
+                .SetUserExceptions(this.UserExceptions)
+                .SetUsers(this.Users)
+                .Build();
+            return consideration;
+        }
+    }
+
     public class JobConsiderationLimitsPerPeriod : JobConsideration {
         private HashSet<int> _jobsToIgnore = new HashSet<int>();
         private int[] _actuals;

@@ -29,25 +29,6 @@ namespace SoundScheduler_Logic.Engine {
             _exceptions.AddException(date, user, isSoftException);
         }
 
-        public MeetingsByDate BuildSchedule() {
-            //CreateMeetingsFromTemplates();
-            FillMeetingsAll();
-            return _meetings;
-        }
-
-        private void CreateMeetingsFromTemplates() {
-            foreach (DateTime date in _templates.Keys) {
-                if (!_meetings.ContainsKey(date)) {
-                    Meeting meeting = _templates[date].ToMeeting(date);
-                    _meetings.AddMeeting(meeting);
-                }
-            }
-        }
-
-        private void FillMeetingsAll() {
-            
-        }
-
         public class ActionFillMeetingsAll {
             private List<Template> _templates = new List<Template>();
             private List<User> _users;
@@ -80,6 +61,7 @@ namespace SoundScheduler_Logic.Engine {
             private void CreateTemplatesFromMeetings() {
                 foreach (Meeting meeting in _meetings) {
                     Template template = new Template();
+                    template.UniqueId = meeting.UniqueId;
                     foreach (Job job in meeting.Jobs) {
                         template.Jobs.Add(job);
                     }

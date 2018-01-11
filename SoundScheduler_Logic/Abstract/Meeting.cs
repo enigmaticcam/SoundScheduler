@@ -18,6 +18,8 @@ namespace SoundScheduler_Logic.Abstract {
             set { _data.Date = value; }
         }
 
+        public int UniqueId { get; set; }
+
         public List<Job> Jobs {
             get { return _data.Jobs; }
             set { _data.Jobs = value; }
@@ -70,6 +72,7 @@ namespace SoundScheduler_Logic.Abstract {
 
         public Template ToTemplate() {
             Template template = new Template(this.PartitionCount);
+            template.UniqueId = this.UniqueId;
             foreach (Job job in this.Jobs) {
                 template.Jobs.Add(job);
                 foreach (int partition in this.PartitionsForJob(job)) {

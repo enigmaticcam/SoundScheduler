@@ -239,46 +239,55 @@ namespace SoundScheduler_Win {
             Job jobSound = new Job();
             jobSound.Name = "Sound Box";
             jobSound.CanBeSubstituded = true;
+            jobSound.UniqueId = 1;
             _jobs.Add(jobSound);
 
             Job jobStage = new Job();
             jobStage.Name = "Stage";
             jobStage.CanBeSubstituded = true;
+            jobStage.UniqueId = 2;
             _jobs.Add(jobStage);
 
             Job jobMic1 = new Job();
             jobMic1.Name = "Mic 1";
             jobMic1.CanBeSubstituded = true;
+            jobMic1.UniqueId = 3;
             _jobs.Add(jobMic1);
 
             Job jobMic2 = new Job();
             jobMic2.Name = "Mic 2";
             jobMic2.CanBeSubstituded = true;
+            jobMic2.UniqueId = 3;
             _jobs.Add(jobMic2);
 
             Job jobMic3 = new Job();
             jobMic3.Name = "Mic 3";
             jobMic3.CanBeSubstituded = true;
+            jobMic3.UniqueId = 3;
             _jobs.Add(jobMic3);
 
             Job jobMic4 = new Job();
             jobMic4.Name = "Mic 4";
             jobMic4.CanBeSubstituded = true;
+            jobMic4.UniqueId = 3;
             _jobs.Add(jobMic4);
 
             Job jobSubstitute = new Job();
             jobSubstitute.Name = "Substitute";
             jobSubstitute.CanBeSubstituded = false;
+            jobSubstitute.UniqueId = 4;
             _jobs.Add(jobSubstitute);
 
             Job jobAttendant1 = new Job();
             jobAttendant1.Name = "Attendant 1";
             jobAttendant1.CanBeSubstituded = false;
+            jobAttendant1.UniqueId = 5;
             _jobs.Add(jobAttendant1);
 
             Job jobAttendant2 = new Job();
             jobAttendant2.Name = "Attendant 2";
             jobAttendant2.CanBeSubstituded = false;
+            jobAttendant2.UniqueId = 5;
             _jobs.Add(jobAttendant2);
 
             jobMic1.AddSameJob(jobMic2);
@@ -391,6 +400,7 @@ namespace SoundScheduler_Win {
 
             Template templateSunday = new Template(1);
             templateSunday.Name = "Sunday";
+            templateSunday.UniqueId = 1;
             templateSunday.Jobs = new List<Job> { jobSound, jobStage, jobMic1, jobMic2, jobAttendant1, jobAttendant2 };
             templateSunday.AddJobToAllPartitions(jobSound);
             templateSunday.AddJobToAllPartitions(jobStage);
@@ -401,6 +411,7 @@ namespace SoundScheduler_Win {
 
             Template templateTuesday = new Template(1);
             templateTuesday.Name = "Tuesday";
+            templateTuesday.UniqueId = 2;
             templateTuesday.Jobs = new List<Job> { jobSound, jobStage, jobMic1, jobMic2, jobSubstitute, jobAttendant1, jobAttendant2 };
             templateTuesday.AddJobToAllPartitions(jobSound);
             templateTuesday.AddJobToAllPartitions(jobStage);
@@ -471,7 +482,14 @@ namespace SoundScheduler_Win {
             ((JobConsiderationLimitsPerPeriod)consideration).AddIgnoreLimitCountOnJob(jobAttendant1);
             ((JobConsiderationLimitsPerPeriod)consideration).AddIgnoreLimitCountOnJob(jobAttendant2);
 
-            consideration = new JobConsiderationEvenUserDistributionPerJob.Builder()
+            //consideration = new JobConsiderationEvenUserDistributionPerJob.Builder()
+            //    .SetJobs(_jobs)
+            //    .SetTemplates(_templates)
+            //    .SetUsers(_users)
+            //    .SetUserExceptions(exceptions)
+            //    .Build();
+            //_jobConsiderations.Add(consideration);
+            consideration = new JobConsiderationVariety.Builder()
                 .SetJobs(_jobs)
                 .SetTemplates(_templates)
                 .SetUsers(_users)

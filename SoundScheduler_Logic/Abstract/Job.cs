@@ -19,6 +19,8 @@ namespace SoundScheduler_Logic.Abstract {
             set { _data.Name = value; }
         }
 
+        public int UniqueId { get; set; }
+
         public bool IsVoidedOnSoftException {
             get { return _data.IsVoidedOnSoftException; }
             set { _data.IsVoidedOnSoftException = value; }

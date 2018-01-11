@@ -12,6 +12,7 @@ namespace SoundScheduler_Logic.Abstract {
 
         public string Name { get; set; }
         public List<Job> Jobs { get; set; }
+        public int UniqueId { get; set; }
 
         private int _partitionCount;
         public int ParitionCount {
@@ -40,6 +41,7 @@ namespace SoundScheduler_Logic.Abstract {
             meeting.PartitionCount = _partitionCount;
             meeting.Date = date;
             meeting.Name = this.Name + " - " + date.ToShortDateString();
+            meeting.UniqueId = this.UniqueId;
             foreach (Job job in this.Jobs) {
                 meeting.Jobs.Add(job);
                 foreach (int partition in PartitionsForJob(job)) {
