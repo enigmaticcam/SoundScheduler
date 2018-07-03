@@ -55,6 +55,12 @@
     <Compile Include="frmGenetic.Designer.cs">
       <DependentUpon>frmGenetic.cs</DependentUpon>
     </Compile>
+    <Compile Include="frmJobConsiderationTester.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frmJobConsiderationTester.Designer.cs">
+      <DependentUpon>frmJobConsiderationTester.cs</DependentUpon>
+    </Compile>
     <Compile Include="frmJobs.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -95,6 +101,9 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="frmGenetic.resx">
       <DependentUpon>frmGenetic.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frmJobConsiderationTester.resx">
+      <DependentUpon>frmJobConsiderationTester.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="frmJobs.resx">
       <DependentUpon>frmJobs.cs</DependentUpon>

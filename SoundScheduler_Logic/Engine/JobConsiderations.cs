@@ -149,6 +149,8 @@ namespace SoundScheduler_Logic.Engine {
             int index = 0;
             foreach (Template template in this.Templates) {
                 foreach (Job job in template.Jobs) {
+                    // Instead of building a concatenated string, use a 64-bit number to store the individual values as bits
+                    // 
                     _keys.Add(template.UniqueId + ":" + job.UniqueId + ":" + usersInJobs[index].ToString());
                     index++;
                 }
