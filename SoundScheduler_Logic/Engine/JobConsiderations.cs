@@ -121,7 +121,7 @@ namespace SoundScheduler_Logic.Engine {
     }
 
     public class JobConsiderationVariety : JobConsideration {
-        private HashSet<uint> _keys = new HashSet<uint>();
+        private Dictionary<uint, int> _keys = new Dictionary<uint, int>();
         private int _maxComboCount;
 
         public JobConsiderationVariety(Builder builder) : base(builder) {
@@ -152,11 +152,18 @@ namespace SoundScheduler_Logic.Engine {
                     uint key = (uint)template.UniqueId;
                     key += (uint)job.UniqueId << 8;
                     key += (uint)usersInJobs[index] << 16;
-                    _keys.Add(key);
+                    if (!_keys.ContainsKey(key)) {
+                        _keys.Add(key, 1);
+                    } else {
+                        _keys[key]++;
+                    }
                     index++;
                 }
             }
-            return (_maxComboCount - _keys.Count) / 10;
+            double average = _keys.Values.Average();
+            double sumOfSquaresOfDifferences = _keys.Values.Select(x => (x - average) * (x - average)).Sum();
+            double sd = Math.Sqrt(sumOfSquaresOfDifferences / _keys.Count);
+            return ((_maxComboCount - _keys.Count) / 10) + ((float)sd * 10);
         }
 
         public class Builder : JobConsideration.BuilderBase {
