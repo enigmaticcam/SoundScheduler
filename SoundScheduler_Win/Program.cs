@@ -13,7 +13,7 @@ namespace SoundScheduler_Win {
         static void Main() {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new frmGenetic());
+            Application.Run(new frmMenu());
         }
     }
 }

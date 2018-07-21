@@ -121,7 +121,7 @@ namespace SoundScheduler_Logic.Engine {
     }
 
     public class JobConsiderationVariety : JobConsideration {
-        private HashSet<string> _keys = new HashSet<string>();
+        private HashSet<uint> _keys = new HashSet<uint>();
         private int _maxComboCount;
 
         public JobConsiderationVariety(Builder builder) : base(builder) {
@@ -149,9 +149,10 @@ namespace SoundScheduler_Logic.Engine {
             int index = 0;
             foreach (Template template in this.Templates) {
                 foreach (Job job in template.Jobs) {
-                    // Instead of building a concatenated string, use a 64-bit number to store the individual values as bits
-                    // 
-                    _keys.Add(template.UniqueId + ":" + job.UniqueId + ":" + usersInJobs[index].ToString());
+                    uint key = (uint)template.UniqueId;
+                    key += (uint)job.UniqueId << 8;
+                    key += (uint)usersInJobs[index] << 16;
+                    _keys.Add(key);
                     index++;
                 }
             }

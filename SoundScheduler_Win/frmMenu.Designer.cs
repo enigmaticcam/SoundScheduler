@@ -27,6 +27,8 @@
             this.cmdUsers = new System.Windows.Forms.Button();
             this.cmdTemplates = new System.Windows.Forms.Button();
             this.cmdMeetings = new System.Windows.Forms.Button();
+            this.cmdGenetic = new System.Windows.Forms.Button();
+            this.cmdTester = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // cmdJobs
@@ -69,11 +71,33 @@
             this.cmdMeetings.UseVisualStyleBackColor = true;
             this.cmdMeetings.Click += new System.EventHandler(this.cmdMeetings_Click);
             // 
+            // cmdGenetic
+            // 
+            this.cmdGenetic.Location = new System.Drawing.Point(271, 13);
+            this.cmdGenetic.Name = "cmdGenetic";
+            this.cmdGenetic.Size = new System.Drawing.Size(123, 66);
+            this.cmdGenetic.TabIndex = 5;
+            this.cmdGenetic.Text = "Genetic";
+            this.cmdGenetic.UseVisualStyleBackColor = true;
+            this.cmdGenetic.Click += new System.EventHandler(this.cmdGenetic_Click);
+            // 
+            // cmdTester
+            // 
+            this.cmdTester.Location = new System.Drawing.Point(271, 85);
+            this.cmdTester.Name = "cmdTester";
+            this.cmdTester.Size = new System.Drawing.Size(123, 66);
+            this.cmdTester.TabIndex = 6;
+            this.cmdTester.Text = "Tester";
+            this.cmdTester.UseVisualStyleBackColor = true;
+            this.cmdTester.Click += new System.EventHandler(this.cmdTester_Click);
+            // 
             // frmMenu
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(296, 166);
+            this.ClientSize = new System.Drawing.Size(469, 166);
+            this.Controls.Add(this.cmdTester);
+            this.Controls.Add(this.cmdGenetic);
             this.Controls.Add(this.cmdMeetings);
             this.Controls.Add(this.cmdTemplates);
             this.Controls.Add(this.cmdUsers);
@@ -90,5 +114,7 @@
         private System.Windows.Forms.Button cmdUsers;
         private System.Windows.Forms.Button cmdTemplates;
         private System.Windows.Forms.Button cmdMeetings;
+        private System.Windows.Forms.Button cmdGenetic;
+        private System.Windows.Forms.Button cmdTester;
     }
 }

@@ -1,15 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Diagnostics;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-using SoundScheduler_Logic.Abstract;
+﻿using SoundScheduler_Logic.Abstract;
 using SoundScheduler_Logic.Engine;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Windows.Forms;
 
 namespace SoundScheduler_Win {
     public partial class frmJobConsiderationTester : Form {
@@ -21,7 +15,7 @@ namespace SoundScheduler_Win {
         }
 
         private void cmdGo_Click(object sender, EventArgs e) {
-            BeginTesting(GetConsideration());
+            BeginTesting(GetConsideration(), Convert.ToInt32(txtCount.Text));
         }
 
         private JobConsideration GetConsideration() {
@@ -33,7 +27,8 @@ namespace SoundScheduler_Win {
                 jobs.Add(new Job());
                 templates.Add(new Template());
             }
-            //_slots = new int[users.Count * ]
+            _slots = new int[users.Count * templates.Count];
+            templates.ForEach(x => x.Jobs = jobs);
             return new JobConsiderationVariety.Builder()
                 .SetJobs(jobs)
                 .SetTemplates(templates)
@@ -42,15 +37,16 @@ namespace SoundScheduler_Win {
                 .Build();
         }
 
-        private void BeginTesting(JobConsideration consideration) {
+        private void BeginTesting(JobConsideration consideration, int countMax) {
             consideration.Begin();
             Stopwatch watch = new Stopwatch();
             watch.Start();
-            for (int count = 1; count <= 1000000; count++) {
-                //consideration.IsValid();
+            for (int count = 1; count <= countMax; count++) {
+                consideration.IsValid(_slots);
             }
+            watch.Stop();
+            TimeSpan ts = watch.Elapsed;
+            lblResults.Text = String.Format("{0:00}:{1:00}:{2:00}.{3:00}", ts.Hours, ts.Minutes, ts.Seconds, ts.Milliseconds / 10);
         }
-
-        //private int[]
     }
 }

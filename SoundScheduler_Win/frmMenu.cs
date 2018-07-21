@@ -33,5 +33,15 @@ namespace SoundScheduler_Win {
             frmMeetings frm = new frmMeetings();
             frm.ShowDialog();
         }
+
+        private void cmdTester_Click(object sender, EventArgs e) {
+            frmJobConsiderationTester frm = new frmJobConsiderationTester();
+            frm.ShowDialog();
+        }
+
+        private void cmdGenetic_Click(object sender, EventArgs e) {
+            frmGenetic frm = new frmGenetic();
+            frm.ShowDialog();
+        }
     }
 }
