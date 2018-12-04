@@ -923,7 +923,7 @@ namespace SoundScheduler_Logic.Engine {
     }
 
     public class JobConsiderationUsersWhoDidSameJobLastMeeting : JobConsideration {
-        private Dictionary<int, Job> _usersLastJob = new Dictionary<int, Job>();
+        private Dictionary<int, int> _usersLastJob = new Dictionary<int, int>();
         private Dictionary<int, bool> _hasOnlyOneJob = new Dictionary<int, bool>();
         private int _counter;
 
@@ -942,14 +942,14 @@ namespace SoundScheduler_Logic.Engine {
             foreach (Template template in this.Templates) {
                 foreach (Job job in template.Jobs) {
                     if (_usersLastJob.ContainsKey(usersInJobs[_counter])) {
-                        if (_usersLastJob[usersInJobs[_counter]] == job || _usersLastJob[usersInJobs[_counter]].IsSameJob(job)) {
-                            //if (!_hasOnlyOneJob[usersInJobs[_counter]]) {
-                            ++sameJobCount;
-                            //}
+                        if (_usersLastJob[usersInJobs[_counter]] == job.UniqueId) {
+                            if (!_hasOnlyOneJob[usersInJobs[_counter]]) {
+                                ++sameJobCount;
+                            }
                         }
-                        _usersLastJob[usersInJobs[_counter]] = job;
+                        _usersLastJob[usersInJobs[_counter]] = job.UniqueId;
                     } else {
-                        _usersLastJob.Add(usersInJobs[_counter], job);
+                        _usersLastJob.Add(usersInJobs[_counter], job.UniqueId);
                     }
                     ++_counter;
                 }
