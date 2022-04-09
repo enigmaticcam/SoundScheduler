@@ -24,7 +24,6 @@
         /// </summary>
         private void InitializeComponent() {
             this.cmdGo = new System.Windows.Forms.Button();
-            this.txtResults = new System.Windows.Forms.TextBox();
             this.cmdStop = new System.Windows.Forms.Button();
             this.txtPopulation = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
@@ -38,6 +37,7 @@
             this.cmdPrintSolution = new System.Windows.Forms.Button();
             this.txtStartingSolution = new System.Windows.Forms.TextBox();
             this.label4 = new System.Windows.Forms.Label();
+            this.txtResults = new System.Windows.Forms.RichTextBox();
             this.SuspendLayout();
             // 
             // cmdGo
@@ -49,16 +49,6 @@
             this.cmdGo.Text = "Go";
             this.cmdGo.UseVisualStyleBackColor = true;
             this.cmdGo.Click += new System.EventHandler(this.cmdGo_Click);
-            // 
-            // txtResults
-            // 
-            this.txtResults.Location = new System.Drawing.Point(13, 175);
-            this.txtResults.Multiline = true;
-            this.txtResults.Name = "txtResults";
-            this.txtResults.ReadOnly = true;
-            this.txtResults.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.txtResults.Size = new System.Drawing.Size(768, 386);
-            this.txtResults.TabIndex = 1;
             // 
             // cmdStop
             // 
@@ -172,11 +162,21 @@
             this.label4.TabIndex = 14;
             this.label4.Text = "Starting Solution";
             // 
+            // txtResults
+            // 
+            this.txtResults.Location = new System.Drawing.Point(12, 175);
+            this.txtResults.Name = "txtResults";
+            this.txtResults.ReadOnly = true;
+            this.txtResults.Size = new System.Drawing.Size(769, 386);
+            this.txtResults.TabIndex = 15;
+            this.txtResults.Text = "";
+            // 
             // frmGenetic
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(793, 573);
+            this.Controls.Add(this.txtResults);
             this.Controls.Add(this.label4);
             this.Controls.Add(this.txtStartingSolution);
             this.Controls.Add(this.cmdPrintSolution);
@@ -190,7 +190,6 @@
             this.Controls.Add(this.label1);
             this.Controls.Add(this.txtPopulation);
             this.Controls.Add(this.cmdStop);
-            this.Controls.Add(this.txtResults);
             this.Controls.Add(this.cmdGo);
             this.Name = "frmGenetic";
             this.Text = "frmGenetic";
@@ -203,7 +202,6 @@
         #endregion
 
         private System.Windows.Forms.Button cmdGo;
-        private System.Windows.Forms.TextBox txtResults;
         private System.Windows.Forms.Button cmdStop;
         private System.Windows.Forms.TextBox txtPopulation;
         private System.Windows.Forms.Label label1;
@@ -217,5 +215,6 @@
         private System.Windows.Forms.Button cmdPrintSolution;
         private System.Windows.Forms.TextBox txtStartingSolution;
         private System.Windows.Forms.Label label4;
+        private System.Windows.Forms.RichTextBox txtResults;
     }
 }
